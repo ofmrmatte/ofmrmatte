@@ -1,18 +1,30 @@
 # Matheus Ferreira Folgado
 
-### Administração • Operações • Desenvolvimento de Sistemas
+### Administrador | Gestão, Operações e Desenvolvimento de Sistemas
 
-Construo sistemas e automações para resolver problemas operacionais reais.
+Atuo na interseção entre negócio, operações e tecnologia, criando soluções digitais para problemas operacionais reais.
 
-Sou administrador com atuação em operações, prevenção de perdas, análise de dados e melhoria de processos, em transição para desenvolvimento de software. Meus projetos unem conhecimento de negócio, tecnologia e automação para transformar rotinas manuais em soluções digitais mais rastreáveis e eficientes.
+Sou administrador com experiência em gestão administrativa, prevenção de perdas, análise operacional, indicadores e melhoria de processos. Também atuo na criação e evolução de sistemas, dashboards e automações para processos administrativos e logísticos por meio de **desenvolvimento assistido por inteligência artificial**.
 
-Utilizo IA generativa como apoio à implementação, revisão, refatoração e testes, mantendo participação direta no levantamento de requisitos, definição de regras de negócio, validação funcional, debugging e evolução dos produtos.
+Atualmente, a implementação e alteração de código dos meus projetos é realizada com forte apoio de ferramentas de IA. Minha atuação concentra-se principalmente no levantamento de requisitos, definição de regras de negócio, desenho de fluxos, validação funcional, testes, identificação de falhas, integração de dados e direcionamento da evolução das soluções.
 
-## Tecnologias utilizadas em projetos
+## Stack presente nos projetos
 
-`TypeScript` · `JavaScript` · `React` · `Next.js` · `Node.js` · `C#/.NET` · `SQL` · `PostgreSQL` · `Supabase` · `HTML/CSS` · `Git/GitHub` · `Vercel`
+`TypeScript` · `JavaScript` · `React` · `Next.js` · `Node.js` · `C#` · `.NET` · `SQL` · `PostgreSQL` · `Supabase` · `HTML/CSS` · `Git/GitHub` · `Vercel`
 
-Também trabalho com análise operacional, KPIs, automação de processos, integração de sistemas, APIs, modelagem de regras de negócio e testes funcionais.
+### Competências aplicadas
+
+- Análise operacional e indicadores (KPIs)
+- Gestão e melhoria de processos
+- Prevenção de perdas e pré-faturamento
+- Levantamento de requisitos
+- Modelagem de regras de negócio
+- Desenvolvimento assistido por IA
+- Automação de processos
+- Integração de sistemas e APIs REST
+- Testes e validação funcional de software
+- Identificação de falhas e evolução de produto
+- Git/GitHub e acompanhamento de deploy
 
 ## Projetos em destaque
 
@@ -32,26 +44,43 @@ Aplicação web mobile-first para centralizar pendências, pagamentos, documento
 
 **Stack:** Next.js · React · TypeScript · Supabase · Zod · Vitest · Vercel
 
+### MLDDS — Automação de Processos Logísticos
+
+Solução integrada para automação de processos operacionais envolvendo aplicação desktop, extensão de navegador, integração de dados e regras de negócio.
+
+**Stack:** C# · .NET 8 · WPF · Chrome Extension · JavaScript
+
 ### Automy
 
 **SaaS · ERP · Operations Automation**
 
 Projeto comercial privado voltado à gestão e automação operacional. O código-fonte e detalhes internos permanecem privados por se tratar de produto em desenvolvimento.
 
-## O que esses projetos representam
+## Como trabalho nos projetos
 
-- Levantamento e tradução de necessidades operacionais em requisitos de software.
-- Modelagem de regras de negócio e fluxos de usuário.
-- Desenvolvimento e evolução de aplicações web.
-- Integração com bancos de dados, autenticação e APIs.
-- Automação de processos administrativos e logísticos.
-- Testes, debugging, validação funcional e acompanhamento de deploy.
-- Uso responsável de IA aplicada ao ciclo de desenvolvimento.
+Os projetos são conduzidos com desenvolvimento assistido por IA. Ferramentas de inteligência artificial são utilizadas para geração e alteração de código, refatoração, análise técnica e apoio à correção de falhas.
 
-## Formação e desenvolvimento profissional
+Minha participação envolve principalmente:
 
-- **Bacharel em Administração**
-- Desenvolvimento contínuo em **Full Stack, automação e engenharia de software aplicada a problemas de negócio**
+- transformar necessidades operacionais em requisitos de software;
+- definir comportamentos, regras de negócio e critérios de aceitação;
+- validar fluxos e resultados em ambiente real;
+- testar funcionalidades e identificar inconsistências;
+- direcionar correções e melhorias;
+- acompanhar integração de dados, banco de dados e APIs;
+- validar builds, deploys e evolução contínua dos produtos.
+
+## Formação
+
+### Pós-Graduação Lato Sensu — Desenvolvimento Full Stack
+**PUC Minas** · Início previsto: 10/2026
+
+Formação voltada ao desenvolvimento de aplicações full stack, integração entre front-end e back-end, bancos de dados, APIs e arquitetura de software, complementando a experiência prática em automação e desenvolvimento assistido por IA.
+
+### Bacharel em Administração
+**Centro Universitário FAM** · 02/2022 – 06/2026
+
+Formação voltada à gestão empresarial, processos, finanças, pessoas, operações, planejamento e tomada de decisão.
 
 ## Contato
 
