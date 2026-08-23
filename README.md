@@ -73,7 +73,7 @@ Minha participação envolve principalmente:
 ## Formação
 
 ### Pós-Graduação Lato Sensu — Desenvolvimento Full Stack
-**PUC Minas** · Início previsto: 10/2026
+**PUC Minas** · Início previsto: 09/2026
 
 Formação voltada ao desenvolvimento de aplicações full stack, integração entre front-end e back-end, bancos de dados, APIs e arquitetura de software, complementando a experiência prática em automação e desenvolvimento assistido por IA.
 
