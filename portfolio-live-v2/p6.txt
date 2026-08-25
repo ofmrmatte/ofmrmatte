@@ -1,0 +1,111 @@
+span><span>Next.js</span><span>Node.js</span><span>C#</span><span>.NET</span><span>SQL</span><span>PostgreSQL</span><span>Supabase</span><span>HTML/CSS</span><span>Vercel</span></div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="formacao" class="section">
+      <span class="kicker">Formação</span>
+      <h2>Formação</h2>
+      <div class="edu-list">
+        <article class="edu-card reveal">
+          <span class="edu-index">01</span>
+          <div>
+            <small>Início previsto: 09/2026</small>
+            <h3>Pós-Graduação Lato Sensu — Desenvolvimento Full Stack</h3>
+            <p>Formação voltada ao desenvolvimento de aplicações full stack, integração entre front-end e back-end, bancos de dados, APIs e arquitetura de software.</p>
+          </div>
+          <strong>PUC Minas</strong>
+        </article>
+        <article class="edu-card reveal">
+          <span class="edu-index">02</span>
+          <div>
+            <small>02/2022 — 06/2026</small>
+            <h3>Bacharel em Administração</h3>
+            <p>Formação voltada à gestão empresarial, processos, finanças, pessoas, operações, planejamento e tomada de decisão.</p>
+          </div>
+          <strong>Centro Universitário FAM</strong>
+        </article>
+      </div>
+    </section>
+
+    <section id="contato" class="section">
+      <span class="kicker">Contato</span>
+      <h2>Vamos conectar gestão e tecnologia.</h2>
+      <p class="section-lead">Para oportunidades profissionais, projetos ou para conhecer melhor as soluções desenvolvidas.</p>
+      <div class="contact-grid">
+        <div class="contact-panel dark reveal">
+          <span class="kicker" style="color:#a6dbef">05 / Contato</span>
+          <h3 style="font-size:34px;letter-spacing:-.04em;margin:14px 0 12px;">Pronto para conversar</h3>
+          <p>Se quiser, eu também posso evoluir este portfólio com screenshots reais dos sistemas, detalhes de stack e páginas específicas de projetos.</p>
+        </div>
+        <div class="contact-panel dark contact-links reveal">
+          <a href="https://linkedin.com/in/mrmatte" target="_blank" rel="noreferrer">LinkedIn <span>↗</span></a>
+          <a href="https://github.com/ofmrmatte" target="_blank" rel="noreferrer">GitHub <span>↗</span></a>
+          <a href="mailto:matheus_frafou@outlook.com">E-mail <span>→</span></a>
+        </div>
+        <div class="contact-photo reveal">
+          <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" data-photo="secondary" alt="Foto de Matheus Ferreira sorrindo em ambiente natural" />
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span>© 2026 Matheus Ferreira</span>
+    <span>Administrador | Gestão e Desenvolvimento de Sistemas</span>
+  </footer>
+</div>
+
+<script>
+const root = document.documentElement;
+const app = document.getElementById('app');
+const btn = document.getElementById('menu-button');
+const nav = document.getElementById('nav');
+const reveals = [...document.querySelectorAll('.reveal')];
+
+function updateScene() {
+  const max = Math.max(document.body.scrollHeight - innerHeight, 1);
+  const p = scrollY / max;
+  root.style.setProperty('--progress', p.toFixed(4));
+}
+updateScene();
+addEventListener('scroll', updateScene, { passive:true });
+addEventListener('resize', updateScene);
+addEventListener('pointermove', (e) => {
+  const x = e.clientX / innerWidth;
+  const y = e.clientY / innerHeight;
+  root.style.setProperty('--mx', x.toFixed(4));
+  root.style.setProperty('--my', y.toFixed(4));
+}, { passive:true });
+
+btn.addEventListener('click', () => {
+  const open = nav.classList.toggle('open');
+  btn.setAttribute('aria-expanded', String(open));
+});
+nav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+  nav.classList.remove('open');
+  btn.setAttribute('aria-expanded', 'false');
+}));
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach((entry) => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      observer.unobserve(entry.target);
+    }
+  });
+}, { threshold:.12, rootMargin:'0px 0px -6% 0px' });
+const revealItems = reveals.filter(el => !el.classList.contains('visible'));
+revealItems.forEach(el => observer.observe(el));
+
+Promise.all([
+  fetch('https://raw.githubusercontent.com/ofmrmatte/ofmrmatte/main/portfolio-live-v2/hero.b64', { cache: 'force-cache' }).then(r => { if (!r.ok) throw new Error('hero'); return r.text(); }),
+  fetch('https://raw.githubusercontent.com/ofmrmatte/ofmrmatte/main/portfolio-live-v2/secondary.b64', { cache: 'force-cache' }).then(r => { if (!r.ok) throw new Error('secondary'); return r.text(); })
+]).then(([heroB64, secondaryB64]) => {
+  document.querySelectorAll('[data-photo="hero"]').forEach(img => img.src = 'data:image/webp;base64,' + heroB64.trim());
+  document.querySelectorAll('[data-photo="secondary"]').forEach(img => img.src = 'data:image/webp;base64,' + secondaryB64.trim());
+}).catch(err => console.error('Falha ao carregar fotos', err));
+</script>
+</body>
+</html>
