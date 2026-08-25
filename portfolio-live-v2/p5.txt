@@ -1,0 +1,111 @@
+">
+        <div class="about-card glass-card lead reveal">Atuo na conexão entre conhecimento de negócio, desenvolvimento e automação, participando do levantamento de requisitos, definição de regras de negócio, testes, validação funcional, integração de dados e evolução contínua das soluções.</div>
+        <div class="about-card glass-card reveal">
+          <p>O foco não é apenas desenvolver uma interface: é entender o processo, estruturar a informação e construir ferramentas que reduzam trabalho manual e aumentem o controle operacional.</p>
+          <p>Minha atuação combina visão administrativa com repertório técnico para desenhar, validar e evoluir produtos internos voltados a logística, prevenção de perdas, análise operacional e gestão de dados.</p>
+        </div>
+      </div>
+      <div class="about-extras">
+        <div class="about-photo reveal"><img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" data-photo="secondary" alt="Foto profissional de Matheus Ferreira sorrindo em ambiente com plantas" /></div>
+        <div class="fact-list glass-card reveal">
+          <span class="kicker" style="margin-bottom:2px">Como eu construo</span>
+          <h3>Da rotina ao software</h3>
+          <ul>
+            <li><strong>Leitura da operação</strong>Entender a rotina, o gargalo e a regra de negócio antes de desenhar a solução.</li>
+            <li><strong>Estruturação da informação</strong>Organizar dados, indicadores e fluxos para dar clareza e rastreabilidade.</li>
+            <li><strong>Entrega prática</strong>Transformar a necessidade em dashboard, aplicação ou automação com uso real.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="projetos" class="section">
+      <span class="kicker">Projetos</span>
+      <h2>Projetos</h2>
+      <p class="section-lead">Sistemas e automações voltados a processos administrativos e logísticos. As áreas visuais de cada projeto ficam reservadas para screenshots reais.</p>
+      <div class="project-list">
+        <article class="project-card reveal">
+          <div class="project-number">01</div>
+          <div>
+            <div class="project-screen">
+              <div class="project-screen-bar"><span></span><span></span><span></span></div>
+              <div class="project-screen-body">
+                <small>Plataforma de Gestão e Análise Operacional</small>
+                <strong>Inteligência ALC</strong>
+                <div class="project-lines"><i></i><i></i><i></i></div>
+                <span class="project-note">Espaço preparado para screenshot real</span>
+              </div>
+            </div>
+          </div>
+          <div class="project-content">
+            <p class="project-eyebrow">Plataforma de Gestão e Análise Operacional</p>
+            <h3>Inteligência ALC</h3>
+            <p>Sistema web para consolidação e análise de dados operacionais, prevenção de perdas, PNR, pré-faturamento, indicadores, conciliação de IDs e gestão de motoristas.</p>
+            <div class="tag-list"><span>Next.js</span><span>React</span><span>TypeScript</span><span>Supabase</span><span>PostgreSQL</span><span>Vercel</span></div>
+          </div>
+        </article>
+
+        <article class="project-card reveal">
+          <div class="project-number">02</div>
+          <div>
+            <div class="project-screen">
+              <div class="project-screen-bar"><span></span><span></span><span></span></div>
+              <div class="project-screen-body">
+                <small>Aplicação Web / Mobile</small>
+                <strong>Portal do Motorista</strong>
+                <div class="project-lines"><i></i><i></i><i></i></div>
+                <span class="project-note">Espaço preparado para screenshot real</span>
+              </div>
+            </div>
+          </div>
+          <div class="project-content">
+            <p class="project-eyebrow">Aplicação Web / Mobile</p>
+            <h3>Portal do Motorista</h3>
+            <p>Plataforma para consulta de pendências, pagamentos, contestações, documentos e gestão administrativa de motoristas, com controle de acesso e hierarquia de usuários.</p>
+            <div class="tag-list"><span>Next.js</span><span>React</span><span>TypeScript</span><span>Supabase</span><span>PWA</span><span>Vercel</span></div>
+          </div>
+        </article>
+
+        <article class="project-card reveal">
+          <div class="project-number">03</div>
+          <div>
+            <div class="project-screen">
+              <div class="project-screen-bar"><span></span><span></span><span></span></div>
+              <div class="project-screen-body">
+                <small>Automação de Processos Logísticos</small>
+                <strong>MLDDS</strong>
+                <div class="project-lines"><i></i><i></i><i></i></div>
+                <span class="project-note">Espaço preparado para screenshot real</span>
+              </div>
+            </div>
+          </div>
+          <div class="project-content">
+            <p class="project-eyebrow">Automação de Processos Logísticos</p>
+            <h3>MLDDS</h3>
+            <p>Solução integrada para automação de processos operacionais envolvendo aplicação desktop, extensão de navegador, integração de dados e regras de negócio.</p>
+            <div class="tag-list"><span>C#</span><span>.NET 8</span><span>WPF</span><span>Chrome Extension</span><span>JavaScript</span></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="skills" class="dark-band">
+      <div class="section">
+        <span class="kicker">Competências</span>
+        <h2>Competências</h2>
+        <p class="section-lead">Organizadas conforme meu currículo e a aplicação prática nos projetos.</p>
+        <div class="skills-grid">
+          <article class="skill-card reveal">
+            <span class="kicker" style="color:#a6dbef">01</span>
+            <h3>Gestão e Operações</h3>
+            <div class="tag-list"><span>Análise Operacional</span><span>Gestão de Processos</span><span>Prevenção de Perdas</span><span>Indicadores (KPIs)</span><span>Análise de Dados</span><span>Relatórios Gerenciais</span><span>Pré-faturamento</span><span>Melhoria de Processos</span></div>
+          </article>
+          <article class="skill-card reveal">
+            <span class="kicker" style="color:#a6dbef">02</span>
+            <h3>Sistemas, Automação e IA</h3>
+            <div class="tag-list"><span>Desenvolvimento assistido por IA</span><span>Automação de Processos</span><span>Levantamento de Requisitos</span><span>Regras de Negócio</span><span>Testes Funcionais</span><span>Validação de Software</span><span>Integração de Sistemas</span><span>APIs REST</span><span>Git/GitHub</span></div>
+          </article>
+          <article class="skill-card reveal">
+            <span class="kicker" style="color:#a6dbef">03</span>
+            <h3>Tecnologias em Projetos</h3>
+            <div class="tag-list"><span>TypeScript</span><span>JavaScript</span><span>React</
