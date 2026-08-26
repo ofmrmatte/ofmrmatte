@@ -1,0 +1,11 @@
+.env*
+!.env.example
+.next/
+node_modules/
+out/
+dist/
+*.log
+.vercel/
+tsconfig.tsbuildinfo
+.playwright-mcp/
+portfolio-*.png

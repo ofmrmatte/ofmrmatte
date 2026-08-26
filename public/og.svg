@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#070b0f"/>
+  <path d="M0 120h1200M0 250h1200M0 380h1200M0 510h1200M180 0v630M420 0v630M660 0v630M900 0v630" stroke="#16333a" stroke-width="1"/>
+  <path d="M118 438h312l72-72h214l62-62h304" fill="none" stroke="#5ee6cf" stroke-width="4"/>
+  <path d="M118 482h208l44-44h140" fill="none" stroke="#e3c66d" stroke-width="3" opacity=".8"/>
+  <rect x="96" y="96" width="1008" height="438" rx="18" fill="#0e171c" fill-opacity=".72" stroke="#24454e"/>
+  <text x="136" y="255" fill="#f3fbf9" font-family="Arial, sans-serif" font-size="70" font-weight="700">Matheus Ferreira Folgado</text>
+  <text x="140" y="335" fill="#5ee6cf" font-family="Arial, sans-serif" font-size="34" font-weight="700">Administração, Sistemas e Automação</text>
+  <text x="140" y="405" fill="#aab8ba" font-family="Arial, sans-serif" font-size="28">Gestão, tecnologia e automação aplicadas a operações reais.</text>
+</svg>

@@ -1,0 +1,38 @@
+:root {
+  --color-paper: oklch(9% 0.018 230);
+  --color-paper-strong: oklch(15% 0.026 220);
+  --color-ink: oklch(96% 0.011 180);
+  --color-muted: oklch(72% 0.034 210);
+  --color-line: oklch(36% 0.045 210);
+  --color-teal: oklch(76% 0.14 178);
+  --color-blue: oklch(67% 0.15 235);
+  --color-deep: oklch(17% 0.028 225);
+  --color-light: oklch(86% 0.095 160);
+  --color-warm: oklch(80% 0.13 78);
+  --color-focus: oklch(78% 0.15 170);
+  --font-display: var(--font-space-grotesk), Arial, sans-serif;
+  --font-body: var(--font-inter), Arial, sans-serif;
+  --space-xs: 0.5rem;
+  --space-sm: 0.75rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+  --space-3xl: 4rem;
+  --text-sm: clamp(0.875rem, 0.84rem + 0.17vw, 0.95rem);
+  --text-base: clamp(1rem, 0.96rem + 0.2vw, 1.1rem);
+  --text-lg: clamp(1.15rem, 1.05rem + 0.5vw, 1.35rem);
+  --text-xl: clamp(1.45rem, 1.23rem + 1vw, 2rem);
+  --text-2xl: clamp(2rem, 1.5rem + 2.2vw, 3.5rem);
+  --text-display: clamp(3rem, 1.55rem + 5vw, 7rem);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast: 160ms;
+  --dur-med: 320ms;
+  --dur-slow: 900ms;
+  --rule-thin: 1px;
+  --radius-sm: 0.5rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+}
