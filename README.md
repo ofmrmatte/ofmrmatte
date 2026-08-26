@@ -1,4 +1,4 @@
-# Matheus Ferreira Folgado Portfolio
+# Matheus Ferreira Folgado
 
 Aplicação Next.js do portfólio profissional de Matheus Ferreira Folgado.
 
