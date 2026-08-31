@@ -1,8 +1,9 @@
-name: one-time portfolio polish
+name: portfolio polish
 
 on:
   push:
-    branches: [portfolio-site]
+    branches:
+      - portfolio-site
     paths:
       - .github/workflows/portfolio-polish.yml
 
@@ -11,18 +12,16 @@ permissions:
 
 jobs:
   polish:
-    if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@v4
         with:
           ref: portfolio-site
           fetch-depth: 0
 
       - name: Set up Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
@@ -30,364 +29,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Update education and footer
-        shell: bash
-        run: |
-          python3 <<'PY'
-          from pathlib import Path
-
-          page_path = Path("app/page.tsx")
-          page = page_path.read_text(encoding="utf-8")
-
-          old_education = '''          <div className="education-list">
-            <article className="education-item">
-              <div>
-                <strong>Bacharel em Administração</strong>
-                <p>Centro Universitário FAM</p>
-                <span>02/2022 – 06/2026</span>
-              </div>
-              <span className="status">Concluído</span>
-            </article>
-            <article className="education-item">
-              <div>
-                <strong>Pós-Graduação Lato Sensu em Desenvolvimento Full Stack</strong>
-                <p>PUC Minas</p>
-                <span>Início previsto: 09/2026</span>
-              </div>
-            </article>
-          </div>'''
-
-          new_education = '''          <div className="education-list">
-            <article className="education-item">
-              <div className="education-copy">
-                <strong>Bacharel em Administração</strong>
-                <p className="education-school">Centro Universitário FAM</p>
-                <p className="education-summary">
-                  Formação em gestão, processos, estratégia e tomada de decisão, aplicada à leitura de operações e à
-                  estruturação de soluções de negócio.
-                </p>
-              </div>
-              <span className="status">Concluído</span>
-            </article>
-            <article className="education-item">
-              <div className="education-copy">
-                <strong>Pós-Graduação Lato Sensu em Desenvolvimento Full Stack</strong>
-                <p className="education-school">PUC Minas</p>
-                <p className="education-summary">
-                  Aprofundamento em aplicações full stack, arquitetura, front-end, back-end, bancos de dados, APIs e
-                  integração de sistemas para construção de soluções completas.
-                </p>
-              </div>
-            </article>
-          </div>'''
-
-          if page.count(old_education) != 1:
-              raise SystemExit("Education block changed unexpectedly")
-          page = page.replace(old_education, new_education)
-
-          old_contact = '''      <section id="contato" className="section">
-        <div className="section-inner">
-          <div className="contact-panel">
-            <div>
-              <span className="kicker">Contato</span>
-              <h2>Vamos conectar operação, dados e automação.</h2>
-              <div className="contact-links">
-                <a href="https://linkedin.com/in/mrmatte" target="_blank" rel="noreferrer">
-                  LinkedIn <span>linkedin.com/in/mrmatte</span>
-                </a>
-                <a href="https://github.com/ofmrmatte" target="_blank" rel="noreferrer">
-                  GitHub <span>github.com/ofmrmatte</span>
-                </a>
-                <a href="mailto:matheus_frafou@outlook.com">
-                  E-mail <span>matheus_frafou@outlook.com</span>
-                </a>
-              </div>
-            </div>
-            <figure className="portrait-photo">
-              <Image src={portraitImage.src} alt={portraitImage.alt} width={portraitImage.width} height={portraitImage.height} sizes="(max-width: 980px) 100vw, 28vw" />
-            </figure>
-          </div>
-        </div>
-      </section>
-
-      <footer className="site-footer">
-        <div className="section-inner">© 2026 Matheus Ferreira Folgado. Administração, sistemas e automação.</div>
-      </footer>'''
-
-          new_contact = '''      <footer id="contato" className="site-footer">
-        <div className="section-inner footer-shell">
-          <div className="footer-copy">
-            <span className="kicker">Contato</span>
-            <h2>Vamos conectar operação, dados e automação.</h2>
-            <p>Projetos, tecnologia aplicada ao negócio, automação e melhoria de processos.</p>
-          </div>
-          <nav className="footer-actions" aria-label="Links de contato">
-            <a className="footer-link footer-link-primary" href="https://linkedin.com/in/mrmatte" target="_blank" rel="noreferrer">
-              LinkedIn
-            </a>
-            <a className="footer-link" href="https://github.com/ofmrmatte" target="_blank" rel="noreferrer">
-              GitHub
-            </a>
-            <a className="footer-link" href="mailto:matheus_frafou@outlook.com">
-              E-mail
-            </a>
-          </nav>
-          <div className="footer-meta">
-            <span>© 2026 Matheus Ferreira Folgado</span>
-            <span>Administração · Sistemas · Automação</span>
-          </div>
-        </div>
-      </footer>'''
-
-          if page.count(old_contact) != 1:
-              raise SystemExit("Contact/footer block changed unexpectedly")
-          page = page.replace(old_contact, new_contact)
-          page_path.write_text(page, encoding="utf-8")
-
-          css_path = Path("app/globals.css")
-          css = css_path.read_text(encoding="utf-8")
-
-          css = css.replace('''.project-card,
-.skill-group,
-.education-item,
-.contact-panel {''', '''.project-card,
-.skill-group,
-.education-item {''')
-          css = css.replace('''.project-card::before,
-.skill-group::before,
-.education-item::before,
-.contact-panel::before {''', '''.project-card::before,
-.skill-group::before,
-.education-item::before {''')
-          css = css.replace('''.project-card:hover,
-.skill-group:hover,
-.education-item:hover,
-.contact-panel:hover {''', '''.project-card:hover,
-.skill-group:hover,
-.education-item:hover {''')
-          css = css.replace('''.project-card:hover::before,
-.skill-group:hover::before,
-.education-item:hover::before,
-.contact-panel:hover::before {''', '''.project-card:hover::before,
-.skill-group:hover::before,
-.education-item:hover::before {''')
-          css = css.replace('''.skill-group,
-.education-item,
-.contact-panel {
-  padding: clamp(1rem, 2vw, 1.5rem);
-}''', '''.skill-group,
-.education-item {
-  padding: clamp(1rem, 2vw, 1.5rem);
-}''')
-
-          old_tail = '''.education-item span {
-  color: var(--color-muted);
-}
-
-.status {
-  align-self: start;
-  border-radius: 999px;
-  background: linear-gradient(135deg, var(--color-teal), var(--color-warm));
-  color: oklch(9% 0.02 240);
-  font-size: 0.82rem;
-  font-weight: 900;
-  padding: 0.45rem 0.7rem;
-  white-space: nowrap;
-}
-
-.contact-panel {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(240px, 0.42fr);
-  align-items: center;
-  gap: clamp(1.5rem, 4vw, 3rem);
-  background: linear-gradient(135deg, oklch(18% 0.034 220 / 0.9), oklch(14% 0.044 178 / 0.8));
-}
-
-.contact-links {
-  display: grid;
-  gap: 0.75rem;
-  margin-top: 1.5rem;
-}
-
-.contact-links a {
-  display: flex;
-  min-height: 48px;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  border-bottom: 1px solid var(--color-line);
-  color: var(--color-light);
-  font-weight: 900;
-}
-
-.contact-links span {
-  color: var(--color-muted);
-  font-weight: 700;
-  text-align: right;
-  overflow-wrap: anywhere;
-}
-
-.site-footer {
-  padding: 2rem 0 max(2rem, env(safe-area-inset-bottom));
-  color: var(--color-muted);
-}'''
-
-          new_tail = '''.education-copy {
-  display: grid;
-  gap: 0.35rem;
-}
-
-.education-school {
-  color: var(--color-teal);
-  font-size: 0.95rem;
-  font-weight: 800;
-}
-
-.education-summary {
-  max-width: 78ch;
-  margin-top: 0.35rem;
-  color: var(--color-muted);
-  font-size: 0.98rem;
-  line-height: 1.65;
-}
-
-.status {
-  align-self: start;
-  border: 1px solid oklch(72% 0.14 178 / 0.28);
-  border-radius: 999px;
-  background: oklch(72% 0.14 178 / 0.12);
-  color: var(--color-light);
-  font-size: 0.78rem;
-  font-weight: 900;
-  letter-spacing: 0.02em;
-  padding: 0.45rem 0.7rem;
-  white-space: nowrap;
-}
-
-.site-footer {
-  position: relative;
-  padding: clamp(2.5rem, 5vw, 4rem) 0 max(2rem, env(safe-area-inset-bottom));
-  color: var(--color-muted);
-}
-
-.site-footer::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 50%;
-  width: min(1180px, calc(100% - 2rem));
-  height: 1px;
-  transform: translateX(-50%);
-  background: linear-gradient(90deg, transparent, var(--color-line), oklch(72% 0.14 178 / 0.5), var(--color-line), transparent);
-}
-
-.footer-shell {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: end;
-  gap: 2rem clamp(2rem, 6vw, 5rem);
-}
-
-.footer-copy {
-  display: grid;
-  gap: 0.8rem;
-}
-
-.footer-copy h2 {
-  max-width: 18ch;
-  font-size: clamp(2rem, 4vw, 3.5rem);
-}
-
-.footer-copy p {
-  max-width: 58ch;
-  font-size: 0.98rem;
-}
-
-.footer-actions {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 0.65rem;
-}
-
-.footer-link {
-  display: inline-flex;
-  min-height: 44px;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--color-line);
-  border-radius: 999px;
-  background: oklch(18% 0.028 220 / 0.68);
-  color: var(--color-ink);
-  font-size: 0.9rem;
-  font-weight: 850;
-  padding: 0.72rem 1rem;
-  transition: transform var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out);
-}
-
-.footer-link:hover {
-  transform: translateY(-2px);
-  border-color: oklch(72% 0.14 190 / 0.5);
-  background: oklch(24% 0.05 210 / 0.84);
-}
-
-.footer-link-primary {
-  border-color: transparent;
-  background: linear-gradient(135deg, var(--color-blue), var(--color-teal));
-  color: oklch(9% 0.02 240);
-}
-
-.footer-meta {
-  grid-column: 1 / -1;
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  border-top: 1px solid oklch(45% 0.055 220 / 0.28);
-  padding-top: 1rem;
-  font-size: 0.82rem;
-}'''
-
-          if css.count(old_tail) != 1:
-              raise SystemExit("Education/contact CSS block changed unexpectedly")
-          css = css.replace(old_tail, new_tail)
-
-          css = css.replace('''  .hero-grid,
-  .about-grid,
-  .contact-panel,
-  .section-head {
-    grid-template-columns: 1fr;
-  }''', '''  .hero-grid,
-  .about-grid,
-  .section-head,
-  .footer-shell {
-    grid-template-columns: 1fr;
-  }
-
-  .footer-actions {
-    justify-content: flex-start;
-  }''')
-
-          css = css.replace('''  .education-item {
-    grid-template-columns: 1fr;
-  }
-
-  .field-trace:nth-child(n + 5) {''', '''  .education-item {
-    grid-template-columns: 1fr;
-  }
-
-  .footer-actions,
-  .footer-link {
-    width: 100%;
-  }
-
-  .footer-meta {
-    flex-direction: column;
-  }
-
-  .field-trace:nth-child(n + 5) {''')
-
-          css_path.write_text(css, encoding="utf-8")
-          PY
+      - name: Apply portfolio polish
+        run: python3 scripts/portfolio_polish.py
 
       - name: Lint
         run: npm run lint
@@ -398,12 +41,11 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Commit validated portfolio changes
-        shell: bash
+      - name: Commit validated changes
         run: |
-          rm -f .github/workflows/portfolio-polish.yml
+          rm -f .github/workflows/portfolio-polish.yml scripts/portfolio_polish.py
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add app/page.tsx app/globals.css .github/workflows/portfolio-polish.yml
+          git add -A
           git commit -m "Refine education section and compact contact footer"
           git push origin HEAD:portfolio-site
