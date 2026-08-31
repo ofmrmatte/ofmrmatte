@@ -257,51 +257,53 @@ export default function Page() {
           </div>
           <div className="education-list">
             <article className="education-item">
-              <div>
+              <div className="education-copy">
                 <strong>Bacharel em Administração</strong>
-                <p>Centro Universitário FAM</p>
-                <span>02/2022 – 06/2026</span>
+                <p className="education-school">Centro Universitário FAM</p>
+                <p className="education-summary">
+                  Formação em gestão, processos, estratégia e tomada de decisão, aplicada à leitura de operações e à
+                  estruturação de soluções de negócio.
+                </p>
               </div>
               <span className="status">Concluído</span>
             </article>
             <article className="education-item">
-              <div>
+              <div className="education-copy">
                 <strong>Pós-Graduação Lato Sensu em Desenvolvimento Full Stack</strong>
-                <p>PUC Minas</p>
-                <span>Início previsto: 09/2026</span>
+                <p className="education-school">PUC Minas</p>
+                <p className="education-summary">
+                  Aprofundamento em aplicações full stack, arquitetura, front-end, back-end, bancos de dados, APIs e
+                  integração de sistemas para construção de soluções completas.
+                </p>
               </div>
             </article>
           </div>
         </div>
       </section>
 
-      <section id="contato" className="section">
-        <div className="section-inner">
-          <div className="contact-panel">
-            <div>
-              <span className="kicker">Contato</span>
-              <h2>Vamos conectar operação, dados e automação.</h2>
-              <div className="contact-links">
-                <a href="https://linkedin.com/in/mrmatte" target="_blank" rel="noreferrer">
-                  LinkedIn <span>linkedin.com/in/mrmatte</span>
-                </a>
-                <a href="https://github.com/ofmrmatte" target="_blank" rel="noreferrer">
-                  GitHub <span>github.com/ofmrmatte</span>
-                </a>
-                <a href="mailto:matheus_frafou@outlook.com">
-                  E-mail <span>matheus_frafou@outlook.com</span>
-                </a>
-              </div>
-            </div>
-            <figure className="portrait-photo">
-              <Image src={portraitImage.src} alt={portraitImage.alt} width={portraitImage.width} height={portraitImage.height} sizes="(max-width: 980px) 100vw, 28vw" />
-            </figure>
+      <footer id="contato" className="site-footer">
+        <div className="section-inner footer-shell">
+          <div className="footer-copy">
+            <span className="kicker">Contato</span>
+            <h2>Vamos conectar operação, dados e automação.</h2>
+            <p>Projetos, tecnologia aplicada ao negócio, automação e melhoria de processos.</p>
+          </div>
+          <nav className="footer-actions" aria-label="Links de contato">
+            <a className="footer-link footer-link-primary" href="https://linkedin.com/in/mrmatte" target="_blank" rel="noreferrer">
+              LinkedIn
+            </a>
+            <a className="footer-link" href="https://github.com/ofmrmatte" target="_blank" rel="noreferrer">
+              GitHub
+            </a>
+            <a className="footer-link" href="mailto:matheus_frafou@outlook.com">
+              E-mail
+            </a>
+          </nav>
+          <div className="footer-meta">
+            <span>© 2026 Matheus Ferreira Folgado</span>
+            <span>Administração · Sistemas · Automação</span>
           </div>
         </div>
-      </section>
-
-      <footer className="site-footer">
-        <div className="section-inner">© 2026 Matheus Ferreira Folgado. Administração, sistemas e automação.</div>
       </footer>
     </main>
   );
