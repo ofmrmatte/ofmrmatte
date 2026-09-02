@@ -253,27 +253,28 @@ export default function Page() {
         <div className="section-inner">
           <div className="section-head">
             <h2>Formação</h2>
-            <p>Base em administração e formação técnica voltada à construção de aplicações full stack.</p>
+            <p>Formação em gestão aliada ao aprofundamento técnico em desenvolvimento de software.</p>
           </div>
           <div className="education-list">
             <article className="education-item">
+              <span className="education-label">Gestão e negócios</span>
               <div className="education-copy">
                 <strong>Bacharel em Administração</strong>
                 <p className="education-school">Centro Universitário FAM</p>
                 <p className="education-summary">
-                  Formação em gestão, processos, estratégia e tomada de decisão, aplicada à leitura de operações e à
-                  estruturação de soluções de negócio.
+                  Base em gestão, processos, estratégia e tomada de decisão, aplicada à análise de operações, melhoria
+                  de processos e construção de soluções alinhadas aos objetivos do negócio.
                 </p>
               </div>
-              <span className="status">Concluído</span>
             </article>
             <article className="education-item">
+              <span className="education-label">Tecnologia e produto digital</span>
               <div className="education-copy">
                 <strong>Pós-Graduação Lato Sensu em Desenvolvimento Full Stack</strong>
                 <p className="education-school">PUC Minas</p>
                 <p className="education-summary">
-                  Aprofundamento em aplicações full stack, arquitetura, front-end, back-end, bancos de dados, APIs e
-                  integração de sistemas para construção de soluções completas.
+                  Aprofundamento em arquitetura e desenvolvimento de aplicações, APIs, bancos de dados e integração de
+                  sistemas, ampliando a capacidade de transformar necessidades operacionais em soluções digitais.
                 </p>
               </div>
             </article>
