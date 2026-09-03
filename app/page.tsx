@@ -1,307 +1,423 @@
 import Image from "next/image";
-import type { CSSProperties } from "react";
-import { OrbField } from "./components/OrbField";
+import {
+  ArrowRight,
+  ArrowUpRight,
+  Briefcase,
+  Database,
+  EnvelopeSimple,
+  GithubLogo,
+  LinkedinLogo,
+  Robot,
+  UserCircle
+} from "@phosphor-icons/react/dist/ssr";
+import { PortfolioMotion } from "./components/PortfolioMotion";
+import { Button } from "../components/ui/button";
+import { Card, CardContent } from "../components/ui/card";
 
-const navItems = ["Sobre", "Projetos", "Competências", "Formação", "Contato"];
+const navItems = [
+  ["Sobre", "#sobre"],
+  ["Projetos", "#projetos"],
+  ["Competências", "#competencias"],
+  ["Formação", "#formacao"],
+  ["Contato", "#contato"]
+] as const;
 
-const heroImage = {
-  src:
-    process.env.NEXT_PUBLIC_HERO_IMAGE_URL ||
-    "https://xakeaewgrcieufmxbfvs.supabase.co/storage/v1/object/public/portfolio-assets/matheus/hero.webp",
-  width: 1600,
-  height: 1066,
-  alt: "Matheus Ferreira usando camisa cinza ajustando a gola"
-};
-
-const portraitImage = {
-  src:
-    process.env.NEXT_PUBLIC_PORTRAIT_IMAGE_URL ||
-    "https://xakeaewgrcieufmxbfvs.supabase.co/storage/v1/object/public/portfolio-assets/matheus/portrait.webp",
-  width: 1394,
-  height: 1394,
-  alt: "Matheus Ferreira usando camisa branca sorrindo próximo a plantas"
-};
-
-const projects = [
+const projectCards = [
   {
     name: "Inteligência ALC",
+    eyebrow: "Plataforma de inteligência operacional",
     description:
-      "Sistema web para consolidação e análise de dados operacionais, prevenção de perdas, PNR, pré-faturamento, indicadores, conciliação de IDs e gestão de motoristas.",
-    tech: ["Next.js", "React", "TypeScript", "Supabase", "PostgreSQL", "Vercel"],
-    colors: ["oklch(46% 0.12 205)", "oklch(61% 0.14 247)"]
+      "Centraliza PNR, pré-faturamento, risco, conciliação, qualidade e gestão operacional em uma única visão, reduzindo dispersão de dados e apoiando decisões mais rápidas.",
+    href: "https://github.com/ofmrmatte/Inteligencia_ALC",
+    action: "Ver projeto",
+    visual: "intelligence"
   },
   {
-    name: "Portal do Motorista",
+    name: "Novo site da ALC",
+    eyebrow: "Presença digital e experiência institucional",
     description:
-      "Plataforma web/mobile/PWA para consulta de pendências, pagamentos, contestações, documentos e gestão administrativa de motoristas com controle de acesso e hierarquia.",
-    tech: ["Next.js", "React", "TypeScript", "Supabase", "PWA", "Vercel"],
-    colors: ["oklch(42% 0.1 183)", "oklch(67% 0.12 178)"]
+      "Reconstrução do site institucional da transportadora com foco em clareza comercial, credibilidade, responsividade e uma apresentação mais forte da operação e da marca.",
+    href: "https://alcepereirafilho.com.br",
+    action: "Acessar site",
+    visual: "alc-site"
   },
   {
     name: "MLDDS",
+    eyebrow: "Automação operacional assistida",
     description:
-      "Automação de processos logísticos integrando aplicação desktop, extensão de navegador, tratamento de dados e regras de negócio.",
-    tech: ["C#", ".NET 8", "WPF", "Chrome Extension", "JavaScript"],
-    colors: ["oklch(35% 0.09 232)", "oklch(68% 0.105 71)"]
+      "Aplicação desktop para apoiar roteirização e execução de processos logísticos com regras de negócio, validações, rastreabilidade e segurança operacional.",
+    href: "https://github.com/ofmrmatte/MLDDS-Releases",
+    action: "Ver releases",
+    visual: "mldds"
   }
-];
+] as const;
 
-const skills = [
+const competencies = [
   {
-    title: "Gestão e Operações",
-    items: [
-      "Análise Operacional",
-      "Gestão de Processos",
-      "Prevenção de Perdas",
-      "KPIs",
-      "Análise de Dados",
-      "Relatórios Gerenciais",
-      "Pré-faturamento",
-      "Melhoria de Processos"
-    ]
+    title: "Gestão & Operações",
+    text: "Leitura de processos, indicadores e gargalos para transformar rotina operacional em fluxos mais claros, controláveis e eficientes.",
+    Icon: Briefcase
   },
   {
-    title: "Sistemas, Automação e IA",
-    items: [
-      "Desenvolvimento assistido por IA",
-      "Automação de Processos",
-      "Levantamento de Requisitos",
-      "Regras de Negócio",
-      "Testes Funcionais",
-      "Validação de Software",
-      "Integração de Sistemas",
-      "APIs REST",
-      "Git/GitHub"
-    ]
+    title: "Sistemas & Dados",
+    text: "Modelagem de informações, dashboards, integrações e aplicações que transformam dados dispersos em visão confiável para decisão.",
+    Icon: Database
   },
   {
-    title: "Tecnologias em Projetos",
-    items: [
-      "TypeScript",
-      "JavaScript",
-      "React",
-      "Next.js",
-      "Node.js",
-      "C#",
-      ".NET",
-      "SQL",
-      "PostgreSQL",
-      "Supabase",
-      "HTML/CSS",
-      "Vercel"
-    ]
+    title: "Automação & IA aplicada",
+    text: "Desenvolvimento de automações e soluções assistidas por IA para reduzir retrabalho, acelerar ciclos e ampliar capacidade operacional.",
+    Icon: Robot
   }
-];
+] as const;
 
-function anchor(label: string) {
-  return `#${label.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")}`;
+function BrandMark() {
+  return (
+    <span className="brand-mark" aria-hidden="true">
+      M
+    </span>
+  );
+}
+
+function IntelligencePreview() {
+  return (
+    <div className="product-preview intelligence-preview" aria-label="Representação visual do Inteligência ALC">
+      <div className="preview-sidebar" aria-hidden="true">
+        <span className="sidebar-logo">ALC</span>
+        <span />
+        <span />
+        <span />
+        <span />
+      </div>
+      <div className="preview-main">
+        <div className="preview-topline">
+          <div>
+            <span className="preview-kicker">Inteligência ALC</span>
+            <strong>Visão operacional</strong>
+          </div>
+          <span className="preview-pill">Dados consolidados</span>
+        </div>
+        <div className="metric-grid">
+          {["PNR", "Pré-faturamento", "Conciliação", "Qualidade"].map((label) => (
+            <div className="metric-card" key={label}>
+              <span>{label}</span>
+              <strong>Visão integrada</strong>
+              <small>Monitoramento contínuo</small>
+            </div>
+          ))}
+        </div>
+        <div className="preview-charts">
+          <div className="line-chart-card">
+            <div className="chart-heading">
+              <span>Evolução operacional</span>
+              <span className="chart-legend">Indicadores</span>
+            </div>
+            <svg viewBox="0 0 420 150" role="img" aria-label="Gráfico ilustrativo de evolução operacional">
+              <path d="M10 126 C 58 106, 76 66, 118 78 S 178 118, 218 72 S 288 44, 330 62 S 382 38, 410 30" />
+              <path className="secondary-line" d="M10 138 C 52 126, 84 96, 122 104 S 182 130, 220 102 S 280 82, 326 94 S 376 68, 410 72" />
+            </svg>
+          </div>
+          <div className="status-card">
+            <span>Status dos fluxos</span>
+            <div className="donut" aria-hidden="true" />
+            <div className="status-list">
+              <span><i className="status-dot status-dot-success" /> Validado</span>
+              <span><i className="status-dot status-dot-progress" /> Em análise</span>
+              <span><i className="status-dot status-dot-neutral" /> Monitorado</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AlcSitePreview() {
+  return (
+    <div className="product-preview site-preview">
+      <Image
+        src="https://raw.githubusercontent.com/ofmrmatte/ALC-Pereira-Filho-Transportes/main/assets/images/frota/alc-frota-operacao.jpg"
+        alt="Frota da ALC Pereira Filho Transportes em operação"
+        fill
+        sizes="(max-width: 900px) 100vw, 33vw"
+      />
+      <div className="site-preview-overlay">
+        <span className="site-preview-brand">ALC</span>
+        <div>
+          <span>Transporte e logística</span>
+          <strong>Operação apresentada com mais clareza.</strong>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MlddsPreview() {
+  return (
+    <div className="product-preview mldds-preview" aria-label="Representação visual do fluxo do MLDDS">
+      <div className="mldds-window">
+        <div className="mldds-titlebar">
+          <span className="window-dot" />
+          <span className="window-dot" />
+          <span className="window-dot" />
+          <strong>MLDDS · Operação</strong>
+        </div>
+        <div className="mldds-flow">
+          {[
+            ["01", "Captura", "Snapshot operacional"],
+            ["02", "Regras", "Classificação e contexto"],
+            ["03", "Roteirização", "Plano de execução"],
+            ["04", "Validação", "Aplicar com segurança"]
+          ].map(([step, title, text], index) => (
+            <div className="flow-step" key={title}>
+              <span className="flow-index">{step}</span>
+              <div>
+                <strong>{title}</strong>
+                <small>{text}</small>
+              </div>
+              {index < 3 ? <ArrowRight size={18} weight="bold" className="flow-arrow" /> : null}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ProjectVisual({ type }: { type: (typeof projectCards)[number]["visual"] }) {
+  if (type === "alc-site") return <AlcSitePreview />;
+  if (type === "mldds") return <MlddsPreview />;
+  return <IntelligencePreview />;
 }
 
 export default function Page() {
   return (
     <main className="site-shell">
-      <OrbField />
+      <PortfolioMotion />
+
       <header className="site-header">
-        <div className="nav-wrap">
-          <a className="brand" href="#top" aria-label="Ir para o início">
+        <div className="page-container nav-shell">
+          <a className="brand" href="#top" aria-label="Voltar ao início">
+            <BrandMark />
             <span>Matheus Ferreira Folgado</span>
           </a>
-          <nav className="desktop-nav" aria-label="Seções principais">
-            {navItems.map((item) => (
-              <a href={anchor(item)} key={item}>
-                {item}
-              </a>
+
+          <nav className="desktop-nav" aria-label="Navegação principal">
+            {navItems.map(([label, href]) => (
+              <a href={href} key={href}>{label}</a>
             ))}
           </nav>
-          <nav className="social-nav" aria-label="Links externos">
-            <a href="https://github.com/ofmrmatte" target="_blank" rel="noreferrer">
-              GitHub
+
+          <Button asChild className="header-cta">
+            <a href="mailto:matheus_frafou@outlook.com">
+              Entrar em contato
+              <EnvelopeSimple size={18} weight="bold" />
             </a>
-            <a href="https://linkedin.com/in/mrmatte" target="_blank" rel="noreferrer">
-              LinkedIn
-            </a>
-          </nav>
+          </Button>
+
           <details className="mobile-menu">
             <summary>Menu</summary>
             <nav className="mobile-panel" aria-label="Menu mobile">
-              {navItems.map((item) => (
-                <a href={anchor(item)} key={item}>
-                  {item}
-                </a>
+              {navItems.map(([label, href]) => (
+                <a href={href} key={href}>{label}</a>
               ))}
-              <a href="https://github.com/ofmrmatte" target="_blank" rel="noreferrer">
-                GitHub
-              </a>
-              <a href="https://linkedin.com/in/mrmatte" target="_blank" rel="noreferrer">
-                LinkedIn
-              </a>
             </nav>
           </details>
         </div>
       </header>
 
-      <section id="top" className="hero">
-        <div className="section-inner hero-grid">
-          <div className="hero-copy">
-            <h1>Matheus Ferreira Folgado</h1>
-            <div className="actions">
-              <a className="btn btn-primary" href="#projetos">
-                Ver projetos
-              </a>
-              <a className="btn btn-secondary" href="https://github.com/ofmrmatte" target="_blank" rel="noreferrer">
-                GitHub
-              </a>
-            </div>
-            <div className="signal-panel" aria-label="Fluxo de atuação">
-              <span>$ mapear_operacao --dados --processos</span>
-              <span>$ validar_regras --falhas --evidencias</span>
-              <span>$ automatizar_rotina --controle --escala</span>
+      <section id="top" className="hero-section">
+        <div className="page-container hero-grid">
+          <div className="hero-copy" data-hero-copy>
+            <span className="eyebrow">Gestão · Sistemas · Automação</span>
+            <h1>
+              Administração, sistemas e automação para <em>operações reais.</em>
+            </h1>
+            <p>
+              Transformo processos, dados e tecnologia em soluções que geram eficiência operacional,
+              reduzem retrabalho e apoiam decisões melhores.
+            </p>
+            <div className="hero-actions">
+              <Button asChild size="lg">
+                <a href="#projetos">
+                  Ver projetos
+                  <ArrowRight size={19} weight="bold" />
+                </a>
+              </Button>
+              <Button asChild size="lg" variant="outline">
+                <a href="mailto:matheus_frafou@outlook.com">
+                  <EnvelopeSimple size={19} />
+                  Entrar em contato
+                </a>
+              </Button>
             </div>
           </div>
-          <div className="hero-photo-wrap">
-            <figure className="hero-photo">
-              <Image src={heroImage.src} alt={heroImage.alt} width={heroImage.width} height={heroImage.height} preload sizes="(max-width: 980px) 100vw, 45vw" />
-            </figure>
+
+          <div className="hero-visual" data-hero-visual>
+            <div className="hero-visual-glow" aria-hidden="true" />
+            <IntelligencePreview />
+            <div className="floating-panel floating-panel-top">
+              <span>Regra de negócio</span>
+              <strong>Dados → validação → decisão</strong>
+            </div>
+            <div className="floating-panel floating-panel-side">
+              <span>Fluxos</span>
+              <small><i className="status-dot status-dot-success" /> Validados</small>
+              <small><i className="status-dot status-dot-progress" /> Em análise</small>
+              <small><i className="status-dot status-dot-neutral" /> Monitorados</small>
+            </div>
           </div>
         </div>
       </section>
 
-      <section id="sobre" className="section">
-        <div className="section-inner about-grid">
-          <figure className="portrait-photo">
-            <Image src={portraitImage.src} alt={portraitImage.alt} width={portraitImage.width} height={portraitImage.height} sizes="(max-width: 980px) 100vw, 35vw" />
-          </figure>
-          <div className="hero-copy">
-            <span className="kicker">Sobre</span>
-            <h2>Negócio primeiro. Tecnologia onde faz sentido.</h2>
-            <p>
-              Minha atuação conecta processos, análise operacional, tecnologia, automação, desenvolvimento de sistemas e
-              melhoria contínua. O foco é transformar rotina administrativa e logística em fluxos mais claros,
-              rastreáveis e fáceis de validar.
-            </p>
-            <div className="pill-row">
-              <span className="pill">Gestão</span>
-              <span className="pill">Sistemas</span>
-              <span className="pill">Automação</span>
-            </div>
-          </div>
+      <section id="sobre" className="section section-compact">
+        <div className="page-container">
+          <Card className="about-card" data-reveal>
+            <CardContent className="about-card-content">
+              <div className="about-heading">
+                <span className="icon-badge"><UserCircle size={26} weight="regular" /></span>
+                <div>
+                  <span className="section-label">Sobre mim</span>
+                  <h2>Perfil</h2>
+                </div>
+              </div>
+              <p>
+                Sou Matheus Ferreira Folgado, administrador que atua na interseção entre operação e tecnologia.
+                Transformo rotinas, dados e regras de negócio em sistemas e automações que reduzem retrabalho
+                e tornam decisões mais claras.
+              </p>
+            </CardContent>
+          </Card>
         </div>
       </section>
 
       <section id="projetos" className="section">
-        <div className="section-inner">
-          <div className="section-head">
-            <h2>Projetos principais</h2>
-            <p>
-              Sistemas e automações com foco em operação, dados, controle administrativo e validação de regras de negócio.
-            </p>
+        <div className="page-container">
+          <div className="section-heading" data-reveal>
+            <div>
+              <span className="section-label">Projetos em destaque</span>
+              <h2>Soluções que geram impacto operacional</h2>
+            </div>
+            <a className="text-link" href="https://github.com/ofmrmatte" target="_blank" rel="noreferrer">
+              Ver GitHub
+              <ArrowRight size={17} weight="bold" />
+            </a>
           </div>
+
           <div className="projects-grid">
-            {projects.map((project) => (
-              <article className="project-card" key={project.name}>
-                <div
-                  className="project-visual"
-                  style={{
-                    "--project-a": project.colors[0],
-                    "--project-b": project.colors[1]
-                  } as CSSProperties}
-                  aria-hidden="true"
-                >
-                  <div className="project-lines">
-                    <span />
-                    <span />
-                    <span />
+            {projectCards.map((project) => (
+              <Card className="project-card" key={project.name} data-reveal data-project-card>
+                <div className="project-media">
+                  <ProjectVisual type={project.visual} />
+                </div>
+                <CardContent className="project-content">
+                  <span className="project-eyebrow">{project.eyebrow}</span>
+                  <div className="project-title-row">
+                    <h3>{project.name}</h3>
+                    <a href={project.href} target="_blank" rel="noreferrer" aria-label={`${project.action}: ${project.name}`}>
+                      <ArrowUpRight size={20} weight="bold" />
+                    </a>
                   </div>
-                </div>
-                <h3>{project.name}</h3>
-                <p>{project.description}</p>
-                <div className="tag-list" aria-label={`Tecnologias do projeto ${project.name}`}>
-                  {project.tech.map((tech) => (
-                    <span className="tag" key={tech}>
-                      {tech}
-                    </span>
-                  ))}
-                </div>
-              </article>
+                  <p>{project.description}</p>
+                  <a className="project-link" href={project.href} target="_blank" rel="noreferrer">
+                    {project.action}
+                    <ArrowRight size={16} weight="bold" />
+                  </a>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </div>
       </section>
 
-      <section id="competencias" className="section">
-        <div className="section-inner">
-          <div className="section-head">
-            <h2>Competências</h2>
-            <p>Organizadas por aplicação prática, sem percentuais artificiais ou níveis inventados.</p>
+      <section id="competencias" className="section skills-section">
+        <div className="page-container">
+          <div className="section-heading" data-reveal>
+            <div>
+              <span className="section-label">Como gero valor</span>
+              <h2>Competências que conectam estratégia e execução</h2>
+            </div>
           </div>
-          <div className="skills-grid">
-            {skills.map((group) => (
-              <article className="skill-group" key={group.title}>
-                <h3>{group.title}</h3>
-                <ul>
-                  {group.items.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </ul>
-              </article>
+
+          <div className="competency-grid">
+            {competencies.map(({ title, text, Icon }) => (
+              <Card className="competency-card" key={title} data-reveal>
+                <CardContent className="competency-content">
+                  <span className="icon-badge icon-badge-large">
+                    <Icon size={30} weight="regular" />
+                  </span>
+                  <div>
+                    <h3>{title}</h3>
+                    <p>{text}</p>
+                  </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </div>
       </section>
 
-      <section id="formacao" className="section">
-        <div className="section-inner">
-          <div className="section-head">
-            <h2>Formação</h2>
-            <p>Formação em gestão aliada ao aprofundamento técnico em desenvolvimento de software.</p>
+      <section id="formacao" className="section formation-section">
+        <div className="page-container">
+          <div className="section-heading formation-heading" data-reveal>
+            <div>
+              <span className="section-label">Formação</span>
+              <h2>Gestão com aprofundamento técnico</h2>
+            </div>
           </div>
-          <div className="education-list">
-            <article className="education-item">
-              <span className="education-label">Gestão e negócios</span>
-              <div className="education-copy">
-                <strong>Bacharel em Administração</strong>
-                <p className="education-school">Centro Universitário FAM</p>
-                <p className="education-summary">
-                  Base em gestão, processos, estratégia e tomada de decisão, aplicada à análise de operações, melhoria
-                  de processos e construção de soluções alinhadas aos objetivos do negócio.
-                </p>
-              </div>
-            </article>
-            <article className="education-item">
-              <span className="education-label">Tecnologia e produto digital</span>
-              <div className="education-copy">
-                <strong>Pós-Graduação Lato Sensu em Desenvolvimento Full Stack</strong>
-                <p className="education-school">PUC Minas</p>
-                <p className="education-summary">
-                  Aprofundamento em arquitetura e desenvolvimento de aplicações, APIs, bancos de dados e integração de
-                  sistemas, ampliando a capacidade de transformar necessidades operacionais em soluções digitais.
-                </p>
-              </div>
-            </article>
+          <div className="formation-grid">
+            <Card className="formation-card" data-reveal>
+              <CardContent>
+                <span>Gestão e negócios</span>
+                <h3>Bacharel em Administração</h3>
+                <strong>Centro Universitário FAM</strong>
+                <p>Gestão, processos, estratégia, análise operacional e tomada de decisão.</p>
+              </CardContent>
+            </Card>
+            <Card className="formation-card" data-reveal>
+              <CardContent>
+                <span>Tecnologia e produto digital</span>
+                <h3>Pós-Graduação em Desenvolvimento Full Stack</h3>
+                <strong>PUC Minas</strong>
+                <p>Arquitetura, aplicações, APIs, bancos de dados e integração de sistemas.</p>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>
 
       <footer id="contato" className="site-footer">
-        <div className="section-inner footer-shell">
-          <div className="footer-copy">
-            <span className="kicker">Contato</span>
-            <h2>Vamos conectar operação, dados e automação.</h2>
-            <p>Projetos, tecnologia aplicada ao negócio, automação e melhoria de processos.</p>
+        <div className="page-container footer-shell">
+          <div className="footer-brand">
+            <div className="brand">
+              <BrandMark />
+              <span>Matheus Ferreira Folgado</span>
+            </div>
+            <p>Transformo processos em soluções e dados em resultados.</p>
           </div>
-          <nav className="footer-actions" aria-label="Links de contato">
-            <a className="footer-link footer-link-primary" href="https://linkedin.com/in/mrmatte" target="_blank" rel="noreferrer">
-              LinkedIn
-            </a>
-            <a className="footer-link" href="https://github.com/ofmrmatte" target="_blank" rel="noreferrer">
-              GitHub
-            </a>
-            <a className="footer-link" href="mailto:matheus_frafou@outlook.com">
-              E-mail
-            </a>
+
+          <nav className="footer-links" aria-label="Contato e redes">
+            <Button asChild variant="outline">
+              <a href="https://linkedin.com/in/mrmatte" target="_blank" rel="noreferrer">
+                <LinkedinLogo size={18} weight="fill" />
+                LinkedIn
+              </a>
+            </Button>
+            <Button asChild variant="outline">
+              <a href="https://github.com/ofmrmatte" target="_blank" rel="noreferrer">
+                <GithubLogo size={18} weight="fill" />
+                GitHub
+              </a>
+            </Button>
+            <Button asChild variant="outline">
+              <a href="mailto:matheus_frafou@outlook.com">
+                <EnvelopeSimple size={18} />
+                E-mail
+              </a>
+            </Button>
           </nav>
-          <div className="footer-meta">
-            <span>© 2026 Matheus Ferreira Folgado</span>
+
+          <div className="footer-bottom">
+            <span>© 2026 Matheus Ferreira Folgado.</span>
             <span>Administração · Sistemas · Automação</span>
           </div>
         </div>

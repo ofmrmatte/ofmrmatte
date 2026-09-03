@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Space_Grotesk } from "next/font/google";
+import { Inter, Newsreader } from "next/font/google";
 import "./globals.css";
 
 const inter = Inter({
@@ -8,19 +8,19 @@ const inter = Inter({
   display: "swap"
 });
 
-const spaceGrotesk = Space_Grotesk({
-  variable: "--font-space-grotesk",
+const newsreader = Newsreader({
+  variable: "--font-newsreader",
   subsets: ["latin"],
   display: "swap"
 });
 
-const siteUrl = "https://matheus-ferreira-portfolio.vercel.app";
+const siteUrl = "https://ofmrmatte.vercel.app";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: "Matheus Ferreira Folgado | Administração, Sistemas e Automação",
   description:
-    "Portfólio profissional de Matheus Ferreira Folgado: gestão, tecnologia e automação aplicadas a operações reais.",
+    "Portfólio profissional de Matheus Ferreira Folgado: gestão, sistemas, dados e automação aplicados a operações reais.",
   alternates: {
     canonical: "/"
   },
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Matheus Ferreira Folgado | Administração, Sistemas e Automação",
     description:
-      "Administrador em Ribeirão Preto/SP com foco em análise operacional, sistemas, dashboards e automação.",
+      "Administração, sistemas, dados e automação conectados para resolver problemas operacionais reais.",
     url: siteUrl,
     siteName: "Matheus Ferreira Folgado",
     locale: "pt_BR",
@@ -59,12 +59,12 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#070b0f"
+  themeColor: "#ffffff"
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="pt-BR" className={`${inter.variable} ${spaceGrotesk.variable}`} data-scroll-behavior="smooth">
+    <html lang="pt-BR" className={`${inter.variable} ${newsreader.variable}`} data-scroll-behavior="smooth">
       <body>{children}</body>
     </html>
   );
