@@ -1,3 +1,5 @@
+@import "./profile-photo.css";
+
 :root {
   --surface: #fbfcfc;
   --surface-muted: #f5f8f8;
