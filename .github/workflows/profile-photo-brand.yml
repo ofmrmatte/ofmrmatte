@@ -1,0 +1,90 @@
+name: profile photo brand
+
+on:
+  push:
+    branches: [portfolio-site]
+    paths:
+      - '.github/workflows/profile-photo-brand.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  update-brand:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: portfolio-site
+          fetch-depth: 0
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Use profile photo in brand marks
+        shell: python
+        run: |
+          from pathlib import Path
+          path = Path('app/globals.css')
+          css = path.read_text(encoding='utf-8')
+          old = '''.brand-mark {
+  display: inline-grid;
+  width: 2.15rem;
+  aspect-ratio: 1;
+  place-items: center;
+  border: 1px solid rgba(0, 117, 113, 0.3);
+  border-radius: 0.65rem;
+  color: var(--teal);
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 700;
+  transform: rotate(-2deg);
+}'''
+          new = '''.brand-mark {
+  display: inline-block;
+  width: 2.25rem;
+  aspect-ratio: 1;
+  flex: 0 0 auto;
+  overflow: hidden;
+  border: 2px solid rgba(0, 117, 113, 0.24);
+  border-radius: 999px;
+  background-image: url("https://avatars.githubusercontent.com/u/279118945?v=4");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  box-shadow: 0 4px 14px rgba(15, 41, 55, 0.12);
+  color: transparent;
+  font-size: 0;
+  transform: none;
+}'''
+          if old not in css:
+              raise SystemExit('brand-mark block not found')
+          path.write_text(css.replace(old, new, 1), encoding='utf-8')
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build
+
+      - name: Commit validated profile photo
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/globals.css
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git commit -m "Use profile photo in portfolio brand icons"
+          git push origin HEAD:portfolio-site
