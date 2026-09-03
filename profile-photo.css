@@ -1,0 +1,24 @@
+.brand-mark {
+  display: inline-block !important;
+  width: 2.25rem !important;
+  aspect-ratio: 1 !important;
+  flex: 0 0 auto !important;
+  overflow: hidden !important;
+  border: 2px solid rgba(0, 117, 113, 0.24) !important;
+  border-radius: 999px !important;
+  background-image: url("https://avatars.githubusercontent.com/u/279118945?v=4") !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  background-size: cover !important;
+  box-shadow: 0 4px 14px rgba(15, 41, 55, 0.12) !important;
+  color: transparent !important;
+  font-size: 0 !important;
+  transform: none !important;
+}
+
+@media (max-width: 560px) {
+  .brand-mark {
+    width: 1.9rem !important;
+    border-radius: 999px !important;
+  }
+}
