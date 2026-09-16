@@ -18,9 +18,9 @@ const siteUrl = "https://ofmrmatte.vercel.app";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: "Matheus Ferreira Folgado | Administração, Sistemas e Automação",
+  title: "Matheus Ferreira Folgado | Sistemas, Automação com IA e Engenharia de Software",
   description:
-    "Portfólio profissional de Matheus Ferreira Folgado: gestão, sistemas, dados e automação aplicados a operações reais.",
+    "Portfólio profissional de Matheus Ferreira Folgado: requisitos, sistemas, automação com IA e Engenharia de Software aplicados a operações reais.",
   alternates: {
     canonical: "/"
   },
@@ -35,9 +35,9 @@ export const metadata: Metadata = {
     }
   },
   openGraph: {
-    title: "Matheus Ferreira Folgado | Administração, Sistemas e Automação",
+    title: "Matheus Ferreira Folgado | Sistemas, Automação com IA e Engenharia de Software",
     description:
-      "Administração, sistemas, dados e automação conectados para resolver problemas operacionais reais.",
+      "Negócio, requisitos, sistemas e automação com IA conectados para resolver problemas operacionais reais.",
     url: siteUrl,
     siteName: "Matheus Ferreira Folgado",
     locale: "pt_BR",
@@ -47,7 +47,7 @@ export const metadata: Metadata = {
         url: "/og.svg",
         width: 1200,
         height: 630,
-        alt: "Matheus Ferreira Folgado - Administração, Sistemas e Automação"
+        alt: "Matheus Ferreira Folgado - Sistemas, Automação com IA e Engenharia de Software"
       }
     ]
   },
