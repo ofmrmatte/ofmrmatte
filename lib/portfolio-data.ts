@@ -18,7 +18,7 @@ export type PortfolioProject = {
   screenshot?: ProjectScreenshot;
 };
 
-export const portfolioProjects = [
+export const portfolioProjects: readonly PortfolioProject[] = [
   {
     name: "Inteligência ALC",
     eyebrow: "Plataforma de inteligência operacional",
@@ -61,4 +61,4 @@ export const portfolioProjects = [
       privacy: "public"
     }
   }
-] as const satisfies readonly PortfolioProject[];
+];
