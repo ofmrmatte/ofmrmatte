@@ -30,7 +30,8 @@ const projectCards = [
       "Centraliza PNR, pré-faturamento, risco, conciliação, qualidade e gestão operacional em uma única visão, reduzindo dispersão de dados e apoiando decisões mais rápidas.",
     href: "https://github.com/ofmrmatte/Inteligencia_ALC",
     action: "Ver projeto",
-    visual: "intelligence"
+    visual: "intelligence",
+    stack: ["Next.js", "React", "TypeScript", "Supabase", "PostgreSQL"]
   },
   {
     name: "Novo site da ALC",
@@ -39,7 +40,8 @@ const projectCards = [
       "Reconstrução do site institucional da transportadora com foco em clareza comercial, credibilidade, responsividade e uma apresentação mais forte da operação e da marca.",
     href: "https://alc-pereira-filho-preview.vercel.app",
     action: "Acessar site",
-    visual: "alc-site"
+    visual: "alc-site",
+    stack: ["HTML", "CSS", "JavaScript", "Vercel"]
   },
   {
     name: "MLDDS",
@@ -48,7 +50,8 @@ const projectCards = [
       "Aplicação desktop para apoiar roteirização e execução de processos logísticos com regras de negócio, validações, rastreabilidade e segurança operacional.",
     href: "https://github.com/ofmrmatte/MLDDS-Releases",
     action: "Ver releases",
-    visual: "mldds"
+    visual: "mldds",
+    stack: ["C#", ".NET 8", "WPF", "Automação"]
   }
 ] as const;
 
@@ -123,6 +126,66 @@ function IntelligencePreview() {
               <span><i className="status-dot status-dot-success" /> Validado</span>
               <span><i className="status-dot status-dot-progress" /> Em análise</span>
               <span><i className="status-dot status-dot-neutral" /> Monitorado</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PortfolioPreview() {
+  const stages = [
+    ["Requisitos", "Mapeamento", "Necessidade → escopo"],
+    ["Regras", "Modelagem", "Critérios claros"],
+    ["Validação", "Testes", "Fluxos verificados"],
+    ["Evolução", "Melhoria", "Entrega contínua"]
+  ] as const;
+
+  return (
+    <div className="product-preview intelligence-preview portfolio-preview" aria-label="Representação visual de um fluxo de Engenharia de Software">
+      <div className="preview-sidebar" aria-hidden="true">
+        <span className="sidebar-logo">MF</span>
+        <span />
+        <span />
+        <span />
+        <span />
+      </div>
+      <div className="preview-main">
+        <div className="preview-topline">
+          <div>
+            <span className="preview-kicker">Engenharia de Software</span>
+            <strong>Da necessidade à solução</strong>
+          </div>
+          <span className="preview-pill">IA como apoio</span>
+        </div>
+        <div className="metric-grid">
+          {stages.map(([label, value, detail]) => (
+            <div className="metric-card" key={label}>
+              <span>{label}</span>
+              <strong>{value}</strong>
+              <small>{detail}</small>
+            </div>
+          ))}
+        </div>
+        <div className="preview-charts">
+          <div className="line-chart-card">
+            <div className="chart-heading">
+              <span>Ciclo de evolução</span>
+              <span className="chart-legend">Iterativo</span>
+            </div>
+            <svg viewBox="0 0 420 150" role="img" aria-label="Gráfico ilustrativo de evolução de uma solução">
+              <path d="M10 126 C 58 106, 76 66, 118 78 S 178 118, 218 72 S 288 44, 330 62 S 382 38, 410 30" />
+              <path className="secondary-line" d="M10 138 C 52 126, 84 96, 122 104 S 182 130, 220 102 S 280 82, 326 94 S 376 68, 410 72" />
+            </svg>
+          </div>
+          <div className="status-card">
+            <span>Qualidade</span>
+            <div className="donut" aria-hidden="true" />
+            <div className="status-list">
+              <span><i className="status-dot status-dot-success" /> Requisitos validados</span>
+              <span><i className="status-dot status-dot-progress" /> Testes</span>
+              <span><i className="status-dot status-dot-neutral" /> Integrações</span>
             </div>
           </div>
         </div>
@@ -254,16 +317,16 @@ export default function Page() {
 
           <div className="hero-visual" data-hero-visual>
             <div className="hero-visual-glow" aria-hidden="true" />
-            <IntelligencePreview />
+            <PortfolioPreview />
             <div className="floating-panel floating-panel-top">
               <span>Regra de negócio</span>
-              <strong>Dados → validação → decisão</strong>
+              <strong>Contexto → requisito → validação</strong>
             </div>
             <div className="floating-panel floating-panel-side">
               <span>Fluxos</span>
-              <small><i className="status-dot status-dot-success" /> Validados</small>
-              <small><i className="status-dot status-dot-progress" /> Em análise</small>
-              <small><i className="status-dot status-dot-neutral" /> Monitorados</small>
+              <small><i className="status-dot status-dot-success" /> Mapeados</small>
+              <small><i className="status-dot status-dot-progress" /> Em validação</small>
+              <small><i className="status-dot status-dot-neutral" /> Automatizados</small>
             </div>
           </div>
         </div>
@@ -281,7 +344,7 @@ export default function Page() {
                 </div>
               </div>
               <p>
-                Sou Matheus Ferreira Folgado, administrador com atuação em sistemas, automação e Engenharia de Software.
+                Sou Matheus Ferreira Folgado, administrador com atuação em sistemas e automação, com foco em Engenharia de Software.
                 Transformo necessidades operacionais em requisitos, regras de negócio, fluxos e soluções digitais.
                 Minha atuação envolve levantamento de requisitos, testes, validação funcional, integração de dados e
                 evolução de sistemas, utilizando inteligência artificial como apoio ao desenvolvimento.
@@ -319,6 +382,9 @@ export default function Page() {
                     </a>
                   </div>
                   <p>{project.description}</p>
+                  <div className="project-stack" aria-label={`Tecnologias do projeto ${project.name}`}>
+                    {project.stack.map((item) => <span key={item}>{item}</span>)}
+                  </div>
                   <a className="project-link" href={project.href} target="_blank" rel="noreferrer">
                     {project.action}
                     <ArrowRight size={16} weight="bold" />
@@ -393,7 +459,7 @@ export default function Page() {
               <BrandMark />
               <span>Matheus Ferreira Folgado</span>
             </div>
-            <p>Transformo processos em soluções e dados em resultados.</p>
+            <p>Conecto negócio, requisitos e tecnologia para transformar processos em soluções.</p>
           </div>
 
           <nav className="footer-links" aria-label="Contato e redes">
@@ -419,7 +485,7 @@ export default function Page() {
 
           <div className="footer-bottom">
             <span>© 2026 Matheus Ferreira Folgado.</span>
-            <span>Administração · Sistemas · Automação com IA · Engenharia de Software</span>
+            <span>Administrador · Sistemas e Automação com IA · Requisitos, Processos e Engenharia de Software</span>
           </div>
         </div>
       </footer>
