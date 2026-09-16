@@ -37,7 +37,7 @@ const projectCards = [
     eyebrow: "Presença digital e experiência institucional",
     description:
       "Reconstrução do site institucional da transportadora com foco em clareza comercial, credibilidade, responsividade e uma apresentação mais forte da operação e da marca.",
-    href: "https://alcepereirafilho.com.br",
+    href: "https://alc-pereira-filho-preview.vercel.app",
     action: "Acessar site",
     visual: "alc-site"
   },
@@ -281,10 +281,10 @@ export default function Page() {
                 </div>
               </div>
               <p>
-                Sou Matheus Ferreira Folgado, administrador com atuação em sistemas e automação, conectando
-                conhecimento de negócio, requisitos e tecnologia. Minha atuação envolve levantamento de requisitos,
-                regras de negócio, desenho de fluxos, testes, validação funcional, integração de dados e evolução
-                de soluções, com uso de inteligência artificial como apoio ao desenvolvimento.
+                Sou Matheus Ferreira Folgado, administrador com atuação em sistemas, automação e Engenharia de Software.
+                Transformo necessidades operacionais em requisitos, regras de negócio, fluxos e soluções digitais.
+                Minha atuação envolve levantamento de requisitos, testes, validação funcional, integração de dados e
+                evolução de sistemas, utilizando inteligência artificial como apoio ao desenvolvimento.
               </p>
             </CardContent>
           </Card>
