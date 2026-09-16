@@ -564,6 +564,7 @@ img {
 }
 
 .project-media {
+  position: relative;
   height: 235px;
   overflow: hidden;
   border-bottom: 1px solid #e7ecee;
@@ -576,6 +577,16 @@ img {
   border-radius: 0;
   box-shadow: none;
   transform: none;
+}
+
+.project-screenshot {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-size: cover;
+  pointer-events: none;
 }
 
 .project-media .intelligence-preview {
