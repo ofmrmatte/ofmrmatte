@@ -379,7 +379,7 @@ export default function Page() {
                 <span>Engenharia de Software</span>
                 <h3>Pós-Graduação Lato Sensu em Engenharia de Software</h3>
                 <strong>Universidade de Uberaba (Uniube)</strong>
-                <p>Fundamentos de Engenharia de Software, requisitos, métodos ágeis, testes e qualidade. Início previsto: 09/2026.</p>
+                <p>Fundamentos de Engenharia de Software, requisitos, métodos ágeis, testes e qualidade.</p>
               </CardContent>
             </Card>
           </div>
