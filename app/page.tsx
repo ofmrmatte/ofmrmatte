@@ -54,8 +54,8 @@ const projectCards = [
 
 const competencies = [
   {
-    title: "Gestão & Operações",
-    text: "Leitura de processos, indicadores e gargalos para transformar rotina operacional em fluxos mais claros, controláveis e eficientes.",
+    title: "Requisitos & Processos",
+    text: "Levantamento de requisitos, definição de regras de negócio e desenho de fluxos para transformar necessidades operacionais em soluções claras e validáveis.",
     Icon: Briefcase
   },
   {
@@ -228,13 +228,13 @@ export default function Page() {
       <section id="top" className="hero-section">
         <div className="page-container hero-grid">
           <div className="hero-copy" data-hero-copy>
-            <span className="eyebrow">Gestão · Sistemas · Automação</span>
+            <span className="eyebrow">Sistemas · Automação com IA · Engenharia de Software</span>
             <h1>
-              Administração, sistemas e automação para <em>operações reais.</em>
+              Negócio, sistemas e automação para <em>operações reais.</em>
             </h1>
             <p>
-              Transformo processos, dados e tecnologia em soluções que geram eficiência operacional,
-              reduzem retrabalho e apoiam decisões melhores.
+              Conecto visão de negócio, requisitos e tecnologia para transformar processos em sistemas,
+              automações e fluxos mais eficientes.
             </p>
             <div className="hero-actions">
               <Button asChild size="lg">
@@ -281,9 +281,10 @@ export default function Page() {
                 </div>
               </div>
               <p>
-                Sou Matheus Ferreira Folgado, administrador que atua na interseção entre operação e tecnologia.
-                Transformo rotinas, dados e regras de negócio em sistemas e automações que reduzem retrabalho
-                e tornam decisões mais claras.
+                Sou Matheus Ferreira Folgado, administrador com atuação em sistemas e automação, conectando
+                conhecimento de negócio, requisitos e tecnologia. Minha atuação envolve levantamento de requisitos,
+                regras de negócio, desenho de fluxos, testes, validação funcional, integração de dados e evolução
+                de soluções, com uso de inteligência artificial como apoio ao desenvolvimento.
               </p>
             </CardContent>
           </Card>
@@ -334,7 +335,7 @@ export default function Page() {
           <div className="section-heading" data-reveal>
             <div>
               <span className="section-label">Como gero valor</span>
-              <h2>Competências que conectam estratégia e execução</h2>
+              <h2>Competências que conectam negócio e software</h2>
             </div>
           </div>
 
@@ -361,7 +362,7 @@ export default function Page() {
           <div className="section-heading formation-heading" data-reveal>
             <div>
               <span className="section-label">Formação</span>
-              <h2>Gestão com aprofundamento técnico</h2>
+              <h2>Gestão com aprofundamento em Engenharia de Software</h2>
             </div>
           </div>
           <div className="formation-grid">
@@ -375,10 +376,10 @@ export default function Page() {
             </Card>
             <Card className="formation-card" data-reveal>
               <CardContent>
-                <span>Tecnologia e produto digital</span>
-                <h3>Pós-Graduação em Desenvolvimento Full Stack</h3>
-                <strong>PUC Minas</strong>
-                <p>Arquitetura, aplicações, APIs, bancos de dados e integração de sistemas.</p>
+                <span>Engenharia de Software</span>
+                <h3>Pós-Graduação Lato Sensu em Engenharia de Software</h3>
+                <strong>Universidade de Uberaba (Uniube)</strong>
+                <p>Fundamentos de Engenharia de Software, requisitos, métodos ágeis, testes e qualidade. Início previsto: 09/2026.</p>
               </CardContent>
             </Card>
           </div>
@@ -418,7 +419,7 @@ export default function Page() {
 
           <div className="footer-bottom">
             <span>© 2026 Matheus Ferreira Folgado.</span>
-            <span>Administração · Sistemas · Automação</span>
+            <span>Administração · Sistemas · Automação com IA · Engenharia de Software</span>
           </div>
         </div>
       </footer>
