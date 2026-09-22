@@ -407,7 +407,7 @@ export default function Page() {
           <div className="section-heading formation-heading" data-reveal>
             <div>
               <span className="section-label">Formação</span>
-              <h2>Gestão com aprofundamento em Engenharia de Software</h2>
+              <h2>Gestão, Engenharia de Software e Inteligência Artificial</h2>
             </div>
           </div>
           <div className="formation-grid">
@@ -425,6 +425,14 @@ export default function Page() {
                 <h3>Pós-Graduação Lato Sensu em Engenharia de Software</h3>
                 <strong>Universidade de Uberaba (Uniube)</strong>
                 <p>Fundamentos de Engenharia de Software, requisitos, métodos ágeis, testes e qualidade.</p>
+              </CardContent>
+            </Card>
+            <Card className="formation-card" data-reveal>
+              <CardContent>
+                <span>Inteligência Artificial</span>
+                <h3>Pós-Graduação Lato Sensu em Inteligência Artificial para Devs</h3>
+                <strong>Faculdade Unyleya</strong>
+                <p>Machine Learning, Deep Learning, NLP, engenharia de dados para IA, MLOps, IA generativa, Cloud ML e LLMs.</p>
               </CardContent>
             </Card>
           </div>
