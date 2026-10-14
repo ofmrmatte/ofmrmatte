@@ -592,8 +592,6 @@ img {
 .concept-preview-archi { background: linear-gradient(135deg, #e7f6f4, #f6fafb 55%, #dbecef); }
 .concept-preview-atendimento { background: linear-gradient(135deg, #eaf5fb, #f5fafa 55%, #e4f0ef); }
 .concept-preview-portal { background: linear-gradient(135deg, #f0f4ff, #f7fafc 55%, #e1eef4); }
-.concept-preview-automy { background: linear-gradient(135deg, #eff3fd, #f9fbfd 55%, #e5f1f5); }
-.concept-preview-voss { background: linear-gradient(135deg, #f0eae4, #f7f5f2 55%, #e7e0d9); }
 .concept-mark {
   display: grid;
   place-items: center;
@@ -606,7 +604,6 @@ img {
   font-size: 1.8rem;
   font-weight: 700;
 }
-.concept-preview-voss .concept-mark { color: #614738; border-color: #cbb6a5; }
 .concept-name { color: var(--navy); font-size: 1.16rem; font-weight: 800; letter-spacing: -0.025em; }
 .concept-categories { color: #3c827e; font-size: 0.72rem; font-weight: 700; }
 .concept-preview strong {
@@ -621,7 +618,93 @@ img {
 .concept-lines span:nth-child(1) { width: 48%; }
 .concept-lines span:nth-child(2) { width: 26%; }
 .concept-lines span:nth-child(3) { width: 12%; }
-.project-link-restricted { color: #697b84; font-weight: 650; }
+
+
+/* ARCHI: detalhe expansível com subsistemas e status reais do monorepo. */
+.project-card:has(.archi-more[open]) {
+  grid-column: 1 / -1;
+}
+.archi-more {
+  width: 100%;
+  margin-top: auto;
+  border-top: 1px solid #e5edf0;
+  padding-top: 0.8rem;
+}
+.archi-more summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border: 1px solid rgba(0, 117, 113, 0.17);
+  border-radius: 0.78rem;
+  background: #e9f4f2;
+  color: #126d69;
+  cursor: pointer;
+  font-size: 0.86rem;
+  font-weight: 750;
+  list-style: none;
+  transition: background 180ms ease, border-color 180ms ease;
+}
+.archi-more summary:hover {
+  background: #dcedea;
+  border-color: rgba(0, 117, 113, 0.32);
+}
+.archi-more summary:focus-visible {
+  outline: 3px solid #389f96;
+  outline-offset: 3px;
+}
+.archi-more summary::-webkit-details-marker { display: none; }
+.archi-more summary svg { transition: transform 180ms ease; }
+.archi-more[open] summary svg { transform: rotate(90deg); }
+.archi-more-open-label { display: none; }
+.archi-more[open] .archi-more-closed-label { display: none; }
+.archi-more[open] .archi-more-open-label { display: inline; }
+.archi-more-content { padding: 1.15rem 0 0.25rem; }
+.project-content .archi-more-intro {
+  max-width: 73ch;
+  margin: 0 0 1rem;
+}
+.archi-modules {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+.archi-module {
+  display: flex;
+  flex-direction: column;
+  gap: 0.38rem;
+  min-width: 0;
+  padding: 1rem;
+  border: 1px solid #e0e9ec;
+  border-radius: 0.8rem;
+  background: #f8fafb;
+}
+.archi-module-status {
+  color: #357a78;
+  font-size: 0.67rem;
+  font-weight: 780;
+  letter-spacing: 0.015em;
+}
+.archi-module h4 {
+  margin: 0;
+  color: #1c3c46;
+  font-size: 0.9rem;
+  line-height: 1.35;
+}
+.project-content .archi-module p {
+  margin: 0;
+  color: #52666e;
+  font-size: 0.79rem;
+  line-height: 1.52;
+}
+@media (max-width: 950px) {
+  .archi-modules { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 600px) {
+  .archi-modules { grid-template-columns: 1fr; }
+}
 
 .project-screenshot {
   position: absolute;
