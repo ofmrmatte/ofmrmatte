@@ -1,5 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="MF">
-  <rect width="64" height="64" rx="10" fill="#070b0f"/>
-  <path d="M10 46V17h8l14 18 14-18h8v29h-8V29L34 45h-4L18 29v17z" fill="#eefcf8"/>
-  <path d="M10 52h44" stroke="#5ee6cf" stroke-width="4"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#173c4a"/><stop offset="1" stop-color="#071827"/></linearGradient></defs>
+<rect width="64" height="64" rx="16" fill="#06121e"/>
+<rect x="4" y="4" width="56" height="56" rx="13" fill="url(#g)" stroke="#9df3df" stroke-width="1.5"/>
+<path d="M15 46V19l17 17 17-17v27" fill="none" stroke="#d6fff1" stroke-width="6" stroke-linecap="square" stroke-linejoin="round"/>
+<circle cx="49" cy="17" r="3.6" fill="#9ffcdf"/>
 </svg>

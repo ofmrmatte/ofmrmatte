@@ -6,6 +6,6 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: "*",
       allow: "/"
     },
-    sitemap: "https://matheus-ferreira-portfolio.vercel.app/sitemap.xml"
+    sitemap: "https://ofmrmatte-production.up.railway.app/sitemap.xml"
   };
 }

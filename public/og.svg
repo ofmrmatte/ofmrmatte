@@ -1,10 +1,22 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
-  <rect width="1200" height="630" fill="#070b0f"/>
-  <path d="M0 120h1200M0 250h1200M0 380h1200M0 510h1200M180 0v630M420 0v630M660 0v630M900 0v630" stroke="#16333a" stroke-width="1"/>
-  <path d="M118 438h312l72-72h214l62-62h304" fill="none" stroke="#5ee6cf" stroke-width="4"/>
-  <path d="M118 482h208l44-44h140" fill="none" stroke="#e3c66d" stroke-width="3" opacity=".8"/>
-  <rect x="96" y="96" width="1008" height="438" rx="18" fill="#0e171c" fill-opacity=".72" stroke="#24454e"/>
-  <text x="136" y="255" fill="#f3fbf9" font-family="Arial, sans-serif" font-size="70" font-weight="700">Matheus Ferreira Folgado</text>
-  <text x="140" y="335" fill="#5ee6cf" font-family="Arial, sans-serif" font-size="29" font-weight="700">Sistemas, Automação com IA e Engenharia de Software</text>
-  <text x="140" y="405" fill="#aab8ba" font-family="Arial, sans-serif" font-size="28">Negócio, requisitos e tecnologia aplicados a operações reais.</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+<defs>
+ <radialGradient id="sky" cx="80%" cy="20%" r="85%"><stop stop-color="#183551"/><stop offset=".48" stop-color="#0c1b30"/><stop offset="1" stop-color="#050b16"/></radialGradient>
+ <radialGradient id="orb"><stop stop-color="#7ff3d2" stop-opacity=".23"/><stop offset="1" stop-color="#7ff3d2" stop-opacity="0"/></radialGradient>
+ <linearGradient id="line" x1="0" x2="1"><stop stop-color="#8cf4dd"/><stop offset="1" stop-color="#6f94e6"/></linearGradient>
+</defs>
+<rect width="1200" height="630" fill="url(#sky)"/>
+<path d="M0 70H1200M0 140H1200M0 210H1200M0 280H1200M0 350H1200M0 420H1200M0 490H1200M0 560H1200M80 0V630M160 0V630M240 0V630M320 0V630M400 0V630M480 0V630M560 0V630M640 0V630M720 0V630M800 0V630M880 0V630M960 0V630M1040 0V630M1120 0V630" stroke="#9ad9f4" stroke-opacity=".07"/>
+<circle cx="980" cy="250" r="370" fill="url(#orb)"/>
+<circle cx="984" cy="310" r="225" fill="none" stroke="#a4f4e1" stroke-opacity=".16"/>
+<circle cx="984" cy="310" r="175" fill="none" stroke="#a4f4e1" stroke-opacity=".2" stroke-dasharray="4 9"/>
+<circle cx="984" cy="310" r="111" fill="none" stroke="#a4f4e1" stroke-opacity=".3"/>
+<rect x="78" y="75" width="49" height="49" rx="14" fill="#122d35" stroke="#9bead7"/>
+<text x="92" y="111" font-family="Arial, sans-serif" font-size="30" font-weight="bold" fill="#beffe5">M</text>
+<circle cx="117" cy="88" r="3" fill="#b6ffea"/>
+<text x="145" y="108" font-family="Arial, sans-serif" font-size="17" letter-spacing="3" font-weight="700" fill="#b7d9dc">PORTFÓLIO / 2026</text>
+<text x="78" y="265" font-family="Arial, sans-serif" font-size="65" font-weight="700" letter-spacing="-3" fill="#eef9ff">Tecnologia com</text>
+<text x="78" y="341" font-family="Georgia, serif" font-size="73" font-style="italic" fill="#b3f4e0">visão de negócio.</text>
+<text x="78" y="427" font-family="Arial, sans-serif" font-size="24" fill="#a8becc">ARCHI  ·  MLDDS  ·  ALC &amp; Pereira Filho</text>
+<rect x="78" y="488" width="453" height="1" fill="url(#line)"/>
+<text x="78" y="548" font-family="Arial, sans-serif" font-size="19" letter-spacing="2" font-weight="700" fill="#98e7d1">MATHEUS FERREIRA FOLGADO</text>
 </svg>

@@ -14,13 +14,13 @@ const newsreader = Newsreader({
   display: "swap"
 });
 
-const siteUrl = "https://ofmrmatte.vercel.app";
+const siteUrl = "https://ofmrmatte-production.up.railway.app";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: "Matheus Ferreira Folgado | Engenharia de Software, Sistemas e IA aplicada",
+  title: "Matheus Ferreira Folgado | Processos, Software e IA aplicada",
   description:
-    "Portfólio de Matheus Ferreira Folgado: ARCHI, sistemas corporativos, automação logística, aplicações web, requisitos e inteligência artificial aplicada.",
+    "Portfólio de Matheus Ferreira Folgado. Conheça o ARCHI, o MLDDS e sistemas desenvolvidos com foco em operação, engenharia de software e IA aplicada.",
   alternates: {
     canonical: "/"
   },
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     }
   },
   openGraph: {
-    title: "Matheus Ferreira Folgado | Engenharia de Software, Sistemas e IA aplicada",
+    title: "Matheus Ferreira Folgado | Processos, Software e IA aplicada",
     description:
       "Projetos em sistemas corporativos, logística, automação, integração de dados e IA aplicada.",
     url: siteUrl,
@@ -59,7 +59,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#ffffff"
+  themeColor: "#060d18"
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
