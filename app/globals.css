@@ -154,7 +154,7 @@ h1,h2,h3,h4,p { overflow-wrap: break-word; }
   transition: transform .7s cubic-bezier(.2,.8,.2,1),border-color .4s;
 }
 .hero-stage-card:hover { transform: rotateY(-2deg) rotateX(1deg) rotateZ(0deg) translateY(-5px); border-color: rgba(167,255,232,.4); }
-.hero-stage-card::before { content: ""; position: absolute; inset: 0; background-image: linear-gradient(rgba(162,237,239,.037) 1px,transparent 1px),linear-gradient(90deg,rgba(162,237,239,.037) 1px,transparent 1px); background-size: 32px 32px; mask-image: linear-gradient(90deg,transparent 5%,#000 100%); pointer-events:none; }
+
 .hero-stage-topline { display: flex; justify-content: space-between; align-items: center; gap: 1rem; color: #92b1c0; letter-spacing: .15em; font-size: .63rem; font-weight: 740; position: relative; }
 .stage-led { width: 6px; height: 6px; display: inline-block; background: #9bebd6; border-radius: 50%; box-shadow: 0 0 8px #a2ffd6; margin-right: auto; }
 .hero-stage-topline > svg { color: #8fdaca; }
