@@ -489,3 +489,488 @@ h1,h2,h3,h4,p { overflow-wrap: break-word; }
 @media (pointer:coarse) {
   [data-spotlight-card]::before { display:none; }
 }
+
+
+
+/* ================================================================
+   PORTFOLIO 2.1 — Real atmospheric canvas + personal photography
+   The 2D scene stays above the opaque browser background, unlike
+   the previous decorative layer with negative stacking order.
+   ================================================================ */
+.site-shell {
+  isolation: isolate;
+}
+.atmospheric-field {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 77% 32%, rgba(23, 77, 115, .30), transparent 55%),
+    radial-gradient(ellipse at 51% 94%, rgba(14, 72, 91, .20), transparent 64%),
+    #050b15;
+}
+.atmospheric-canvas {
+  display: block;
+  width: 100vw;
+  height: 100vh;
+  opacity: .98;
+  filter: saturate(1.1);
+}
+.atmospheric-readable-mask {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgba(3, 10, 21, .57), rgba(3, 10, 21, .21) 35%, rgba(3, 10, 21, .01) 68%),
+    linear-gradient(0deg, rgba(3, 9, 18, .28), transparent 35%);
+  pointer-events: none;
+}
+.motion-toggle {
+  position: fixed;
+  z-index: 80;
+  bottom: 24px;
+  right: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .55rem;
+  min-height: 42px;
+  padding: .6rem .95rem;
+  border: 1px solid rgba(151, 236, 220, .32);
+  border-radius: 999px;
+  background: rgba(11, 30, 45, .82);
+  backdrop-filter: blur(16px);
+  color: #c1f8e6;
+  font: 700 .72rem/1 var(--font-body);
+  letter-spacing: .02em;
+  cursor: pointer;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, .28), inset 0 1px rgba(255, 255, 255, .07);
+  transition: background .2s ease, transform .2s ease, border-color .2s ease;
+}
+.motion-toggle:hover {
+  transform: translateY(-3px);
+  background: rgba(24, 67, 80, .94);
+  border-color: rgba(171, 249, 221, .6);
+}
+.motion-toggle:focus-visible {
+  outline: 3px solid #b8fce7;
+  outline-offset: 3px;
+}
+.site-header,
+.hero,
+.section,
+.footer {
+  position: relative;
+  z-index: 2;
+}
+.horizon-divider { position: relative; z-index: 2; }
+.hero-eyebrow-hint {
+  color: #89b9bf;
+  font-size: .57rem;
+  font-weight: 690;
+  letter-spacing: .17em;
+  margin: .78rem 0 0;
+}
+.hero-eyebrow-hint span {
+  color: #acffe4;
+  font-size: .85rem;
+  padding-right: .35rem;
+}
+
+/* The photograph from the original profile returns in navigation and the
+   hero, with clear fallback and without turning a portrait into an icon. */
+.monogram-photo {
+  overflow: hidden;
+  border-radius: 50%;
+  border-color: rgba(190, 255, 233, .64);
+  background: #142b35;
+}
+.monogram-avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center;
+}
+.monogram-photo i {
+  z-index: 2;
+  right: 2px;
+  top: 2px;
+}
+
+.hero-inner {
+  grid-template-columns: minmax(0, 1fr) minmax(0, .94fr);
+  align-items: center;
+  min-height: 690px;
+  gap: clamp(2rem, 4.6vw, 5rem);
+}
+.hero h1 {
+  font-size: clamp(3.2rem, 5.25vw, 5.7rem);
+  max-width: 13ch;
+}
+.hero-portrait-art {
+  position: relative;
+  width: 100%;
+  min-height: 655px;
+  padding: 1.5rem 1.6rem 1.5rem .6rem;
+  perspective: 1100px;
+}
+.portrait-light-trail {
+  position: absolute;
+  inset: 2% 7% 7%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 55% 43%, rgba(107, 235, 213, .26), rgba(57, 102, 202, .12) 34%, transparent 74%);
+  filter: blur(32px);
+  pointer-events: none;
+}
+.portrait-orbit {
+  position: absolute;
+  pointer-events: none;
+  width: 78%;
+  aspect-ratio: 1;
+  top: 12%;
+  left: 8%;
+  border: 1px solid rgba(171, 247, 220, .15);
+  border-radius: 50%;
+}
+.portrait-orbit-one {
+  transform: rotate(-24deg) scaleX(.79);
+  box-shadow: 0 0 0 70px rgba(112, 214, 230, .011), 0 0 0 135px rgba(112, 214, 230, .009);
+}
+.portrait-orbit-two {
+  width: 94%;
+  left: 2%;
+  top: 6%;
+  border-style: dashed;
+  border-color: rgba(136, 180, 241, .21);
+  transform: rotate(22deg) scaleX(.90);
+  animation: portrait-orbit-motion 36s linear infinite;
+}
+@keyframes portrait-orbit-motion {
+  to { transform: rotate(382deg) scaleX(.9); }
+}
+.hero-portrait-frame {
+  position: relative;
+  z-index: 2;
+  width: min(100%, 405px);
+  height: 540px;
+  margin: 0 auto;
+  overflow: hidden;
+  border-radius: 34px 34px 100px 34px;
+  border: 1px solid rgba(193, 242, 226, .36);
+  background:
+    radial-gradient(circle at 50% 34%, rgba(124, 190, 183, .22), transparent 45%),
+    #142b3b;
+  box-shadow:
+    0 45px 125px rgba(0, 0, 0, .42),
+    0 0 110px rgba(70, 224, 207, .085),
+    inset 0 1px rgba(255, 255, 255, .17);
+  transform: rotateY(-6deg) rotateX(1.5deg) translateZ(12px);
+  transition: transform .6s cubic-bezier(.18,.82,.24,1), border-color .3s ease;
+}
+.hero-portrait-frame:hover {
+  transform: rotateY(0deg) rotateX(0deg) translateY(-6px);
+  border-color: rgba(196, 255, 230, .6);
+}
+.photo-fallback {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: rgba(185, 255, 222, .37);
+  font-size: 8rem;
+  font-weight: 700;
+}
+.hero-portrait-image {
+  z-index: 1;
+  object-fit: cover;
+  object-position: center 28%;
+  filter: saturate(.87) contrast(1.05);
+}
+.hero-portrait-shade {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background:
+    linear-gradient(0deg, rgba(5,16,30,.98) 0%, rgba(5,16,30,.70) 20%, rgba(5,16,30,.06) 60%, rgba(3,12,23,.34) 100%),
+    linear-gradient(110deg,rgba(31,96,106,.09),transparent 55%);
+  pointer-events: none;
+}
+.hero-portrait-top {
+  position: absolute;
+  top: 23px;
+  left: 25px;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: .58rem;
+  padding: .55rem .76rem;
+  border: 1px solid rgba(203, 255, 234, .24);
+  border-radius: 999px;
+  background: rgba(6, 22, 34, .55);
+  backdrop-filter: blur(12px);
+  color: #d3f8e9;
+  font-size: .56rem;
+  font-weight: 760;
+  letter-spacing: .14em;
+}
+.portrait-live-dot {
+  width: 7px;
+  height: 7px;
+  flex: none;
+  border-radius: 50%;
+  background: #aaffdf;
+  box-shadow: 0 0 12px rgba(156, 255, 220, .95);
+}
+.hero-portrait-text {
+  position: absolute;
+  z-index: 3;
+  left: 28px;
+  right: 28px;
+  bottom: 40px;
+}
+.hero-portrait-text > span {
+  color: #bbeddc;
+  font-size: .6rem;
+  font-weight: 760;
+  letter-spacing: .15em;
+}
+.hero-portrait-text strong {
+  display: block;
+  margin-top: .7rem;
+  color: #f0fffa;
+  font-size: clamp(1.45rem,2.5vw,2rem);
+  letter-spacing: -.05em;
+  line-height: 1.12;
+}
+.portrait-bottom-line {
+  display: flex;
+  justify-content: space-between;
+  gap: .8rem;
+  align-items: center;
+  margin-top: 1.15rem;
+  padding-top: .9rem;
+  border-top: 1px solid rgba(212, 255, 236, .23);
+  color: #c3dbdd;
+  font-size: .54rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+}
+.portrait-bottom-line svg { color: #c0f8df; }
+.portrait-workflow-panel {
+  position: absolute;
+  z-index: 4;
+  width: min(385px, 75%);
+  min-height: auto;
+  right: -3%;
+  bottom: 12px;
+  padding: 1.05rem 1.2rem;
+  transform: rotateZ(1.5deg) translateZ(30px);
+  border-radius: 17px;
+  border-color: rgba(164, 234, 224, .4);
+  background: linear-gradient(135deg,rgba(18,47,59,.97),rgba(5,22,39,.96));
+  box-shadow: 0 30px 75px rgba(0,0,0,.42), 0 0 45px rgba(113,242,216,.1);
+}
+.portrait-workflow-panel:hover { transform: rotateZ(0deg) translateY(-5px); }
+.portrait-workflow-panel .hero-stage-topline {
+  font-size: .54rem;
+  gap: .4rem;
+  color: #a6cfd0;
+}
+.portrait-workflow-headline {
+  margin: 1rem 0 .7rem;
+  color: #f1f8ff;
+  font-size: 1.14rem;
+  font-weight: 720;
+  letter-spacing: -.035em;
+}
+.portrait-workflow-headline em {
+  font-family: var(--font-newsreader), Georgia, serif;
+  color: #a8fbe0;
+  font-weight: 500;
+}
+.portrait-workflow-stages {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  border-top: 1px solid rgba(157, 213, 224, .15);
+  padding-top: .7rem;
+  color: #87b7c1;
+}
+.portrait-workflow-stages > span {
+  display: grid;
+  gap: .3rem;
+  white-space: nowrap;
+  color: #80a7b0;
+  font-size: .52rem;
+}
+.portrait-workflow-stages strong {
+  color: #bfe6df;
+  font-size: .54rem;
+  letter-spacing: .02em;
+}
+.hero-portrait-art .float-note-b {
+  top: 15%;
+  right: -2%;
+  z-index: 5;
+}
+.about-portrait-signature {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  max-width: 390px;
+  margin-top: 2.5rem;
+  padding: .95rem 1.1rem;
+  border: 1px solid rgba(164, 243, 221, .21);
+  border-radius: 16px;
+  background: rgba(11, 34, 50, .68);
+  box-shadow: inset 0 1px rgba(255, 255, 255, .05);
+}
+.about-portrait-mini {
+  position: relative;
+  width: 65px;
+  height: 65px;
+  overflow: hidden;
+  flex: 0 0 auto;
+  border: 2px solid rgba(157, 245, 213, .36);
+  border-radius: 14px;
+  background: #162b37;
+}
+.about-portrait-mini img { object-fit: cover; }
+.about-portrait-signature > div:last-child { display: grid; gap: .35rem; }
+.about-portrait-signature strong {
+  color: #e4fbf1;
+  font-size: .84rem;
+  line-height: 1.35;
+}
+.about-portrait-signature span {
+  color: #90bdb9;
+  font-size: .56rem;
+  font-weight: 750;
+  letter-spacing: .08em;
+}
+
+/* Real project image rather than another illustrative placeholder. */
+.system-preview-real {
+  position: relative;
+  padding: 0;
+  background: #eff5f9;
+  border-bottom-color: rgba(172, 245, 225, .20);
+}
+.system-preview-real .mldds-real-screenshot {
+  object-fit: cover;
+  object-position: 25% 18%;
+  filter: saturate(.94);
+  transition: transform .65s cubic-bezier(.2,.8,.2,1);
+}
+.showcase-secondary:hover .mldds-real-screenshot {
+  transform: scale(1.055);
+}
+.mldds-image-shade {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(180deg,rgba(5,17,30,.42),transparent 38%,rgba(5,18,32,.47));
+}
+.actual-screenshot-tag {
+  position: absolute;
+  z-index: 2;
+  left: 19px;
+  top: 17px;
+  display: inline-flex;
+  align-items: center;
+  gap: .48rem;
+  padding: .5rem .72rem;
+  border: 1px solid rgba(200,255,235,.3);
+  border-radius: 999px;
+  background: rgba(5,26,41,.85);
+  color: #d3ffed;
+  font-size: .56rem;
+  font-weight: 740;
+  letter-spacing: .08em;
+}
+.actual-screenshot-tag > span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #abffdf;
+}
+
+@media (max-width: 1100px) {
+  .hero-inner { gap: 2.3rem; }
+  .hero-portrait-art { padding-right: 0; }
+  .hero-portrait-frame { height: 500px; max-width: 360px; }
+  .hero-portrait-art .float-note-b { right: -1.5%; }
+  .portrait-workflow-panel { right: -2%; }
+}
+@media (max-width: 900px) {
+  .hero-inner { grid-template-columns: 1fr; min-height: auto; }
+  .hero-portrait-art {
+    width: min(100%, 580px);
+    min-height: 590px;
+    padding: 2.2rem 1rem 3.5rem;
+    margin-inline: auto;
+  }
+  .hero-portrait-frame {
+    height: 520px;
+    width: min(100%, 385px);
+  }
+  .portrait-workflow-panel { right: 0; bottom: 0; }
+  .hero-portrait-art .float-note-b { right: 0; top: 10%; }
+}
+@media (max-width: 650px) {
+  .motion-toggle {
+    right: 12px;
+    bottom: 12px;
+    min-height: 38px;
+    padding: .5rem .72rem;
+    font-size: .66rem;
+  }
+  .hero { padding-top: 3.5rem; }
+  .hero-portrait-art {
+    width: 100%;
+    min-height: 510px;
+    padding: 1.6rem .4rem 2.9rem;
+  }
+  .hero-portrait-frame {
+    width: min(90%, 340px);
+    height: 425px;
+    transform: none;
+    border-radius: 24px 24px 75px 24px;
+  }
+  .hero-portrait-frame:hover { transform: none; }
+  .hero-portrait-top {
+    top: 14px;
+    left: 14px;
+    padding: .46rem .56rem;
+    font-size: .49rem;
+  }
+  .hero-portrait-text {
+    bottom: 24px;
+    left: 20px;
+    right: 20px;
+  }
+  .hero-portrait-text > span { font-size: .49rem; }
+  .hero-portrait-text strong { font-size: 1.55rem; }
+  .portrait-bottom-line { font-size: .48rem; }
+  .portrait-workflow-panel {
+    width: min(79%, 300px);
+    right: -1%;
+    bottom: 0;
+    padding: .8rem .85rem;
+  }
+  .portrait-workflow-headline { font-size: .95rem; }
+  .portrait-workflow-stages { gap: .2rem; }
+  .portrait-workflow-stages > span { font-size: .45rem; }
+  .portrait-workflow-stages strong { font-size: .45rem; }
+  .hero-portrait-art .float-note-b { right: -1%; top: 8%; }
+  .about-portrait-signature { margin-top: 1.8rem; }
+  .atmospheric-readable-mask { background: linear-gradient(180deg,rgba(4,9,21,.40),rgba(4,9,21,.15) 48%,rgba(4,9,21,.10)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .portrait-orbit-two { animation: none !important; }
+  .hero-portrait-frame,
+  .portrait-workflow-panel { transform: none !important; }
+  .system-preview-real .mldds-real-screenshot { transform: none !important; }
+}
