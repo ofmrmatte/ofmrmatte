@@ -214,10 +214,30 @@ function MlddsPreview() {
   );
 }
 
+const conceptLabels = {
+  archi: ["ALC ARCHI", "Identidade · Setores · Aplicações", "Acesso seguro, módulos independentes"],
+  atendimento: ["ALC Atendimento", "Conversas · PNRs · Evidências", "Tratativas e automações assistidas"],
+  portal: ["Portal do Motorista", "Mobile · Documentos · Contestações", "A jornada do motorista"],
+  automy: ["Automy", "ERP · Contratos · Gestão", "Operação empresarial integrada"],
+  voss: ["VOSS Barber Lounge", "Marca · Serviços · Experiência", "Presença digital e agendamento"]
+} as const;
+
 function ProjectVisual({ type }: { type: PortfolioProject["visual"] }) {
   if (type === "alc-site") return <AlcSitePreview />;
   if (type === "mldds") return <MlddsPreview />;
-  return <IntelligencePreview />;
+  if (type === "intelligence") return <IntelligencePreview />;
+
+  const [name, categories, summary] = conceptLabels[type];
+
+  return (
+    <div className={`product-preview concept-preview concept-preview-${type}`} aria-label={`Ilustração conceitual do projeto ${name}`}>
+      <div className="concept-mark" aria-hidden="true">{type === "archi" ? "A" : type === "automy" ? "a" : type === "voss" ? "V" : type === "portal" ? "P" : "@"}</div>
+      <span className="concept-name">{name}</span>
+      <span className="concept-categories">{categories}</span>
+      <strong>{summary}</strong>
+      <div className="concept-lines" aria-hidden="true"><span /><span /><span /></div>
+    </div>
+  );
 }
 
 export default function Page() {
@@ -259,7 +279,7 @@ export default function Page() {
       <section id="top" className="hero-section">
         <div className="page-container hero-grid">
           <div className="hero-copy" data-hero-copy>
-            <span className="eyebrow">Sistemas · Automação com IA · Engenharia de Software</span>
+            <span className="eyebrow">Engenharia de Software · Sistemas · IA aplicada</span>
             <h1>
               Negócio, sistemas e automação para <em>operações reais.</em>
             </h1>
@@ -327,7 +347,7 @@ export default function Page() {
           <div className="section-heading" data-reveal>
             <div>
               <span className="section-label">Projetos em destaque</span>
-              <h2>Soluções que geram impacto operacional</h2>
+              <h2>Sistemas, automação e produtos digitais</h2>
             </div>
             <a className="text-link" href="https://github.com/ofmrmatte" target="_blank" rel="noreferrer">
               Ver GitHub
@@ -356,18 +376,26 @@ export default function Page() {
                   <span className="project-eyebrow">{project.eyebrow}</span>
                   <div className="project-title-row">
                     <h3>{project.name}</h3>
-                    <a href={project.href} target="_blank" rel="noreferrer" aria-label={`${project.action}: ${project.name}`}>
-                      <ArrowUpRight size={20} weight="bold" />
-                    </a>
+                    {project.href && project.action ? (
+                      <a href={project.href} target="_blank" rel="noopener noreferrer" aria-label={`${project.action}: ${project.name}`}>
+                        <ArrowUpRight size={20} weight="bold" />
+                      </a>
+                    ) : null}
                   </div>
                   <p>{project.description}</p>
                   <div className="project-stack" aria-label={`Tecnologias do projeto ${project.name}`}>
                     {project.stack.map((item) => <span key={item}>{item}</span>)}
                   </div>
-                  <a className="project-link" href={project.href} target="_blank" rel="noreferrer">
-                    {project.action}
-                    <ArrowRight size={16} weight="bold" />
-                  </a>
+                  {project.href && project.action ? (
+                    <a className="project-link" href={project.href} target="_blank" rel="noopener noreferrer">
+                      {project.action}
+                      <ArrowRight size={16} weight="bold" />
+                    </a>
+                  ) : (
+                    <span className="project-link project-link-restricted" aria-label="Projeto de acesso restrito">
+                      Projeto corporativo · acesso restrito
+                    </span>
+                  )}
                 </CardContent>
               </Card>
             ))}
@@ -446,7 +474,7 @@ export default function Page() {
               <BrandMark />
               <span>Matheus Ferreira Folgado</span>
             </div>
-            <p>Conecto negócio, requisitos e tecnologia para transformar processos em soluções.</p>
+            <p>Conecto processos, sistemas e IA aplicada para desenvolver soluções digitais úteis.</p>
           </div>
 
           <nav className="footer-links" aria-label="Contato e redes">
