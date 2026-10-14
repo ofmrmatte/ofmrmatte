@@ -1,4 +1,4 @@
-export type ProjectVisual = "archi" | "intelligence" | "atendimento" | "alc-site" | "mldds" | "portal";
+export type ProjectVisual = "archi" | "alc-site" | "mldds";
 
 export type ProjectScreenshot = {
   src: string;
@@ -23,8 +23,8 @@ export type ArchiSubsystem = {
 };
 
 // Situações fundamentadas na documentação de outubro/2026 do monorepo ALC.
-// O ARCHI centraliza a identidade e a entrada, não incorpora os apps setoriais
-// ao mesmo processo nem presume integrações ainda não homologadas.
+// Prevenção de Perdas e Atendimento compõem o catálogo de subsistemas do ARCHI.
+// Eles preservam serviços próprios enquanto o SSO central está em homologação.
 export const archiSubsystems: readonly ArchiSubsystem[] = [
   {
     name: "Identidade e acessos",
@@ -78,13 +78,13 @@ export const archiSubsystems: readonly ArchiSubsystem[] = [
   },
   {
     name: "Prevenção de Perdas",
-    status: "Aplicativo existente · Integração planejada",
-    description: "PNR, análise de perdas, risco e pré-faturamento. Segue operando separadamente do ARCHI."
+    status: "Subsistema existente · SSO em homologação",
+    description: "Análise de PNR, perdas, risco e pré-faturamento. Integra o ecossistema ARCHI, mas continua operando em serviço próprio até a homologação do acesso central."
   },
   {
     name: "Atendimento",
-    status: "Aplicativo existente · Integração planejada",
-    description: "Tratativas, conversas WhatsApp, evidências, filas e agente Ellie. Entrada atual continua pelo sistema de Prevenção de Perdas."
+    status: "Subsistema existente · SSO em homologação",
+    description: "Tratativas de PNR, conversas WhatsApp, evidências, filas e agente Ellie. A entrada ainda ocorre pela Prevenção de Perdas até a integração com o ARCHI."
   }
 ];
 
@@ -93,31 +93,9 @@ export const portfolioProjects: readonly PortfolioProject[] = [
     name: "ALC ARCHI",
     eyebrow: "Plataforma corporativa · Identidade e acessos",
     description:
-      "Hub corporativo da ALC com identidade compartilhada, MFA, permissões por setor e integração entre aplicativos independentes. Explore os subsistemas e seu estágio de implantação.",
+      "Central corporativa de gestão e identidade da ALC. Organiza os subsistemas por setor, com MFA, permissões de acesso e integrações graduais entre aplicações. Consulte o detalhamento em Ver mais.",
     visual: "archi",
     stack: ["Next.js", "TypeScript", "PostgreSQL", "Supabase Auth", "SSO", "Railway"]
-  },
-  {
-    name: "ALC Prevenção de Perdas",
-    eyebrow: "Inteligência operacional · Aplicativo setorial",
-    description:
-      "Antigo Inteligência ALC: análise de PNR, pré-faturamento, perdas, conciliação e indicadores operacionais. Permanece independente do ARCHI até sua integração ser aprovada.",
-    visual: "intelligence",
-    stack: ["Next.js", "React", "TypeScript", "PostgreSQL", "Supabase", "Railway"],
-    screenshot: {
-      src: "/projects/inteligencia-alc.png",
-      alt: "Tela da ALC Prevenção de Perdas com dados sensíveis ocultados no arquivo",
-      objectPosition: "top center",
-      privacy: "redacted"
-    }
-  },
-  {
-    name: "ALC Atendimento",
-    eyebrow: "Atendimento operacional · WhatsApp",
-    description:
-      "Aplicação independente para tratativas de PNR, conversas, evidências e filas, com integração à WhatsApp Cloud API e automação assistida pela agente Ellie.",
-    visual: "atendimento",
-    stack: ["Next.js", "TypeScript", "PostgreSQL", "WhatsApp Cloud API", "IA"]
   },
   {
     name: "MLDDS",
@@ -132,14 +110,6 @@ export const portfolioProjects: readonly PortfolioProject[] = [
       objectPosition: "top center",
       privacy: "public"
     }
-  },
-  {
-    name: "Portal do Motorista",
-    eyebrow: "PWA · Pagamentos e contestações",
-    description:
-      "Aplicação mobile-first para motoristas acompanharem documentos, pagamentos, pendências e contestações em uma experiência responsiva e autenticada.",
-    visual: "portal",
-    stack: ["Next.js", "React", "TypeScript", "Supabase", "PWA"]
   },
   {
     name: "Site ALC & Pereira Filho",
