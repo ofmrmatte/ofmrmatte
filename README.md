@@ -28,13 +28,25 @@ No desenvolvimento, utilizo ferramentas de inteligência artificial como apoio �
 
 ## Projetos em destaque
 
-### [Inteligência ALC](https://github.com/ofmrmatte/Inteligencia_ALC)
+### ALC ARCHI
 
-**Analytics · Operations · Loss Prevention · Full Stack**
+**Plataforma corporativa · Identidade · Setores · SSO**
 
-Plataforma web para análise operacional, prevenção de perdas e apoio à tomada de decisão em operações logísticas. Centraliza dados de diferentes fontes, processa informações operacionais e disponibiliza indicadores, conciliações e controles com rastreabilidade.
+Central de gestão e acesso da ALC com identidade compartilhada, MFA, sessões revogáveis e permissões por setor. Administrativo aberto por SSO. Outras integrações ainda dependem de homologação. Projeto corporativo privado.
 
-**Stack:** Next.js · React · TypeScript · Supabase · PostgreSQL · Zustand · Recharts · Vitest · Vercel
+### ALC Prevenção de Perdas (antigo Inteligência ALC)
+
+**Analytics · PNR · Loss Prevention · Full Stack**
+
+Aplicativo operacional independente, com PNR, pré-faturamento, conciliações, perdas e indicadores. A integração ao ARCHI depende de homologação. Projeto corporativo privado.
+
+**Stack:** Next.js · React · TypeScript · PostgreSQL · Supabase · Railway
+
+### ALC Atendimento
+
+**WhatsApp · PNR · Evidências · Ellie**
+
+Aplicação setorial separada para tratativas e conversas, gestão de evidências e integrações com a WhatsApp Cloud API. Projeto corporativo privado.
 
 ### [Portal do Motorista](https://github.com/ofmrmatte/painel_motorista)
 
@@ -44,17 +56,25 @@ Aplicação web mobile-first para centralizar pendências, pagamentos, documento
 
 **Stack:** Next.js · React · TypeScript · Supabase · Zod · Vitest · Vercel
 
-### MLDDS — Automação de Processos Logísticos
+### [MLDDS — Automação de Processos Logísticos](https://github.com/ofmrmatte/MLDDS-Releases)
 
 Solução desktop integrada para automação de processos logísticos, com aplicação de regras de negócio, integração de dados, roteirização, validações e rastreabilidade operacional.
 
 **Stack:** C# · .NET 8 · WPF · Integrações de dados · Automação
 
-### Automy
+### [Automy](https://automy.dev.br)
 
 **SaaS · ERP · Operations Automation**
 
-Projeto comercial privado voltado à gestão e automação operacional. O código-fonte e detalhes internos permanecem privados por se tratar de produto em desenvolvimento.
+Projeto comercial em desenvolvimento, com gestão de clientes, contratos, finanças e operações. Código-fonte privado.
+
+### [Site ALC & Pereira Filho](https://github.com/ofmrmatte/ALC-Pereira-Filho-Transportes)
+
+Portal institucional multipágina de logística. Repositório público.
+
+### [VOSS Barber Lounge](https://voss-barber-lounge.vercel.app)
+
+Site comercial responsivo com serviços, galeria, equipe e caminhos de agendamento.
 
 ## Como trabalho nos projetos
 
@@ -73,9 +93,14 @@ Minha participação envolve principalmente:
 ## Formação
 
 ### Pós-Graduação Lato Sensu — Engenharia de Software
-**Universidade de Uberaba (Uniube)** · Início previsto: 09/2026
+**Universidade de Uberaba (Uniube)**
 
 Formação voltada a fundamentos de Engenharia de Software, ciclo de vida, engenharia de requisitos, gerenciamento de projetos, métodos ágeis, testes e qualidade de software.
+
+### Pós-Graduação Lato Sensu — Inteligência Artificial para Devs
+**Faculdade Unyleya**
+
+Formação em Machine Learning, Deep Learning, NLP, engenharia de dados para IA, MLOps e aplicações de IA generativa.
 
 ### Bacharel em Administração
 **Centro Universitário FAM** · 02/2022 – 06/2026

@@ -1,14 +1,8 @@
 # Imagens dos projetos
 
-Os cards do portfólio já procuram automaticamente estes arquivos:
+- `inteligencia-alc.png`: captura do **ALC Prevenção de Perdas** (antigo Inteligência ALC), mantendo o nome para preservar o arquivo já publicado.
+- `mldds.png`: captura do MLDDS.
 
-- `public/projects/inteligencia-alc.png`
-- `public/projects/mldds.png`
+Para futuros screenshots de `ALC ARCHI` e `ALC Atendimento`, primeiro remova dados sensíveis diretamente nos arquivos de imagem e só então faça upload. As ilustrações conceituais atuais não simulam dados reais. As imagens são configuradas em `lib/portfolio-data.ts`.
 
-Basta substituir/adicionar as imagens usando exatamente esses nomes. O site usa fallback visual enquanto o arquivo ainda não existir.
-
-## Privacidade
-
-A imagem do Inteligência ALC deve ser redigida antes de ser enviada ao repositório. Não use blur via CSS para esconder dados sensíveis, porque o arquivo original continuaria publicamente acessível.
-
-A configuração central dos cards fica em `lib/portfolio-data.ts`.
+**Privacidade:** nunca publique capturas brutas de áreas internas, pessoas, PNRs, contatos, finanças ou identificadores. Blur em CSS não protege os arquivos originais.
