@@ -92,11 +92,10 @@ function Monogram() {
   return (
     <span className="monogram monogram-photo" aria-hidden="true">
       <Image
-        src="https://avatars.githubusercontent.com/u/279118945?v=4&s=800"
+        src="/matheus-profissional.webp"
         alt=""
         width={80}
         height={80}
-        unoptimized
         className="monogram-avatar"
       />
       <i />
@@ -224,12 +223,11 @@ export default function Page() {
             <div className="hero-portrait-frame">
               <div className="photo-fallback" aria-hidden="true">MF</div>
               <Image
-                src="https://avatars.githubusercontent.com/u/279118945?v=4&s=800"
+                src="/matheus-profissional.webp"
                 alt="Foto de perfil de Matheus Ferreira Folgado"
                 fill
                 priority
-                unoptimized
-                sizes="(max-width: 900px) 76vw, 400px"
+                        sizes="(max-width: 900px) 76vw, 400px"
                 className="hero-portrait-image"
               />
               <div className="hero-portrait-shade" />
@@ -267,12 +265,11 @@ export default function Page() {
             <div className="about-portrait-signature">
               <div className="about-portrait-mini">
                 <Image
-                  src="https://avatars.githubusercontent.com/u/279118945?v=4&s=800"
+                  src="/matheus-profissional.webp"
                   alt="Foto de Matheus Ferreira Folgado"
                   fill
                   sizes="96px"
-                  unoptimized
-                />
+                          />
               </div>
               <div><strong>Matheus Ferreira Folgado</strong><span>NEGÓCIO + DESENVOLVIMENTO + IA</span></div>
             </div>

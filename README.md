@@ -53,7 +53,8 @@ O site utiliza uma interface renovada de estética editorial escura, com malha e
 - **Motion for React:** parallax suave controlado por cursor e rolagem, animações de entrada e barra de progresso.
 - **shadcn/ui:** composição sobre os componentes locais de Button e Card, com Radix Slot.
 - **21st.dev:** inspiração para layout de hero e cartões com spotlight, implementados localmente com CSS variables.
-- **Acessibilidade e desempenho:** animações desabilitadas com `prefers-reduced-motion`, fallback em telas sensíveis ao toque e efeitos decorativos sem dados de clientes.
+- **Acessibilidade e desempenho:** fundo Canvas 2D contínuo com controles de pausa, limitação de FPS/DPR, pausa em abas inativas e suporte a `prefers-reduced-motion`.
+- **Fotografia:** retrato profissional local (`public/matheus-profissional.webp`) e captura real do MLDDS, sem depender de avatar externo para a foto pessoal.
 - **Publicação:** Railway, serviço `ofmrmatte`, branch `main`.
 
 Os únicos projetos mostrados como trabalhos independentes são ARCHI, MLDDS e o site institucional da ALC. Prevenção de Perdas e Atendimento são subsistemas apresentados dentro do ARCHI; o Painel do Motorista está descontinuado e não aparece.
