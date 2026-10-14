@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { Pause, Play } from "@phosphor-icons/react";
+import { useEffect, useRef } from "react";
 
 /**
  * A real-time ambient scene, intentionally rendered with the Canvas 2D API
  * rather than a video or a static gradient. Perspective particles, linked
- * constellations, animated wave-grid and moving orbital paths respond to
+ * constellations, curated stellar groups and orbital light paths respond to
  * pointer and scroll depth. No third-party shaders or external services.
  */
 type Particle = {
@@ -16,18 +15,31 @@ type Particle = {
   phase: number;
   speed: number;
   radius: number;
+  group: number;
 };
 
 function makeParticles(width: number, height: number): Particle[] {
-  const count = Math.min(165, Math.max(85, Math.floor((width * height) / 11500)));
-  return Array.from({ length: count }, (_, index) => ({
-    x: (Math.random() - 0.5) * width * 1.45,
-    y: (Math.random() - 0.5) * height * 1.25,
-    z: 0.15 + Math.random() * 0.85,
-    phase: (index * 2.4 + Math.random() * 6) % (Math.PI * 2),
-    speed: 0.25 + Math.random() * 0.65,
-    radius: 0.7 + Math.random() * 1.6
-  }));
+  const count = Math.min(110, Math.max(55, Math.floor((width * height) / 17500)));
+  // Deliberate constellation clusters: distinct, asymmetric star fields rather
+  // than uniformly distributed noise across the entire viewport.
+  const anchors = [
+    [0.83, 0.28], [0.62, 0.57], [0.94, 0.76],
+    [0.31, 0.19], [0.16, 0.79], [0.54, 0.12]
+  ];
+  return Array.from({ length: count }, (_, index) => {
+    const group = index % anchors.length;
+    const angle = Math.random() * Math.PI * 2;
+    const radius = Math.sqrt(Math.random());
+    return {
+      x: (anchors[group][0] - 0.5) * width + Math.cos(angle) * radius * Math.min(width * 0.2, 245),
+      y: (anchors[group][1] - 0.5) * height + Math.sin(angle) * radius * Math.min(height * 0.23, 170),
+      z: 0.22 + Math.random() * 0.78,
+      phase: Math.random() * Math.PI * 2,
+      speed: 0.16 + Math.random() * 0.32,
+      radius: 0.65 + Math.random() * 1.65,
+      group
+    };
+  });
 }
 
 function drawScene(
@@ -70,118 +82,98 @@ function drawScene(
   }
   ctx.restore();
 
-  // Moving celestial rings: elliptical paths with varying axial angles.
+  // Cinematic orbit fragments, not geometric wireframe circles.
+  // Elliptical arcs breathe on independent axes and show soft comet trails.
   ctx.save();
-  ctx.translate(centerX, centerY - 22);
-  for (let ring = 0; ring < 4; ring++) {
+  ctx.translate(centerX, centerY - 34);
+  ctx.globalCompositeOperation = "screen";
+  for (let ring = 0; ring < 3; ring++) {
+    const rx = 160 + ring * 87;
+    const ry = 74 + ring * 43;
+    const angle = -0.42 + ring * 0.53 + Math.sin(time * (0.07 + ring * 0.025)) * 0.16;
     ctx.save();
-    ctx.rotate(-0.38 + ring * 0.48 + Math.sin(time * 0.12 + ring) * 0.12);
+    ctx.rotate(angle);
+    const start = time * (0.045 + ring * 0.016) + ring * 1.85;
+    const length = Math.PI * (0.77 + ring * 0.1);
     ctx.beginPath();
-    ctx.ellipse(0, 0, 150 + ring * 64, 61 + ring * 33, 0, 0, Math.PI * 2);
-    ctx.strokeStyle = ring % 2 === 0 ? "rgba(129,252,222,0.22)" : "rgba(137,175,255,0.18)";
-    ctx.lineWidth = 0.9 + (ring === 0 ? 0.5 : 0);
-    ctx.setLineDash(ring === 2 ? [5, 8] : []);
+    ctx.ellipse(0, 0, rx, ry, 0, start, start + length);
+    ctx.strokeStyle = ring === 1 ? "rgba(139,174,248,0.22)" : "rgba(123,236,220,0.23)";
+    ctx.lineWidth = ring === 0 ? 1.15 : 0.8;
     ctx.stroke();
-    ctx.setLineDash([]);
-    const progress = time * (0.21 + ring * 0.035) + ring * 1.8;
-    const beadX = Math.cos(progress) * (150 + ring * 64);
-    const beadY = Math.sin(progress) * (61 + ring * 33);
     ctx.beginPath();
-    ctx.arc(beadX, beadY, ring === 0 ? 3.7 : 2.5, 0, Math.PI * 2);
-    ctx.fillStyle = ring % 2 === 0 ? "rgba(162,255,228,0.93)" : "rgba(160,185,255,0.83)";
-    ctx.shadowBlur = 19;
-    ctx.shadowColor = ctx.fillStyle as string;
+    ctx.ellipse(0, 0, rx, ry, 0, start + length - 0.42, start + length);
+    ctx.strokeStyle = ring === 1 ? "rgba(172,194,255,0.42)" : "rgba(180,255,230,0.45)";
+    ctx.lineWidth = 1.8;
+    ctx.stroke();
+
+    const cometPosition = start + length;
+    const cx = Math.cos(cometPosition) * rx;
+    const cy = Math.sin(cometPosition) * ry;
+    const halo = ctx.createRadialGradient(cx, cy, 0, cx, cy, ring === 0 ? 27 : 17);
+    halo.addColorStop(0, ring === 1 ? "rgba(173,194,255,0.58)" : "rgba(167,255,223,0.62)");
+    halo.addColorStop(1, "rgba(150,240,222,0)");
+    ctx.fillStyle = halo;
+    ctx.beginPath();
+    ctx.arc(cx, cy, ring === 0 ? 27 : 17, 0, Math.PI * 2);
     ctx.fill();
-    ctx.shadowBlur = 0;
     ctx.restore();
   }
   ctx.restore();
 
-  // Perspective floor: rows drift like an animated, floating topography.
-  const horizon = height * 0.54;
-  const baseY = height * 1.12;
-  const lines = 27;
-  const columns = Math.min(46, Math.max(28, Math.floor(width / 34)));
-  ctx.save();
-  for (let row = 0; row <= lines; row++) {
-    const ratio = row / lines;
-    const depth = Math.pow(ratio, 1.8);
-    const y = horizon + (baseY - horizon) * depth;
-    ctx.beginPath();
-    for (let col = 0; col <= columns; col++) {
-      const relX = col / columns;
-      const horizontal = (relX - 0.5) * (width * (0.9 + depth * 1.3));
-      const x = width * 0.54 + horizontal + px * 28 * depth;
-      const wave = (Math.sin(relX * 11 + time * 0.55 + ratio * 10) * 9 +
-                    Math.sin(relX * 23 - time * 0.4) * 3.5) * depth;
-      if (col === 0) ctx.moveTo(x, y + wave);
-      else ctx.lineTo(x, y + wave);
-    }
-    ctx.strokeStyle = "rgba(92,228,217," + (0.05 + depth * 0.18) + ")";
-    ctx.lineWidth = 0.75 + depth * 0.5;
-    ctx.stroke();
-  }
-  for (let col = 0; col <= columns; col += 2) {
-    ctx.beginPath();
-    for (let row = 0; row <= lines; row++) {
-      const ratio = row / lines;
-      const depth = Math.pow(ratio, 1.8);
-      const relX = col / columns;
-      const x = width * 0.54 + (relX - 0.5) * (width * (0.9 + depth * 1.3)) + px * 28 * depth;
-      const y = horizon + (baseY - horizon) * depth +
-        (Math.sin(relX * 11 + time * 0.55 + ratio * 10) * 9 +
-          Math.sin(relX * 23 - time * 0.4) * 3.5) * depth;
-      if (row === 0) ctx.moveTo(x, y);
-      else ctx.lineTo(x, y);
-    }
-    ctx.strokeStyle = "rgba(105,169,248,0.10)";
-    ctx.lineWidth = 0.75;
-    ctx.stroke();
-  }
-  ctx.restore();
-
-  // Near-field particle network. Project by depth and connect spatial neighbors.
-  const projected: { x: number; y: number; a: number; r: number }[] = [];
-  for (const particle of particles) {
-    const speed = time * particle.speed;
-    const depth = (particle.z + speed * 0.024) % 1;
-    const perspective = 0.33 + Math.pow(depth, 1.6) * 1.14;
-    const x = centerX + particle.x * perspective * 0.62 + px * 24 * depth;
-    const y = centerY + particle.y * perspective * 0.68 + Math.sin(speed + particle.phase) * 9;
-    const intensity = 0.3 + Math.sin(time * 0.9 + particle.phase) * 0.16;
-    projected.push({ x, y, a: intensity + depth * 0.35, r: particle.radius * (0.55 + depth) });
+  // Organic constellation groups. Connect only nearby stars *within* the same
+  // cluster, keeping the dark negative space clean and intentional.
+  const projected: { x: number; y: number; a: number; r: number; group: number }[] = [];
+  const drift = Math.sin(time * 0.17) * 17;
+  for (const star of particles) {
+    const z = star.z;
+    const parallax = 0.62 + z * 0.42;
+    const x = width / 2 + star.x * parallax +
+      px * (9 + z * 34) + Math.sin(time * star.speed + star.phase) * 9 + drift * z;
+    const y = height / 2 + star.y * parallax +
+      py * (8 + z * 22) + Math.cos(time * star.speed * 0.75 + star.phase) * 11 -
+      Math.min(scroll * 0.017 * z, 31);
+    const twinkle = 0.35 + Math.sin(time * (0.75 + z * 0.3) + star.phase) * 0.19;
+    projected.push({
+      x, y, a: twinkle + z * 0.35,
+      r: star.radius * (0.65 + z * 0.65),
+      group: star.group
+    });
   }
   ctx.save();
-  const maxDistance = Math.min(150, width * 0.14);
-  for (let a = 0; a < projected.length; a++) {
-    const p = projected[a];
-    if (p.x < -10 || p.x > width + 10 || p.y < -10 || p.y > height + 10) continue;
-    // Limit neighbors for predictable ~30 fps performance on mid-range devices.
-    for (let b = a + 1, links = 0; b < projected.length && links < 3; b++) {
-      const q = projected[b];
-      const dx = p.x - q.x, dy = p.y - q.y;
-      if (Math.abs(dx) > maxDistance || Math.abs(dy) > maxDistance) continue;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      if (dist > maxDistance) continue;
-      const alpha = (1 - dist / maxDistance) * 0.23 * Math.min(p.a, q.a);
+  ctx.globalCompositeOperation = "screen";
+  const maxDistance = Math.min(138, width * 0.13);
+  for (let index = 0; index < projected.length; index++) {
+    const p = projected[index];
+    if (p.x < -15 || p.x > width + 15 || p.y < -15 || p.y > height + 15) continue;
+    let links = 0;
+    for (let j = index + 1; j < projected.length && links < 2; j++) {
+      const q = projected[j];
+      if (p.group !== q.group) continue;
+      const dx = p.x - q.x;
+      const dy = p.y - q.y;
+      const distance2 = dx * dx + dy * dy;
+      if (distance2 > maxDistance * maxDistance) continue;
+      const alpha = (1 - Math.sqrt(distance2) / maxDistance) * 0.18 * Math.min(p.a, q.a);
+      ctx.strokeStyle = "rgba(143,231,232," + alpha.toFixed(3) + ")";
+      ctx.lineWidth = 0.8;
       ctx.beginPath();
       ctx.moveTo(p.x, p.y);
       ctx.lineTo(q.x, q.y);
-      ctx.strokeStyle = "rgba(130,239,238," + alpha.toFixed(3) + ")";
-      ctx.lineWidth = 0.75;
       ctx.stroke();
       links++;
     }
+    const glowRadius = p.r * 5;
+    const starGlow = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, glowRadius);
+    starGlow.addColorStop(0, "rgba(191,255,240," + Math.min(p.a * 0.66, 0.55).toFixed(3) + ")");
+    starGlow.addColorStop(1, "rgba(136,242,223,0)");
+    ctx.fillStyle = starGlow;
     ctx.beginPath();
-    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-    ctx.fillStyle = "rgba(181,249,241," + Math.min(0.9, p.a).toFixed(3) + ")";
+    ctx.arc(p.x, p.y, glowRadius, 0, Math.PI * 2);
     ctx.fill();
-    if (p.r > 2) {
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r * 4, 0, Math.PI * 2);
-      ctx.fillStyle = "rgba(109,227,216,0.045)";
-      ctx.fill();
-    }
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r * 0.68, 0, Math.PI * 2);
+    ctx.fillStyle = "rgba(206,255,249," + Math.min(0.84, p.a).toFixed(3) + ")";
+    ctx.fill();
   }
   ctx.restore();
 }
@@ -190,7 +182,6 @@ export function AtmosphericField() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const pointerRef = useRef({ x: 0, y: 0 });
   const scrollRef = useRef(0);
-  const [paused, setPaused] = useState(false);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -208,7 +199,7 @@ export function AtmosphericField() {
     let last = 0;
     let logicalTime = 0;
     let fpsElapsed = 0;
-    let active = !paused && !initialReducedMotion;
+    let active = !initialReducedMotion;
 
     const resize = () => {
       width = window.innerWidth;
@@ -247,7 +238,7 @@ export function AtmosphericField() {
       if (!document.hidden && active) raf = window.requestAnimationFrame(frame);
     };
     const motionPreference = () => {
-      active = !paused && !media.matches;
+      active = !media.matches;
       visibility();
       if (!active) drawScene(ctx, width, height, particles, logicalTime, pointerRef.current.x, pointerRef.current.y, scrollRef.current);
     };
@@ -268,24 +259,12 @@ export function AtmosphericField() {
       document.removeEventListener("visibilitychange", visibility);
       media.removeEventListener("change", motionPreference);
     };
-  }, [paused]);
+  }, []);
 
   return (
-    <>
-      <div className="atmospheric-field" aria-hidden="true">
-        <canvas ref={canvasRef} className="atmospheric-canvas" />
-        <div className="atmospheric-readable-mask" />
-      </div>
-      <button
-        className="motion-toggle"
-        type="button"
-        aria-label={paused ? "Ativar animações de fundo" : "Pausar animações de fundo"}
-        aria-pressed={paused}
-        onClick={() => setPaused(value => !value)}
-      >
-        {paused ? <Play size={17} weight="fill" /> : <Pause size={17} weight="fill" />}
-        <span>{paused ? "Ativar fundo" : "Pausar fundo"}</span>
-      </button>
-    </>
+    <div className="atmospheric-field" aria-hidden="true">
+      <canvas ref={canvasRef} className="atmospheric-canvas" />
+      <div className="atmospheric-readable-mask" />
+    </div>
   );
 }
