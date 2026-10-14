@@ -20,7 +20,8 @@ import {
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
 import { archiSubsystems, portfolioProjects } from "../lib/portfolio-data";
-import { DepthBackground, Reveal, ScrollProgress, SpotlightGrid } from "./components/ImmersiveEffects";
+import { Reveal, ScrollProgress, SpotlightGrid } from "./components/ImmersiveEffects";
+import { AtmosphericField } from "./components/AtmosphericField";
 
 const navItems = [
   { href: "#sobre", label: "Sobre" },
@@ -89,8 +90,16 @@ const education = [
 
 function Monogram() {
   return (
-    <span className="monogram" aria-hidden="true">
-      <span>M</span><i />
+    <span className="monogram monogram-photo" aria-hidden="true">
+      <Image
+        src="https://avatars.githubusercontent.com/u/279118945?v=4&s=800"
+        alt=""
+        width={80}
+        height={80}
+        unoptimized
+        className="monogram-avatar"
+      />
+      <i />
     </span>
   );
 }
@@ -145,32 +154,16 @@ function ArchitectureDisplay() {
 
 function SystemPreview() {
   return (
-    <div className="system-preview" role="img" aria-label="Ilustração do fluxo do MLDDS: entrada, regras, roteirização e validação">
-      <div className="system-window">
-        <div className="system-titlebar">
-          <div className="window-dots"><i /><i /><i /></div>
-          <span>MLDDS / OPERAÇÃO</span>
-          <span className="system-version">AUTOMAÇÃO DESKTOP</span>
-        </div>
-        <div className="system-content">
-          <div className="system-side-rail"><i /><i /><i /><i /></div>
-          <div className="system-stages">
-            {[
-              ["01", "Entrada de dados", "Captura e contexto"],
-              ["02", "Regras de negócio", "Classificação"],
-              ["03", "Roteirização", "Plano operacional"],
-              ["04", "Validação", "Execução assistida"]
-            ].map(([number, title, caption], index) => (
-              <div className="system-stage" key={title}>
-                <span className="system-step-number">{number}</span>
-                <div><strong>{title}</strong><small>{caption}</small></div>
-                {index === 3 ? <CheckCircle size={19} weight="fill" /> : <ArrowRight size={18} />}
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-      <div className="system-glow" aria-hidden="true" />
+    <div className="system-preview system-preview-real">
+      <Image
+        src="/projects/mldds.png"
+        alt="Captura da interface real do sistema desktop de roteirização MLDDS"
+        fill
+        sizes="(max-width: 650px) 100vw, 50vw"
+        className="mldds-real-screenshot"
+      />
+      <div className="mldds-image-shade" aria-hidden="true" />
+      <span className="actual-screenshot-tag"><span /> INTERFACE REAL / MLDDS</span>
     </div>
   );
 }
@@ -182,7 +175,7 @@ function StackTags({ items }: { items: readonly string[] }) {
 export default function Page() {
   return (
     <main id="top" className="site-shell">
-      <DepthBackground />
+      <AtmosphericField />
       <ScrollProgress />
 
       <header className="site-header">
@@ -211,6 +204,7 @@ export default function Page() {
         <div className="container hero-inner">
           <div className="hero-content">
             <div className="hero-kicker"><span className="pulse-dot" /> SISTEMAS / PROCESSOS / IA APLICADA</div>
+            <div className="hero-eyebrow-hint"><span>✦</span> FUNDO VIVO · PROFUNDIDADE INTERATIVA</div>
             <h1 id="hero-title">Tecnologia com <span className="hero-italic">visão de negócio.</span><br />Resultado com <span className="hero-highlight">propósito.</span></h1>
             <p className="hero-description">Transformo necessidades operacionais em sistemas, automações e experiências digitais. Da regra de negócio à validação da solução — conectando processos, dados e engenharia de software.</p>
             <div className="hero-actions">
@@ -223,23 +217,41 @@ export default function Page() {
             </div>
           </div>
 
-          <div className="hero-art" aria-label="Representação conceitual do ciclo de desenvolvimento">
-            <div className="art-halo art-halo-back" aria-hidden="true" />
-            <div className="art-halo art-halo-front" aria-hidden="true" />
-            <div className="hero-stage-card">
-              <div className="hero-stage-topline"><span className="stage-led" /> WORKFLOW / SOLUÇÃO <GitBranch size={18} /></div>
-              <div className="hero-stage-title">Da complexidade<br />à clareza.</div>
-              <div className="hero-stage-diagram">
-                <div className="stage-node"><span>01</span><strong>Entender</strong><small>Contexto</small></div>
-                <div className="stage-connector"><i /></div>
-                <div className="stage-node stage-node-active"><span>02</span><strong>Construir</strong><small>Solução</small></div>
-                <div className="stage-connector"><i /></div>
-                <div className="stage-node"><span>03</span><strong>Validar</strong><small>Qualidade</small></div>
+          <div className="hero-art hero-portrait-art" aria-label="Retrato profissional e representação visual da atuação">
+            <div className="portrait-light-trail" aria-hidden="true" />
+            <div className="portrait-orbit portrait-orbit-one" aria-hidden="true" />
+            <div className="portrait-orbit portrait-orbit-two" aria-hidden="true" />
+            <div className="hero-portrait-frame">
+              <div className="photo-fallback" aria-hidden="true">MF</div>
+              <Image
+                src="https://avatars.githubusercontent.com/u/279118945?v=4&s=800"
+                alt="Foto de perfil de Matheus Ferreira Folgado"
+                fill
+                priority
+                unoptimized
+                sizes="(max-width: 900px) 76vw, 400px"
+                className="hero-portrait-image"
+              />
+              <div className="hero-portrait-shade" />
+              <div className="hero-portrait-top"><span className="portrait-live-dot" /> PERFIL / ENGENHARIA & IA</div>
+              <div className="hero-portrait-text">
+                <span>ENTRE PROCESSOS E TECNOLOGIA</span>
+                <strong>Matheus Ferreira<br />Folgado.</strong>
+                <div className="portrait-bottom-line"><span>PRODUTO · REQUISITOS · AUTOMAÇÃO</span><ArrowUpRight size={20} /></div>
               </div>
-              <div className="hero-stage-footer"><span><CheckCircle size={15} weight="fill" /> PROCESSO ORIENTADO A EVIDÊNCIAS</span><span>MF / 2026</span></div>
             </div>
-            <div className="float-note float-note-a"><span className="float-icon"><ShieldCheck size={17} /></span><div><small>FOCO</small><strong>Regras reais</strong></div></div>
-            <div className="float-note float-note-b"><span className="float-icon"><Code size={17} /></span><div><small>ENTREGA</small><strong>Soluções digitais</strong></div></div>
+            <div className="hero-stage-card portrait-workflow-panel">
+              <div className="hero-stage-topline"><span className="stage-led" /> DO CONTEXTO À SOLUÇÃO <GitBranch size={17} /></div>
+              <div className="portrait-workflow-headline">Entender. Construir. <em>Validar.</em></div>
+              <div className="portrait-workflow-stages">
+                <span>01 <strong>REQUISITOS</strong></span>
+                <ArrowRight size={14} />
+                <span>02 <strong>SOFTWARE</strong></span>
+                <ArrowRight size={14} />
+                <span>03 <strong>QUALIDADE</strong></span>
+              </div>
+            </div>
+            <div className="float-note float-note-b"><span className="float-icon"><Code size={17} /></span><div><small>ATUAÇÃO</small><strong>Sistemas & IA aplicada</strong></div></div>
           </div>
         </div>
         <div className="container hero-bottom"><span>ESTRATÉGIA ENCONTRA EXECUÇÃO</span><a href="#projetos" aria-label="Rolar para projetos"><span>ROLE PARA EXPLORAR</span><ArrowDown size={16} /></a></div>
@@ -252,6 +264,18 @@ export default function Page() {
           <Reveal className="about-heading">
             <div className="section-tag"><span>01 /</span> QUEM SOU</div>
             <h2>Visão de operação.<br /><em>Mentalidade de produto.</em></h2>
+            <div className="about-portrait-signature">
+              <div className="about-portrait-mini">
+                <Image
+                  src="https://avatars.githubusercontent.com/u/279118945?v=4&s=800"
+                  alt="Foto de Matheus Ferreira Folgado"
+                  fill
+                  sizes="96px"
+                  unoptimized
+                />
+              </div>
+              <div><strong>Matheus Ferreira Folgado</strong><span>NEGÓCIO + DESENVOLVIMENTO + IA</span></div>
+            </div>
           </Reveal>
           <Reveal className="about-right" delay={0.1}>
             <div className="about-overline"><span className="dot-square" /> SOBRE MINHA ATUAÇÃO</div>
