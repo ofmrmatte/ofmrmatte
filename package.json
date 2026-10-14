@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "start": "next start --hostname 0.0.0.0 --port ${PORT:-3000}"
   },
   "dependencies": {
     "@phosphor-icons/react": "^2.1.10",
