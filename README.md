@@ -10,7 +10,7 @@ No desenvolvimento, utilizo ferramentas de inteligência artificial como apoio �
 
 ## Stack presente nos projetos
 
-`TypeScript` · `JavaScript` · `React` · `Next.js` · `Node.js` · `C#` · `.NET` · `SQL` · `PostgreSQL` · `Supabase` · `HTML/CSS` · `Git/GitHub` · `Vercel`
+`TypeScript` · `JavaScript` · `React` · `Next.js` · `Node.js` · `C#` · `.NET` · `SQL` · `PostgreSQL` · `Supabase` · `HTML/CSS` · `Git/GitHub` · `Railway` · `Motion`
 
 ### Competências aplicadas
 
@@ -45,6 +45,18 @@ Solução desktop integrada para automação de processos logísticos, com aplic
 ### Site ALC & Pereira Filho
 
 Portal institucional multipágina de logística.
+
+## Experiência visual do portfólio
+
+O site utiliza uma interface renovada de estética editorial escura, com malha em perspectiva, camadas de luz em profundidade e interações responsivas.
+
+- **Motion for React:** parallax suave controlado por cursor e rolagem, animações de entrada e barra de progresso.
+- **shadcn/ui:** composição sobre os componentes locais de Button e Card, com Radix Slot.
+- **21st.dev:** inspiração para layout de hero e cartões com spotlight, implementados localmente com CSS variables.
+- **Acessibilidade e desempenho:** animações desabilitadas com `prefers-reduced-motion`, fallback em telas sensíveis ao toque e efeitos decorativos sem dados de clientes.
+- **Publicação:** Railway, serviço `ofmrmatte`, branch `main`.
+
+Os únicos projetos mostrados como trabalhos independentes são ARCHI, MLDDS e o site institucional da ALC. Prevenção de Perdas e Atendimento são subsistemas apresentados dentro do ARCHI; o Painel do Motorista está descontinuado e não aparece.
 
 ## Como trabalho nos projetos
 
