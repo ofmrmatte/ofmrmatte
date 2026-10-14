@@ -48,59 +48,6 @@ function BrandMark() {
   );
 }
 
-function IntelligencePreview() {
-  return (
-    <div className="product-preview intelligence-preview" aria-label="Representação visual do Inteligência ALC">
-      <div className="preview-sidebar" aria-hidden="true">
-        <span className="sidebar-logo">ALC</span>
-        <span />
-        <span />
-        <span />
-        <span />
-      </div>
-      <div className="preview-main">
-        <div className="preview-topline">
-          <div>
-            <span className="preview-kicker">Inteligência ALC</span>
-            <strong>Visão operacional</strong>
-          </div>
-          <span className="preview-pill">Dados consolidados</span>
-        </div>
-        <div className="metric-grid">
-          {["PNR", "Pré-faturamento", "Conciliação", "Qualidade"].map((label) => (
-            <div className="metric-card" key={label}>
-              <span>{label}</span>
-              <strong>Visão integrada</strong>
-              <small>Monitoramento contínuo</small>
-            </div>
-          ))}
-        </div>
-        <div className="preview-charts">
-          <div className="line-chart-card">
-            <div className="chart-heading">
-              <span>Evolução operacional</span>
-              <span className="chart-legend">Indicadores</span>
-            </div>
-            <svg viewBox="0 0 420 150" role="img" aria-label="Gráfico ilustrativo de evolução operacional">
-              <path d="M10 126 C 58 106, 76 66, 118 78 S 178 118, 218 72 S 288 44, 330 62 S 382 38, 410 30" />
-              <path className="secondary-line" d="M10 138 C 52 126, 84 96, 122 104 S 182 130, 220 102 S 280 82, 326 94 S 376 68, 410 72" />
-            </svg>
-          </div>
-          <div className="status-card">
-            <span>Status dos fluxos</span>
-            <div className="donut" aria-hidden="true" />
-            <div className="status-list">
-              <span><i className="status-dot status-dot-success" /> Validado</span>
-              <span><i className="status-dot status-dot-progress" /> Em análise</span>
-              <span><i className="status-dot status-dot-neutral" /> Monitorado</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function PortfolioPreview() {
   const stages = [
     ["Requisitos", "Mapeamento", "Necessidade → escopo"],
@@ -213,25 +160,16 @@ function MlddsPreview() {
   );
 }
 
-const conceptLabels = {
-  archi: ["ALC ARCHI", "Identidade · Setores · Aplicações", "Acesso seguro, módulos independentes"],
-  atendimento: ["ALC Atendimento", "Conversas · PNRs · Evidências", "Tratativas e automações assistidas"],
-  portal: ["Portal do Motorista", "Mobile · Documentos · Contestações", "A jornada do motorista"]
-} as const;
-
 function ProjectVisual({ type }: { type: PortfolioProject["visual"] }) {
   if (type === "alc-site") return <AlcSitePreview />;
   if (type === "mldds") return <MlddsPreview />;
-  if (type === "intelligence") return <IntelligencePreview />;
-
-  const [name, categories, summary] = conceptLabels[type];
 
   return (
-    <div className={`product-preview concept-preview concept-preview-${type}`} aria-label={`Ilustração conceitual do projeto ${name}`}>
-      <div className="concept-mark" aria-hidden="true">{type === "archi" ? "A" : type === "portal" ? "P" : "@"}</div>
-      <span className="concept-name">{name}</span>
-      <span className="concept-categories">{categories}</span>
-      <strong>{summary}</strong>
+    <div className="product-preview concept-preview concept-preview-archi" aria-label="Ilustração conceitual do ARCHI">
+      <div className="concept-mark" aria-hidden="true">A</div>
+      <span className="concept-name">ALC ARCHI</span>
+      <span className="concept-categories">Identidade · Setores · Subsistemas</span>
+      <strong>Plataforma corporativa com módulos independentes</strong>
       <div className="concept-lines" aria-hidden="true"><span /><span /><span /></div>
     </div>
   );
@@ -383,10 +321,10 @@ export default function Page() {
                       </summary>
                       <div className="archi-more-content">
                         <p className="archi-more-intro">
-                          O ARCHI é o centro de identidade e navegação da plataforma. Os aplicativos
-                          setoriais mantêm serviços e responsabilidades próprios. As etapas abaixo
-                          diferenciam funcionalidades operacionais, telas de apresentação e integrações
-                          ainda dependentes de homologação.
+                          O ARCHI centraliza a identidade e o acesso aos subsistemas corporativos,
+                          incluindo Prevenção de Perdas e Atendimento. Alguns subsistemas operam
+                          em serviços separados, e suas integrações com a central ainda estão
+                          em homologação. Veja o estágio de cada área abaixo.
                         </p>
                         <div className="archi-modules">
                           {archiSubsystems.map((subsystem) => (

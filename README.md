@@ -32,31 +32,9 @@ No desenvolvimento, utilizo ferramentas de inteligência artificial como apoio �
 
 **Plataforma corporativa · Identidade · Setores · SSO**
 
-Central de gestão e acesso da ALC com identidade compartilhada, MFA, sessões revogáveis e permissões por setor. O ARCHI centraliza a entrada, mas mantém aplicativos setoriais independentes.
+Central de gestão e acesso da ALC com identidade compartilhada, MFA, sessões revogáveis e permissões por setor. O ARCHI organiza os subsistemas corporativos em uma central de identidade e acesso. Prevenção de Perdas e Atendimento fazem parte desse conjunto, preservando serviços próprios até a homologação do SSO.
 
 **Subsistemas e áreas:** Identidade e Acessos (operacional); Administrativo (SSO ativo e backend a homologar); RH (em preparação); Frotas, GR, Monitoramento, Operação e Captação (telas propostas); Financeiro e Fiscal (aplicativos independentes com implantação a homologar); Prevenção de Perdas e Atendimento (existentes, com entrada no ARCHI planejada).
-
-### ALC Prevenção de Perdas (antigo Inteligência ALC)
-
-**Analytics · PNR · Loss Prevention · Full Stack**
-
-Aplicativo operacional independente, com PNR, pré-faturamento, conciliações, perdas e indicadores. A integração ao ARCHI depende de homologação. Projeto corporativo privado.
-
-**Stack:** Next.js · React · TypeScript · PostgreSQL · Supabase · Railway
-
-### ALC Atendimento
-
-**WhatsApp · PNR · Evidências · Ellie**
-
-Aplicação setorial separada para tratativas e conversas, gestão de evidências e integrações com a WhatsApp Cloud API. Projeto corporativo privado.
-
-### Portal do Motorista
-
-**PWA · Mobile · Payments · Disputes · Full Stack**
-
-Aplicação web mobile-first para centralizar pendências, pagamentos, documentos, contestações e comunicação entre operação administrativa e motoristas.
-
-**Stack:** Next.js · React · TypeScript · Supabase · Zod · Vitest · Vercel
 
 ### MLDDS — Automação de Processos Logísticos
 
