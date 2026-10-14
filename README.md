@@ -48,16 +48,19 @@ Portal institucional multipágina de logística.
 
 ## Experiência visual do portfólio
 
-O site utiliza uma interface renovada de estética editorial escura, com malha em perspectiva, camadas de luz em profundidade e interações responsivas.
+O site utiliza uma identidade visual editorial escura com constelações assimétricas, trilhas orbitais luminosas, fotografia local e interações responsivas. Não utiliza quadriculados nem controle visual de pausa.
 
-- **Motion for React:** parallax suave controlado por cursor e rolagem, animações de entrada e barra de progresso.
+- **Motion for React:** animações de entrada e barra de leitura, com preferência de movimento reduzido respeitada.
 - **shadcn/ui:** composição sobre os componentes locais de Button e Card, com Radix Slot.
 - **21st.dev:** inspiração para layout de hero e cartões com spotlight, implementados localmente com CSS variables.
-- **Acessibilidade e desempenho:** fundo Canvas 2D contínuo com controles de pausa, limitação de FPS/DPR, pausa em abas inativas e suporte a `prefers-reduced-motion`.
+- **Acessibilidade e desempenho:** fundo Canvas 2D com constelações agrupadas e órbitas parciais, sem malha quadriculada; FPS/DPR limitado, pausado automaticamente em abas inativas, com suporte a `prefers-reduced-motion`.
 - **Fotografia:** retrato profissional local (`public/matheus-profissional.webp`) e captura real do MLDDS, sem depender de avatar externo para a foto pessoal.
 - **Publicação:** Railway, serviço `ofmrmatte`, branch `main`.
 
-Os únicos projetos mostrados como trabalhos independentes são ARCHI, MLDDS e o site institucional da ALC. Prevenção de Perdas e Atendimento são subsistemas apresentados dentro do ARCHI; o Painel do Motorista está descontinuado e não aparece.
+Além dos projetos, o site destaca o método de trabalho — investigar, estruturar, implementar e validar — sem alegar resultados quantitativos não auditados. Os únicos projetos mostrados como trabalhos independentes são ARCHI, MLDDS e o site institucional da ALC. Prevenção de Perdas e Atendimento são subsistemas apresentados dentro do ARCHI; o Painel do Motorista está descontinuado e não aparece.
+
+
+O cabeçalho exibe **Matheus Ferreira Folgado** como nome completo; `PORTFÓLIO / SISTEMAS & IA` é um subtítulo separado. A fotografia principal permanece no arquivo já versionado `public/matheus-profissional.webp`.
 
 ## Como trabalho nos projetos
 

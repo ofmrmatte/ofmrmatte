@@ -14,7 +14,6 @@ import {
   GraduationCap,
   LinkedinLogo,
   Robot,
-  ShieldCheck,
   Stack
 } from "@phosphor-icons/react/dist/ssr";
 import { Button } from "../components/ui/button";
@@ -26,6 +25,7 @@ import { AtmosphericField } from "./components/AtmosphericField";
 const navItems = [
   { href: "#sobre", label: "Sobre" },
   { href: "#projetos", label: "Projetos" },
+  { href: "#entregas", label: "Entregas" },
   { href: "#competencias", label: "Competências" },
   { href: "#formacao", label: "Formação" }
 ] as const;
@@ -59,8 +59,15 @@ const capabilities = [
     number: "03",
     icon: Robot,
     title: "Automação & IA",
-    description: "Aplicar automação e IA no desenvolvimento e na melhoria de processos, com validação humana e foco em qualidade.",
+    description: "Explorar automações e IA no desenvolvimento e na melhoria de processos, com validação humana e critérios de qualidade.",
     tags: ["Automação", "IA aplicada", "Qualidade"]
+  },
+  {
+    number: "04",
+    icon: GitBranch,
+    title: "Dados & integração",
+    description: "Identificar informações necessárias, acompanhar integrações e apoiar a consistência dos dados que sustentam a operação.",
+    tags: ["Fluxos de dados", "APIs", "Rastreabilidade"]
   }
 ] as const;
 
@@ -86,6 +93,31 @@ const education = [
     detail: "Machine Learning, NLP, engenharia de dados, GenAI e LLMs.",
     Icon: Brain
   }
+] as const;
+
+const archiGroups = [
+  {
+    name: "Núcleo e gestão",
+    subtitle: "Identidade, governança e administração da operação",
+    systems: ["Identidade e acessos", "Administrativo", "Recursos Humanos (RH)", "Financeiro", "Fiscal"]
+  },
+  {
+    name: "Operação e controle",
+    subtitle: "Áreas setoriais com implantação gradual",
+    systems: ["Frotas", "Gerenciamento de Risco (GR)", "Monitoramento", "Operação", "Captação"]
+  },
+  {
+    name: "Subsistemas conectados",
+    subtitle: "Aplicações existentes com integração central em homologação",
+    systems: ["Prevenção de Perdas", "Atendimento"]
+  }
+] as const;
+
+const deliveryStages = [
+  { number: "01", title: "Investigar", detail: "Escuta da operação e definição do problema" },
+  { number: "02", title: "Estruturar", detail: "Fluxos, requisitos e regras de negócio" },
+  { number: "03", title: "Implementar", detail: "Sistemas, integrações e automações" },
+  { number: "04", title: "Validar", detail: "Testes, correções e melhoria contínua" }
 ] as const;
 
 function Monogram() {
@@ -125,10 +157,28 @@ function SectionHeading({
   );
 }
 
+function ArchiSymbol({ size = 52 }: { size?: number }) {
+  return (
+    <svg className="archi-symbol" width={size} height={size} viewBox="0 0 100 100" fill="none" aria-hidden="true">
+      <defs>
+        <linearGradient id="archi-symbol-gradient" x1="14" y1="16" x2="88" y2="90">
+          <stop stopColor="#DAFFF1" />
+          <stop offset="0.54" stopColor="#98F4DD" />
+          <stop offset="1" stopColor="#6BACC9" />
+        </linearGradient>
+      </defs>
+      <circle cx="50" cy="50" r="40" stroke="url(#archi-symbol-gradient)" strokeOpacity=".32" strokeWidth="1.4" />
+      <path d="M14 51a36 36 0 0 1 70-6" stroke="url(#archi-symbol-gradient)" strokeWidth="2" strokeLinecap="round" />
+      <path d="M24 77L49.5 23L75 77M36 58H63" stroke="url(#archi-symbol-gradient)" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="83" cy="43" r="5.5" fill="#B5FFE7" />
+      <circle cx="18" cy="70" r="3" fill="#6AD5CE" />
+    </svg>
+  );
+}
+
 function ArchitectureDisplay() {
   return (
     <div className="architecture-visual" role="img" aria-label="Diagrama conceitual do ARCHI conectando os subsistemas da ALC">
-      <div className="architecture-grid" aria-hidden="true" />
       <div className="architecture-ring ring-outer" aria-hidden="true" />
       <div className="architecture-ring ring-middle" aria-hidden="true" />
       <div className="architecture-ring ring-inner" aria-hidden="true" />
@@ -138,7 +188,7 @@ function ArchitectureDisplay() {
       <div className="architecture-line architecture-line-three" aria-hidden="true" />
       <div className="architecture-line architecture-line-four" aria-hidden="true" />
       <div className="architecture-core">
-        <div className="core-icon"><Stack size={25} weight="duotone" /></div>
+        <div className="core-icon"><ArchiSymbol size={72} /></div>
         <strong>ARCHI</strong>
         <span>CENTRAL ALC</span>
       </div>
@@ -146,7 +196,7 @@ function ArchitectureDisplay() {
       <span className="architecture-node architecture-node-right"><i /> Financeiro</span>
       <span className="architecture-node architecture-node-left"><i /> Prevenção</span>
       <span className="architecture-node architecture-node-bottom"><i /> Atendimento</span>
-      <span className="architecture-footnote">IDENTIDADE • SETORES • INTEGRAÇÕES</span>
+      <span className="architecture-footnote">GOVERNANÇA • MODULARIDADE • ACESSO</span>
     </div>
   );
 }
@@ -181,7 +231,7 @@ export default function Page() {
         <div className="container navbar">
           <a href="#top" className="brand" aria-label="Matheus Ferreira Folgado — voltar ao início">
             <Monogram />
-            <span className="brand-label"><strong>Matheus Ferreira</strong><small>FOLGADO / PORTFÓLIO</small></span>
+            <span className="brand-label"><strong>Matheus Ferreira Folgado</strong><small>PORTFÓLIO / SISTEMAS & IA</small></span>
           </a>
           <nav className="desktop-nav" aria-label="Navegação principal">
             {navItems.map(({ href, label }) => <a href={href} key={href}>{label}</a>)}
@@ -203,7 +253,7 @@ export default function Page() {
         <div className="container hero-inner">
           <div className="hero-content">
             <div className="hero-kicker"><span className="pulse-dot" /> SISTEMAS / PROCESSOS / IA APLICADA</div>
-            <div className="hero-eyebrow-hint"><span>✦</span> FUNDO VIVO · PROFUNDIDADE INTERATIVA</div>
+            <div className="hero-eyebrow-hint"><span>✦</span> PROJETOS REAIS · SOLUÇÕES DIGITAIS</div>
             <h1 id="hero-title">Tecnologia com <span className="hero-italic">visão de negócio.</span><br />Resultado com <span className="hero-highlight">propósito.</span></h1>
             <p className="hero-description">Transformo necessidades operacionais em sistemas, automações e experiências digitais. Da regra de negócio à validação da solução — conectando processos, dados e engenharia de software.</p>
             <div className="hero-actions">
@@ -227,14 +277,14 @@ export default function Page() {
                 alt="Foto de perfil de Matheus Ferreira Folgado"
                 fill
                 priority
-                        sizes="(max-width: 900px) 76vw, 400px"
+                sizes="(max-width: 900px) 76vw, 400px"
                 className="hero-portrait-image"
               />
               <div className="hero-portrait-shade" />
               <div className="hero-portrait-top"><span className="portrait-live-dot" /> PERFIL / ENGENHARIA & IA</div>
               <div className="hero-portrait-text">
                 <span>ENTRE PROCESSOS E TECNOLOGIA</span>
-                <strong>Matheus Ferreira<br />Folgado.</strong>
+                <strong>Matheus Ferreira<br />Folgado</strong>
                 <div className="portrait-bottom-line"><span>PRODUTO · REQUISITOS · AUTOMAÇÃO</span><ArrowUpRight size={20} /></div>
               </div>
             </div>
@@ -269,7 +319,7 @@ export default function Page() {
                   alt="Foto de Matheus Ferreira Folgado"
                   fill
                   sizes="96px"
-                          />
+                />
               </div>
               <div><strong>Matheus Ferreira Folgado</strong><span>NEGÓCIO + DESENVOLVIMENTO + IA</span></div>
             </div>
@@ -293,9 +343,9 @@ export default function Page() {
                   <CardContent className="showcase-copy">
                     <div className="showcase-number"><span>PROJETO 01</span><span className="project-kind"><i /> PLATAFORMA CORPORATIVA</span></div>
                     <span className="showcase-small-kicker">SISTEMA / GOVERNANÇA / INTEGRAÇÕES</span>
-                    <h3>ALC <em>ARCHI</em></h3>
+                    <h3 className="archi-project-heading"><ArchiSymbol size={50} /> ALC <em>ARCHI</em></h3>
                     <p>{archi.description}</p>
-                    <div className="showcase-detail"><Stack size={19} /><span>Ecossistema corporativo com <strong>{archiSubsystems.length} áreas e subsistemas</strong>.</span></div>
+                    <div className="showcase-detail"><ArchiSymbol size={23} /><span>Um ecossistema, <strong>{archiSubsystems.length} áreas e subsistemas</strong> com papéis independentes.</span></div>
                     <StackTags items={archi.stack} />
                   </CardContent>
                   <ArchitectureDisplay />
@@ -303,16 +353,28 @@ export default function Page() {
                 <details className="archi-more">
                   <summary><span><span className="archi-summary-icon">+</span> Ver mais sobre os subsistemas do ARCHI</span><ArrowDown size={19} weight="bold" /></summary>
                   <div className="archi-expanded">
-                    <div className="archi-expanded-intro"><span>ARQUITETURA / ECOSSISTEMA ALC</span><p>Prevenção de Perdas e Atendimento fazem parte dos subsistemas do ARCHI, embora preservem serviços próprios. A centralização do acesso está sendo homologada. Os demais módulos também apresentam diferentes estágios de implantação.</p></div>
-                    <div className="archi-modules">
-                      {archiSubsystems.map((subsystem, index) => (
-                        <article className="archi-module" key={subsystem.name}>
-                          <div className="archi-module-index">{String(index + 1).padStart(2, "0")} <span>·</span> {subsystem.status}</div>
-                          <h4>{subsystem.name}</h4>
-                          <p>{subsystem.description}</p>
-                        </article>
-                      ))}
+                    <div className="archi-expanded-intro">
+                      <span>ARQUITETURA / ECOSSISTEMA ALC</span>
+                      <p>O ARCHI é a porta de entrada e camada de identidade do ecossistema. Cada área tem responsabilidades próprias: algumas estão operacionais, outras em implantação ou homologação. Prevenção de Perdas e Atendimento são subsistemas, não projetos independentes deste portfólio.</p>
                     </div>
+                    {archiGroups.map((group, groupIndex) => (
+                      <div className="archi-group" key={group.name}>
+                        <div className="archi-group-heading">
+                          <span>0{groupIndex + 1} / ÁREAS DO ECOSSISTEMA</span>
+                          <h4>{group.name}</h4>
+                          <p>{group.subtitle}</p>
+                        </div>
+                        <div className="archi-modules">
+                          {archiSubsystems.filter((subsystem) => (group.systems as readonly string[]).includes(subsystem.name)).map((subsystem) => (
+                            <article className="archi-module" key={subsystem.name}>
+                              <span className="archi-module-index">{subsystem.status}</span>
+                              <h5>{subsystem.name}</h5>
+                              <p>{subsystem.description}</p>
+                            </article>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </details>
               </Card>
@@ -353,9 +415,36 @@ export default function Page() {
         </div>
       </section>
 
+      <section id="entregas" className="section section-delivery">
+        <div className="container">
+          <SectionHeading
+            index="03"
+            label="COMO TRANSFORMO PROCESSOS"
+            title="Do problema operacional à solução validada."
+            description="Não se trata de prometer números sem evidências. O valor está no método: compreender o contexto, construir com critério e acompanhar o resultado."
+          />
+          <Reveal className="delivery-intro">
+            <div className="delivery-proof">
+              <div className="delivery-proof-mark"><CheckCircle size={27} weight="duotone" /></div>
+              <div><strong>Experiência aplicada à operação real</strong><p>Fluxos de PNR, roteirização, controles internos e comunicação operacional orientam as soluções apresentadas neste portfólio.</p></div>
+            </div>
+            <span className="delivery-proof-end">PROCESSOS → SISTEMAS → VALIDAÇÃO</span>
+          </Reveal>
+          <div className="delivery-track">
+            {deliveryStages.map((stage, index) => (
+              <Reveal key={stage.number} className="delivery-stage" delay={index * 0.07}>
+                <div className="delivery-stage-heading"><span>{stage.number}</span>{index < deliveryStages.length - 1 ? <ArrowRight size={18} aria-hidden="true" /> : <CheckCircle size={18} weight="fill" aria-hidden="true" />}</div>
+                <h3>{stage.title}</h3>
+                <p>{stage.detail}</p>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section id="competencias" className="section section-expertise">
         <div className="container">
-          <SectionHeading index="03" label="COMPETÊNCIAS" title="Tecnologia é meio. Resolver é o objetivo." description="Minha atuação percorre o problema, a solução e a validação — com entendimento das restrições e da rotina operacional." />
+          <SectionHeading index="04" label="COMPETÊNCIAS" title="Tecnologia é meio. Resolver é o objetivo." description="Minha atuação percorre o problema, a solução e a validação — com entendimento das restrições e da rotina operacional." />
           <SpotlightGrid className="expertise-grid">
             {capabilities.map(({ number, icon: Icon, title, description, tags }, index) => (
               <Reveal key={title} delay={index * 0.08}>
@@ -376,7 +465,7 @@ export default function Page() {
 
       <section id="formacao" className="section section-education">
         <div className="container">
-          <SectionHeading index="04" label="JORNADA ACADÊMICA" title="Uma base de gestão. Uma direção em tecnologia." description="Formações complementares que aproximam estratégia, engenharia de software e inteligência artificial aplicada." />
+          <SectionHeading index="05" label="JORNADA ACADÊMICA" title="Uma base de gestão. Uma direção em tecnologia." description="Formações complementares que aproximam estratégia, engenharia de software e inteligência artificial aplicada." />
           <div className="education-grid">
             {education.map(({ type, degree, place, detail, Icon }, index) => (
               <Reveal key={degree} delay={index * 0.08}>
@@ -394,14 +483,28 @@ export default function Page() {
       <footer id="contato" className="footer">
         <div className="container">
           <Reveal className="footer-cta">
-            <div className="section-tag"><span>05 /</span> CONTATO</div>
-            <h2>Tem um desafio<br />para <em>resolver?</em></h2>
-            <p>Vamos conversar sobre sistemas, automações ou soluções que facilitem a rotina de uma operação.</p>
-            <Button asChild size="lg" className="btn-primary btn-footer"><a href="mailto:matheus_frafou@outlook.com">Entre em contato <ArrowUpRight size={20} weight="bold" /></a></Button>
-            <div className="footer-graphic" aria-hidden="true"><span /><span /><span /></div>
+            <div className="footer-cta-copy">
+              <div className="section-tag"><span>06 /</span> CONTATO</div>
+              <h2>Seu desafio merece<br />uma solução <em>à altura.</em></h2>
+              <p>Um processo difícil de executar ou uma ideia que precisa sair do papel? Posso contribuir com o entendimento da operação, estruturação de requisitos, automação e evolução de sistemas.</p>
+              <div className="footer-actions">
+                <Button asChild size="lg" className="btn-primary btn-footer"><a href="mailto:matheus_frafou@outlook.com?subject=Conversa%20sobre%20projeto">Vamos conversar <ArrowUpRight size={20} weight="bold" /></a></Button>
+                <a className="footer-secondary-link" href="https://linkedin.com/in/mrmatte" target="_blank" rel="noopener noreferrer">Conheça meu LinkedIn <ArrowUpRight size={17} /></a>
+              </div>
+            </div>
+            <div className="footer-solution-visual" aria-hidden="true">
+              <span className="footer-solution-kicker">ESTRUTURA / ENTREGA</span>
+              <span className="footer-solution-core"><ArchiSymbol size={77} /></span>
+              {deliveryStages.map((stage) => (
+                <div className="footer-solution-step" key={stage.number}>
+                  <span>{stage.number}</span><strong>{stage.title}</strong><i />
+                </div>
+              ))}
+              <span className="footer-solution-caption">DA NECESSIDADE À VALIDAÇÃO</span>
+            </div>
           </Reveal>
           <div className="footer-bottom">
-            <a href="#top" className="footer-brand"><Monogram /><span><strong>Matheus Ferreira Folgado</strong><small>PROCESSOS. SOFTWARE. PROPÓSITO.</small></span></a>
+            <a href="#top" className="footer-brand"><Monogram /><span><strong>Matheus Ferreira Folgado</strong><small>PORTFÓLIO · SISTEMAS & IA</small></span></a>
             <div className="social-links">
               <a href="https://linkedin.com/in/mrmatte" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><LinkedinLogo size={20} /></a>
               <a href="https://github.com/ofmrmatte" target="_blank" rel="noopener noreferrer" aria-label="GitHub"><GithubLogo size={20} /></a>
