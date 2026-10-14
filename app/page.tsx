@@ -1,7 +1,6 @@
 import Image from "next/image";
 import {
   ArrowRight,
-  ArrowUpRight,
   Briefcase,
   Database,
   EnvelopeSimple,
@@ -13,7 +12,7 @@ import {
 import { PortfolioMotion } from "./components/PortfolioMotion";
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
-import { portfolioProjects, type PortfolioProject } from "../lib/portfolio-data";
+import { archiSubsystems, portfolioProjects, type PortfolioProject } from "../lib/portfolio-data";
 
 const navItems = [
   ["Sobre", "#sobre"],
@@ -217,9 +216,7 @@ function MlddsPreview() {
 const conceptLabels = {
   archi: ["ALC ARCHI", "Identidade · Setores · Aplicações", "Acesso seguro, módulos independentes"],
   atendimento: ["ALC Atendimento", "Conversas · PNRs · Evidências", "Tratativas e automações assistidas"],
-  portal: ["Portal do Motorista", "Mobile · Documentos · Contestações", "A jornada do motorista"],
-  automy: ["Automy", "ERP · Contratos · Gestão", "Operação empresarial integrada"],
-  voss: ["VOSS Barber Lounge", "Marca · Serviços · Experiência", "Presença digital e agendamento"]
+  portal: ["Portal do Motorista", "Mobile · Documentos · Contestações", "A jornada do motorista"]
 } as const;
 
 function ProjectVisual({ type }: { type: PortfolioProject["visual"] }) {
@@ -231,7 +228,7 @@ function ProjectVisual({ type }: { type: PortfolioProject["visual"] }) {
 
   return (
     <div className={`product-preview concept-preview concept-preview-${type}`} aria-label={`Ilustração conceitual do projeto ${name}`}>
-      <div className="concept-mark" aria-hidden="true">{type === "archi" ? "A" : type === "automy" ? "a" : type === "voss" ? "V" : type === "portal" ? "P" : "@"}</div>
+      <div className="concept-mark" aria-hidden="true">{type === "archi" ? "A" : type === "portal" ? "P" : "@"}</div>
       <span className="concept-name">{name}</span>
       <span className="concept-categories">{categories}</span>
       <strong>{summary}</strong>
@@ -349,10 +346,6 @@ export default function Page() {
               <span className="section-label">Projetos em destaque</span>
               <h2>Sistemas, automação e produtos digitais</h2>
             </div>
-            <a className="text-link" href="https://github.com/ofmrmatte" target="_blank" rel="noreferrer">
-              Ver GitHub
-              <ArrowRight size={17} weight="bold" />
-            </a>
           </div>
 
           <div className="projects-grid">
@@ -376,26 +369,37 @@ export default function Page() {
                   <span className="project-eyebrow">{project.eyebrow}</span>
                   <div className="project-title-row">
                     <h3>{project.name}</h3>
-                    {project.href && project.action ? (
-                      <a href={project.href} target="_blank" rel="noopener noreferrer" aria-label={`${project.action}: ${project.name}`}>
-                        <ArrowUpRight size={20} weight="bold" />
-                      </a>
-                    ) : null}
                   </div>
                   <p>{project.description}</p>
                   <div className="project-stack" aria-label={`Tecnologias do projeto ${project.name}`}>
                     {project.stack.map((item) => <span key={item}>{item}</span>)}
                   </div>
-                  {project.href && project.action ? (
-                    <a className="project-link" href={project.href} target="_blank" rel="noopener noreferrer">
-                      {project.action}
-                      <ArrowRight size={16} weight="bold" />
-                    </a>
-                  ) : (
-                    <span className="project-link project-link-restricted" aria-label="Projeto de acesso restrito">
-                      Projeto corporativo · acesso restrito
-                    </span>
-                  )}
+                  {project.visual === "archi" ? (
+                    <details className="archi-more">
+                      <summary>
+                        <span className="archi-more-closed-label">Ver mais · Subsistemas</span>
+                        <span className="archi-more-open-label">Ver menos</span>
+                        <ArrowRight size={17} weight="bold" aria-hidden="true" />
+                      </summary>
+                      <div className="archi-more-content">
+                        <p className="archi-more-intro">
+                          O ARCHI é o centro de identidade e navegação da plataforma. Os aplicativos
+                          setoriais mantêm serviços e responsabilidades próprios. As etapas abaixo
+                          diferenciam funcionalidades operacionais, telas de apresentação e integrações
+                          ainda dependentes de homologação.
+                        </p>
+                        <div className="archi-modules">
+                          {archiSubsystems.map((subsystem) => (
+                            <article className="archi-module" key={subsystem.name}>
+                              <span className="archi-module-status">{subsystem.status}</span>
+                              <h4>{subsystem.name}</h4>
+                              <p>{subsystem.description}</p>
+                            </article>
+                          ))}
+                        </div>
+                      </div>
+                    </details>
+                  ) : null}
                 </CardContent>
               </Card>
             ))}

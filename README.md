@@ -32,7 +32,9 @@ No desenvolvimento, utilizo ferramentas de inteligência artificial como apoio �
 
 **Plataforma corporativa · Identidade · Setores · SSO**
 
-Central de gestão e acesso da ALC com identidade compartilhada, MFA, sessões revogáveis e permissões por setor. Administrativo aberto por SSO. Outras integrações ainda dependem de homologação. Projeto corporativo privado.
+Central de gestão e acesso da ALC com identidade compartilhada, MFA, sessões revogáveis e permissões por setor. O ARCHI centraliza a entrada, mas mantém aplicativos setoriais independentes.
+
+**Subsistemas e áreas:** Identidade e Acessos (operacional); Administrativo (SSO ativo e backend a homologar); RH (em preparação); Frotas, GR, Monitoramento, Operação e Captação (telas propostas); Financeiro e Fiscal (aplicativos independentes com implantação a homologar); Prevenção de Perdas e Atendimento (existentes, com entrada no ARCHI planejada).
 
 ### ALC Prevenção de Perdas (antigo Inteligência ALC)
 
@@ -48,7 +50,7 @@ Aplicativo operacional independente, com PNR, pré-faturamento, conciliações, 
 
 Aplicação setorial separada para tratativas e conversas, gestão de evidências e integrações com a WhatsApp Cloud API. Projeto corporativo privado.
 
-### [Portal do Motorista](https://github.com/ofmrmatte/painel_motorista)
+### Portal do Motorista
 
 **PWA · Mobile · Payments · Disputes · Full Stack**
 
@@ -56,25 +58,15 @@ Aplicação web mobile-first para centralizar pendências, pagamentos, documento
 
 **Stack:** Next.js · React · TypeScript · Supabase · Zod · Vitest · Vercel
 
-### [MLDDS — Automação de Processos Logísticos](https://github.com/ofmrmatte/MLDDS-Releases)
+### MLDDS — Automação de Processos Logísticos
 
 Solução desktop integrada para automação de processos logísticos, com aplicação de regras de negócio, integração de dados, roteirização, validações e rastreabilidade operacional.
 
 **Stack:** C# · .NET 8 · WPF · Integrações de dados · Automação
 
-### [Automy](https://automy.dev.br)
+### Site ALC & Pereira Filho
 
-**SaaS · ERP · Operations Automation**
-
-Projeto comercial em desenvolvimento, com gestão de clientes, contratos, finanças e operações. Código-fonte privado.
-
-### [Site ALC & Pereira Filho](https://github.com/ofmrmatte/ALC-Pereira-Filho-Transportes)
-
-Portal institucional multipágina de logística. Repositório público.
-
-### [VOSS Barber Lounge](https://voss-barber-lounge.vercel.app)
-
-Site comercial responsivo com serviços, galeria, equipe e caminhos de agendamento.
+Portal institucional multipágina de logística.
 
 ## Como trabalho nos projetos
 
@@ -111,7 +103,7 @@ Formação voltada à gestão empresarial, processos, finanças, pessoas, opera�
 
 - LinkedIn: [linkedin.com/in/mrmatte](https://linkedin.com/in/mrmatte)
 - GitHub: [github.com/ofmrmatte](https://github.com/ofmrmatte)
-- Portfólio: [ofmrmatte.vercel.app](https://ofmrmatte.vercel.app)
+- Portfólio: [ofmrmatte-production.up.railway.app](https://ofmrmatte-production.up.railway.app)
 
 ---
 
