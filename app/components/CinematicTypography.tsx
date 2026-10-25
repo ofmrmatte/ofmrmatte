@@ -14,7 +14,7 @@ export function KineticHeroTitle() {
   return (
     <h1 id="hero-title" className="portfolio-kinetic-title" aria-label="Tecnologia com visão de negócio. Resultado com propósito.">
       {HERO_LINES.map((line, index) => (
-        <span className="portfolio-kinetic-line" aria-hidden="true" key={index}>
+        <span className="portfolio-kinetic-line" key={index}>
           {line.map(({ word, style }) => {
             const order = position++;
             return (
@@ -22,7 +22,7 @@ export function KineticHeroTitle() {
                 initial={reduced ? false : { opacity: 0, y: 36, filter: "blur(12px)" }}
                 animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                 transition={{ duration: 0.83, delay: 0.14 + order * 0.085, ease: [0.2, 0.8, 0.17, 1] }}>
-                {word}
+                {word}{" "}
               </motion.span>
             );
           })}
@@ -37,12 +37,12 @@ export function KineticSectionTitle({ text }: { text: string }) {
   return (
     <h2 className="portfolio-section-title" aria-label={text}>
       {text.split(" ").map((word, index) => (
-        <motion.span key={index} className="portfolio-kinetic-word" aria-hidden="true"
+        <motion.span key={index} className="portfolio-kinetic-word"
           initial={reduced ? false : { opacity: 0, y: 22, filter: "blur(8px)" }}
           whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
           viewport={{ once: true, amount: 0.3, margin: "0px 0px -40px 0px" }}
           transition={{ duration: 0.58, delay: Math.min(index * 0.05, 0.6), ease: [0.2, 0.75, 0.18, 1] }}>
-          {word}
+          {word}{" "}
         </motion.span>
       ))}
     </h2>
