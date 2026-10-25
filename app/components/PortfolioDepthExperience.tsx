@@ -31,12 +31,13 @@ export function PortfolioDepthExperience() {
       const heroCopy = document.querySelector<HTMLElement>(".hero-content");
       const heroLight = document.querySelector<HTMLElement>(".hero-editorial__light-veil");
 
-      // A visible introduction; unlike the previous effect, lights and shapes
-      // have substantial travel and evolve independently through each chapter.
-      if (hero) {
-        gsap.fromTo(hero,
-          { opacity: 0.25, scale: 1.09, xPercent: 7 },
-          { opacity: 1, scale: 1, xPercent: 0, duration: 1.65, ease: "power3.out" }
+      // Light gains definition on entry. Keep the hero scene itself fully
+      // visible from first paint so the intro never fights the scrub timeline.
+      const cloud = root.current?.querySelector<HTMLElement>(".cinema-flow__copper-cloud");
+      if (cloud) {
+        gsap.fromTo(cloud,
+          { opacity: 0.62, scale: 1.08 },
+          { opacity: 1, scale: 1, duration: 1.5, ease: "power3.out" }
         );
       }
 
