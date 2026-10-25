@@ -22,6 +22,7 @@ import { archiSubsystems, portfolioProjects } from "../lib/portfolio-data";
 import { Reveal, ScrollProgress, SpotlightGrid } from "./components/ImmersiveEffects";
 import { HeroCamera, KineticEmphasisTitle, KineticHeroTitle, KineticSectionTitle, ScrollSignature } from "./components/CinematicTypography";
 import { PortfolioProjectEngine } from "./components/PortfolioProjectEngine";
+import { PortfolioTypingText } from "./components/PortfolioTypingText";
 
 const navItems = [
   { href: "#sobre", label: "Sobre" },
@@ -289,8 +290,7 @@ export default function Page() {
               </div>
             </div>
             <PortfolioProjectEngine />
-            <div className="float-note float-note-b"><span className="float-icon"><Code size={17} /></span><div><small>ATUAÇÃO</small><strong>Sistemas & IA aplicada</strong></div></div>
-          </HeroCamera>
+                      </HeroCamera>
         </div>
         <div className="container hero-bottom"><span>ESTRATÉGIA ENCONTRA EXECUÇÃO</span><a href="#projetos" aria-label="Rolar para projetos"><span>ROLE PARA EXPLORAR</span><ArrowDown size={16} /></a></div>
       </section>
@@ -307,19 +307,47 @@ export default function Page() {
               <div className="about-portrait-mini">
                 <Image
                   src="/matheus-profissional.webp"
-                  alt="Foto de Matheus Ferreira Folgado"
+                  alt="Retrato de Matheus Ferreira Folgado"
                   fill
-                  sizes="96px"
+                  sizes="72px"
                 />
               </div>
-              <div><strong>Matheus Ferreira Folgado</strong><span>NEGÓCIO + DESENVOLVIMENTO + IA</span></div>
+              <div><strong>Matheus Ferreira Folgado</strong><span>ADMINISTRAÇÃO · SOFTWARE · AUTOMAÇÃO</span></div>
+            </div>
+            <div className="about-credential">
+              <span>BACHAREL EM ADMINISTRAÇÃO</span>
+              <strong>Centro Universitário FAM · 2026</strong>
             </div>
           </Reveal>
           <Reveal className="about-right" delay={0.1}>
-            <div className="about-overline"><span className="dot-square" /> SOBRE MINHA ATUAÇÃO</div>
-            <p>Sou <strong>Matheus Ferreira Folgado</strong>, administrador com atuação em sistemas e automação e formação continuada em Engenharia de Software e Inteligência Artificial.</p>
-            <p>Meu trabalho conecta o entendimento de processos reais à definição de requisitos, regras de negócio, desenho de fluxos, testes e evolução de produtos digitais. Utilizo IA como apoio técnico ao desenvolvimento, sempre com revisão e validação das entregas.</p>
-            <div className="about-pill-row"><span>Operações</span><span>Engenharia de Software</span><span>IA aplicada</span></div>
+            <div className="about-overline"><span className="dot-square" /> PERFIL PROFISSIONAL</div>
+            <PortfolioTypingText text="Entender a operação." highlight="Construir a solução." />
+            <p className="about-lead">Sou <strong>administrador formado pela FAM</strong>, com experiência em gestão administrativa, atendimento, operações logísticas e desenvolvimento de soluções digitais. Minha atuação combina conhecimento dos processos reais com requisitos, automação e engenharia de software.</p>
+            <p>Atualmente trabalho na <strong>ALC &amp; Pereira Filho Transportes</strong>, em administração e operações: prevenção de perdas, PNRs, pré-faturamento, rotas, motoristas e indicadores. Também participo da criação e evolução de sistemas internos, dashboards e integrações que apoiam essas rotinas.</p>
+            <p>Desenvolvo com <strong>React, Next.js, TypeScript, Node.js, C#/.NET e PostgreSQL</strong>, utilizando IA como apoio ao desenvolvimento, à revisão e aos testes. Sigo em formação continuada nas áreas de Engenharia de Software e Inteligência Artificial para Devs.</p>
+            <div className="about-pill-row" aria-label="Áreas de atuação"><span>Processos &amp; requisitos</span><span>Sistemas &amp; integrações</span><span>Automação &amp; IA</span></div>
+          </Reveal>
+        </div>
+        <div className="container">
+          <Reveal className="about-career">
+            <div className="about-career-intro">
+              <span className="section-tag"><span>01.1 /</span> EXPERIÊNCIA</span>
+              <h3>Uma trajetória entre atendimento, operação e tecnologia.</h3>
+            </div>
+            <div className="about-career-list">
+              <div className="about-career-row">
+                <span className="about-career-date">02/2026 — ATUAL</span>
+                <div><strong>ALC &amp; Pereira Filho Transportes</strong><span>Auxiliar Administrativo I · Sistemas, Automação e Operações</span></div>
+              </div>
+              <div className="about-career-row">
+                <span className="about-career-date">06/2025 — 01/2026</span>
+                <div><strong>Área Azul</strong><span>Assistente de Atendimento</span></div>
+              </div>
+              <div className="about-career-row">
+                <span className="about-career-date">10/2022 — 10/2024</span>
+                <div><strong>Prefeitura de São Sebastião</strong><span>Estágio Administrativo</span></div>
+              </div>
+            </div>
           </Reveal>
         </div>
       </section>
@@ -476,6 +504,7 @@ export default function Page() {
           <Reveal className="footer-cta">
             <div className="footer-cta-copy">
               <div className="section-tag"><span>06 /</span> CONTATO</div>
+              <PortfolioTypingText small text="Projetos começam com um problema." highlight="Evoluem com método." />
               <KineticEmphasisTitle footer first="Seu desafio merece" second="uma solução à altura." />
               <p>Um processo difícil de executar ou uma ideia que precisa sair do papel? Posso contribuir com o entendimento da operação, estruturação de requisitos, automação e evolução de sistemas.</p>
               <div className="footer-actions">
@@ -483,15 +512,11 @@ export default function Page() {
                 <a className="footer-secondary-link" href="https://linkedin.com/in/mrmatte" target="_blank" rel="noopener noreferrer">Conheça meu LinkedIn <ArrowUpRight size={17} /></a>
               </div>
             </div>
-            <div className="footer-solution-visual" aria-hidden="true">
-              <span className="footer-solution-kicker">ESTRUTURA / ENTREGA</span>
-              <span className="footer-solution-core"><ArchiSymbol size={77} /></span>
-              {deliveryStages.map((stage) => (
-                <div className="footer-solution-step" key={stage.number}>
-                  <span>{stage.number}</span><strong>{stage.title}</strong><i />
-                </div>
-              ))}
-              <span className="footer-solution-caption">DA NECESSIDADE À VALIDAÇÃO</span>
+            <div className="footer-editorial" aria-hidden="true">
+              <span className="footer-editorial-eyebrow">VISÃO · EXECUÇÃO · VALIDAÇÃO</span>
+              <strong>Digital<br />com visão<br /><em>de negócio.</em></strong>
+              <span className="footer-editorial-rule" />
+              <small>ENTRE O PROCESSO E A TECNOLOGIA</small>
             </div>
           </Reveal>
           <div className="footer-bottom">
