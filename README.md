@@ -48,19 +48,17 @@ Portal institucional multipágina de logística.
 
 ## Experiência visual do portfólio
 
-Portfólio pessoal com direção visual editorial em grafite e bronze. O cenário anterior de órbitas 3D e os retratos pessoais foram removidos enquanto o novo brand kit está em desenvolvimento.
+A direção visual do portfólio é editorial, em grafite e bronze, com **luz volumétrica, fitas de luminosidade e transições perceptíveis ligadas à rolagem**. Não usa grades, constelações ou órbitas decorativas, e não publica fotografias pessoais enquanto o brand kit definitivo não estiver pronto.
 
-- **21st.dev:** referência visual para grade escura com máscara radial e iluminação difusa, adaptada com CSS próprio.
-- **GSAP e ScrollTrigger:** movimento sutil de fundo e assinatura tipográfica somente durante a rolagem, sem animações decorativas contínuas.
-- **Motion for React:** animação de títulos e transições de conteúdo.
-- **Acessibilidade:** suporte a `prefers-reduced-motion`; o fundo permanece estático para quem prefere menos movimento.
-- **Identidade provisória:** monograma textual `MF` na navegação, sem logotipo definitivo ou fotografia pessoal.
-- **UI:** botões e cards locais construídos com shadcn/ui e Radix Slot.
+- **GSAP ScrollTrigger:** scrub de verdade, reversível, ligado à rolagem do usuário e organizado por capítulos: hero, sobre, projetos e seções finais. Anima iluminação, perspectiva e o monograma provisório, sem depender de animação de fundo em looping.
+- **GSAP nos conteúdos:** evolução do histórico profissional e da metodologia conforme cada elemento atravessa a viewport; animação de perspectiva da visualização ARCHI.
+- **Motion for React:** preserva o reveal tipográfico dos títulos e a barra de progresso de leitura.
+- **Cenário visual:** SVG com caminhos luminosos e gradientes de cobre, volumes atmosféricos difusos e textura leve; sem WebGL e sem downloads visuais adicionais.
+- **Acessibilidade:** respeita `prefers-reduced-motion` e preserva a leitura com conteúdo sem animação obrigatória.
+- **Identidade provisória:** monograma tipográfico `MF`; nenhuma fotografia pessoal é exibida, aguardando o brand kit.
 - **Publicação:** Railway, serviço `ofmrmatte`, branch `main`.
 
-Além dos projetos, o site destaca o método — investigar, estruturar, implementar e validar — sem alegar resultados quantitativos não auditados. Os únicos trabalhos independentes em destaque são ARCHI, MLDDS e o site institucional da ALC; Prevenção de Perdas e Atendimento estão integrados ao ARCHI.
-
-O cabeçalho apresenta o nome completo, com `PORTFÓLIO / SISTEMAS & IA` como subtítulo. A imagem pessoal foi removida do repositório até a criação do novo brand kit.
+Os trabalhos independentes em destaque continuam sendo ARCHI, MLDDS e o site institucional da ALC. Prevenção de Perdas e Atendimento são apresentados dentro do ARCHI. Não há alegações de resultados quantitativos não auditados.
 
 ## Como trabalho nos projetos
 
