@@ -20,8 +20,7 @@ import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
 import { archiSubsystems, portfolioProjects } from "../lib/portfolio-data";
 import { Reveal, ScrollProgress, SpotlightGrid } from "./components/ImmersiveEffects";
-import { HeroCamera, KineticEmphasisTitle, KineticHeroTitle, KineticSectionTitle, ScrollSignature } from "./components/CinematicTypography";
-import { PortfolioProjectEngine } from "./components/PortfolioProjectEngine";
+import { KineticEmphasisTitle, KineticHeroTitle, KineticSectionTitle, ScrollSignature } from "./components/CinematicTypography";
 import { PortfolioTypingText } from "./components/PortfolioTypingText";
 
 const navItems = [
@@ -124,15 +123,8 @@ const deliveryStages = [
 
 function Monogram() {
   return (
-    <span className="monogram monogram-photo" aria-hidden="true">
-      <Image
-        src="/matheus-profissional.webp"
-        alt=""
-        width={80}
-        height={80}
-        className="monogram-avatar"
-      />
-      <i />
+    <span className="monogram monogram-temporary" aria-hidden="true">
+      <span className="monogram-temporary__letters">MF</span>
     </span>
   );
 }
@@ -267,30 +259,18 @@ export default function Page() {
             </div>
           </div>
 
-          <HeroCamera>
-            <div className="portrait-light-trail" aria-hidden="true" />
-            <div className="portrait-orbit portrait-orbit-one" aria-hidden="true" />
-            <div className="portrait-orbit portrait-orbit-two" aria-hidden="true" />
-            <div className="hero-portrait-frame">
-              <div className="photo-fallback" aria-hidden="true">MF</div>
-              <Image
-                src="/matheus-profissional.webp"
-                alt="Foto de perfil de Matheus Ferreira Folgado"
-                fill
-                priority
-                sizes="(max-width: 900px) 76vw, 400px"
-                className="hero-portrait-image"
-              />
-              <div className="hero-portrait-shade" />
-              <div className="hero-portrait-top"><span className="portrait-live-dot" /> PERFIL / ENGENHARIA & IA</div>
-              <div className="hero-portrait-text">
-                <span>ENTRE PROCESSOS E TECNOLOGIA</span>
-                <strong>Matheus Ferreira<br />Folgado</strong>
-                <div className="portrait-bottom-line"><span>PRODUTO · REQUISITOS · AUTOMAÇÃO</span><ArrowUpRight size={20} /></div>
-              </div>
+          <div className="hero-editorial" aria-hidden="true">
+            <div className="hero-editorial__eyebrow">
+              <span>PORTFÓLIO PESSOAL</span>
+              <span>2026 / 01</span>
             </div>
-            <PortfolioProjectEngine />
-                      </HeroCamera>
+            <div className="hero-editorial__monogram">MF<span className="hero-editorial__period">.</span></div>
+            <div className="hero-editorial__line" />
+            <div className="hero-editorial__foot">
+              <span>GESTÃO &amp; SOFTWARE</span>
+              <span>PROCESSOS · AUTOMAÇÃO · IA</span>
+            </div>
+          </div>
         </div>
         <div className="container hero-bottom"><span>ESTRATÉGIA ENCONTRA EXECUÇÃO</span><a href="#projetos" aria-label="Rolar para projetos"><span>ROLE PARA EXPLORAR</span><ArrowDown size={16} /></a></div>
       </section>
@@ -304,13 +284,8 @@ export default function Page() {
             <div className="section-tag"><span>01 /</span> QUEM SOU</div>
             <KineticEmphasisTitle first="Visão de operação." second="Mentalidade de produto." />
             <div className="about-portrait-signature">
-              <div className="about-portrait-mini">
-                <Image
-                  src="/matheus-profissional.webp"
-                  alt="Retrato de Matheus Ferreira Folgado"
-                  fill
-                  sizes="72px"
-                />
+              <div className="about-portrait-mini" aria-hidden="true">
+                <span className="about-portrait-mini__letters">MF</span>
               </div>
               <div><strong>Matheus Ferreira Folgado</strong><span>ADMINISTRAÇÃO · SOFTWARE · AUTOMAÇÃO</span></div>
             </div>
