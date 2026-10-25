@@ -264,6 +264,7 @@ export default function Page() {
               <span>PORTFÓLIO PESSOAL</span>
               <span>2026 / 01</span>
             </div>
+            <div className="hero-editorial__light-veil" />
             <div className="hero-editorial__monogram">MF<span className="hero-editorial__period">.</span></div>
             <div className="hero-editorial__line" />
             <div className="hero-editorial__foot">
