@@ -8,7 +8,7 @@ export type MetalCamera = {
 };
 
 /** A closed, softly bevelled metal strip swept along an authored spatial curve. */
-function sculptedRibbon(points: number[][], breadth: number, twist: number, lengthSegments = 240, radialSegments = 40) {
+export function sculptedRibbon(points: number[][], breadth: number, twist: number, lengthSegments = 240, radialSegments = 40) {
   const curve = new THREE.CatmullRomCurve3(points.map(p => new THREE.Vector3(...p)), false, "centripetal");
   const frames = curve.computeFrenetFrames(lengthSegments, false);
   const positions: number[] = [], indices: number[] = [];
@@ -33,7 +33,7 @@ function sculptedRibbon(points: number[][], breadth: number, twist: number, leng
         const b = (i + 1) * radialSegments + j;
         const c = (i + 1) * radialSegments + (j + 1) % radialSegments;
         const d = i * radialSegments + (j + 1) % radialSegments;
-        indices.push(a,b,c,a,c,d);
+        indices.push(a,c,b,a,d,c);
       }
     }
   }
