@@ -21,6 +21,7 @@ import { Card, CardContent } from "../components/ui/card";
 import { archiSubsystems, portfolioProjects } from "../lib/portfolio-data";
 import { Reveal, ScrollProgress, SpotlightGrid } from "./components/ImmersiveEffects";
 import { HeroCamera, KineticEmphasisTitle, KineticHeroTitle, KineticSectionTitle, ScrollSignature } from "./components/CinematicTypography";
+import { PortfolioProjectEngine } from "./components/PortfolioProjectEngine";
 
 const navItems = [
   { href: "#sobre", label: "Sobre" },
@@ -287,17 +288,7 @@ export default function Page() {
                 <div className="portrait-bottom-line"><span>PRODUTO · REQUISITOS · AUTOMAÇÃO</span><ArrowUpRight size={20} /></div>
               </div>
             </div>
-            <div className="hero-stage-card portrait-workflow-panel">
-              <div className="hero-stage-topline"><span className="stage-led" /> DO CONTEXTO À SOLUÇÃO <GitBranch size={17} /></div>
-              <div className="portrait-workflow-headline">Entender. Construir. <em>Validar.</em></div>
-              <div className="portrait-workflow-stages">
-                <span>01 <strong>REQUISITOS</strong></span>
-                <ArrowRight size={14} />
-                <span>02 <strong>SOFTWARE</strong></span>
-                <ArrowRight size={14} />
-                <span>03 <strong>QUALIDADE</strong></span>
-              </div>
-            </div>
+            <PortfolioProjectEngine />
             <div className="float-note float-note-b"><span className="float-icon"><Code size={17} /></span><div><small>ATUAÇÃO</small><strong>Sistemas & IA aplicada</strong></div></div>
           </HeroCamera>
         </div>
