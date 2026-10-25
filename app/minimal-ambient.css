@@ -1,0 +1,235 @@
+/*
+ * EDITORIAL AMBIENT · TEMPORARY PERSONAL IDENTITY
+ * Reference: 21st.dev masked grid/dark backgrounds, adapted for AUREON's
+ * graphite/bronze vocabulary. GSAP ScrollTrigger controls parallax.
+ * No images, no orbit scene, no floating background panels.
+ */
+.ambient-editorial {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  isolation: isolate;
+  contain: paint;
+  background: #090a0c;
+}
+.ambient-editorial__base,
+.ambient-editorial__glow,
+.ambient-editorial__grid,
+.ambient-editorial__grain,
+.ambient-editorial__veil { position: absolute; inset: 0; }
+.ambient-editorial__base {
+  background:
+    radial-gradient(ellipse 70% 85% at 80% 0%,rgba(54,43,38,.25),transparent 75%),
+    linear-gradient(155deg,#0d0e11 0%,#0a0b0d 45%,#08090b 100%);
+}
+.ambient-editorial__glow {
+  inset: -28% -20% -18% 20%;
+  background:
+    radial-gradient(ellipse 37% 37% at 65% 27%,rgba(160,101,59,.23),transparent 74%),
+    radial-gradient(ellipse 30% 38% at 17% 86%,rgba(122,86,60,.1),transparent 78%);
+  filter: blur(42px);
+  opacity: .78;
+  will-change: transform;
+}
+.ambient-editorial__grid {
+  inset: -15% -10% -15%;
+  background-image:
+    linear-gradient(to right,rgba(200,180,164,.075) 1px,transparent 1px),
+    linear-gradient(to bottom,rgba(200,180,164,.075) 1px,transparent 1px);
+  background-size: 90px 90px;
+  -webkit-mask-image: radial-gradient(ellipse 69% 59% at 68% 18%,#000 2%,rgba(0,0,0,.72) 40%,transparent 100%);
+  mask-image: radial-gradient(ellipse 69% 59% at 68% 18%,#000 2%,rgba(0,0,0,.72) 40%,transparent 100%);
+  opacity: .28;
+  will-change: transform;
+}
+.ambient-editorial__grain {
+  opacity: .065;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 160'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.76' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Cpath fill='%23fff' filter='url(%23g)' opacity='.24' d='M0 0h160v160H0z'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+}
+.ambient-editorial__veil {
+  background:linear-gradient(90deg,rgba(7,8,10,.38),transparent 52%),
+    linear-gradient(180deg,rgba(9,10,12,.16),transparent 39%,rgba(7,8,10,.2) 100%);
+}
+.site-shell {position:relative;z-index:1;background:transparent!important;}
+.section::before {opacity:.25;}
+.section-projects::before,.section-delivery::before,.section-expertise::before,.section-education::before {
+  background: transparent;
+}
+.hero {padding-top:clamp(5rem,7.7vw,8.5rem);padding-bottom:2rem;}
+.hero::before {background:radial-gradient(ellipse at 83% 46%,rgba(156,101,59,.07),transparent 47%);}
+.hero-inner {
+  display:grid;
+  grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);
+  gap:clamp(2rem,4.6vw,5rem);
+  min-height:clamp(530px,48vw,690px);
+  align-items:center;
+}
+.hero-content {max-width:780px;}
+.hero h1.portfolio-kinetic-title {font-size:clamp(3rem,5vw,5.9rem);}
+.hero-credibility {margin-top:2.2rem;}
+.hero-editorial {
+  position:relative;
+  isolation:isolate;
+  align-self:stretch;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  min-width:0;
+  width:100%;
+  max-width:590px;
+  min-height:475px;
+  margin-inline:auto;
+  padding:clamp(1.5rem,3.5vw,3rem) clamp(.5rem,1.7vw,1.5rem);
+  color:#d9bfa5;
+}
+.hero-editorial::before {
+  content:"";
+  position:absolute;
+  inset:3% -18%;
+  z-index:-1;
+  background:radial-gradient(ellipse 60% 48% at 50% 49%,rgba(141,88,54,.11),transparent 83%);
+  filter:blur(25px);
+  pointer-events:none;
+}
+.hero-editorial__eyebrow {
+  display:flex;
+  justify-content:space-between;
+  gap:1.25rem;
+  font-size:clamp(.56rem,.7vw,.67rem);
+  font-weight:730;
+  letter-spacing:.16em;
+  color:#b89c84;
+}
+.hero-editorial__eyebrow span:last-child {color:#967e6b;}
+.hero-editorial__monogram {
+  position:relative;
+  display:block;
+  align-self:center;
+  width:max-content;
+  max-width:100%;
+  padding:.02em .13em .08em 0;
+  font-family:var(--font-inter),Arial,sans-serif;
+  font-weight:760;
+  font-size:clamp(9rem,19vw,18.7rem);
+  letter-spacing:-.14em;
+  line-height:1.12;
+  white-space:nowrap;
+  background:linear-gradient(133deg,rgba(244,217,185,.58),rgba(208,159,111,.35) 49%,rgba(175,122,85,.13) 89%);
+  -webkit-background-clip:text;
+  background-clip:text;
+  -webkit-text-fill-color:transparent;
+  user-select:none;
+  transform-origin:center center;
+}
+.hero-editorial__period {
+  display:inline-block;
+  margin-left:.02em;
+  font-size:.65em;
+  font-weight:530;
+}
+.hero-editorial__line {
+  width:100%;
+  height:1px;
+  margin:0 0 1.2rem;
+  background:linear-gradient(90deg,rgba(235,189,139,.33),rgba(235,189,139,.12) 58%,transparent);
+}
+.hero-editorial__foot {
+  display:flex;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:.65rem 1rem;
+  color:#b79d83;
+  font-size:clamp(.55rem,.68vw,.66rem);
+  font-weight:750;
+  letter-spacing:.11em;
+}
+.hero-editorial__foot span:last-child {color:#947e6e;}
+.hero-bottom {margin-top:.5rem;}
+/* Provisional text monogram. Never display a user photograph. */
+.monogram.monogram-temporary {
+  overflow:hidden;
+  border-radius:10px;
+  border:1px solid rgba(211,160,110,.4);
+  background:linear-gradient(140deg,rgba(76,47,33,.26),rgba(17,18,20,.86));
+  box-shadow:inset 0 1px rgba(250,215,178,.1);
+  color:#ecc9a4;
+}
+.monogram-temporary__letters {
+  font-size:.91rem;
+  font-weight:750;
+  letter-spacing:-.1em;
+}
+.monogram-temporary i {display:none;}
+.about-portrait-mini {
+  display:grid;
+  place-items:center;
+  border-radius:12px;
+  border:1px solid rgba(221,168,112,.27);
+  background:linear-gradient(140deg,rgba(77,49,34,.38),rgba(19,18,20,.83));
+}
+.about-portrait-mini__letters {
+  color:#e4bd94;
+  font-weight:740;
+  font-size:1.15rem;
+  letter-spacing:-.1em;
+}
+/* Typographic brand placeholder, not the final brand kit. */
+.footer-editorial strong em {color:#d8a87e;}
+.portfolio-signature {
+  padding:1.35rem 0;
+  background:linear-gradient(90deg,rgba(22,20,20,.17),rgba(40,29,25,.08),rgba(22,20,20,.17));
+}
+.portfolio-signature-track > span {color:rgba(238,212,186,.17);}
+@media(max-width:1050px) {
+  .hero-inner {grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:2rem;}
+  .hero h1.portfolio-kinetic-title {font-size:clamp(2.75rem,5.25vw,5rem);}
+  .hero-editorial {min-height:370px;}
+  .hero-editorial__monogram {font-size:clamp(8rem,19vw,16rem);}
+}
+@media(max-width:900px) {
+  .hero-inner {grid-template-columns:1fr;gap:0;min-height:0;}
+  .hero-content {max-width:760px;}
+  .hero h1.portfolio-kinetic-title {font-size:clamp(3rem,7.7vw,5.4rem);}
+  .hero-editorial {
+    width:min(100%,650px);
+    max-width:650px;
+    min-height:270px;
+    margin:2.4rem auto 0;
+    padding:1rem 0;
+  }
+  .hero-editorial__monogram {font-size:clamp(8.5rem,25vw,15rem);}
+  .hero-editorial__foot,.hero-editorial__eyebrow {font-size:.62rem;}
+}
+@media(max-width:650px) {
+  .ambient-editorial__grid {
+    background-size:64px 64px;
+    -webkit-mask-image:radial-gradient(ellipse 100% 41% at 65% 8%,rgba(0,0,0,.7),transparent);
+    mask-image:radial-gradient(ellipse 100% 41% at 65% 8%,rgba(0,0,0,.7),transparent);
+    opacity:.2;
+  }
+  .ambient-editorial__glow {inset:-15% -60% -20% 0;filter:blur(60px);opacity:.64;}
+  .hero {padding-top:3.5rem;}
+  .hero h1.portfolio-kinetic-title {font-size:clamp(2.55rem,9.2vw,4.2rem);}
+  .hero-editorial {
+    min-height:0;
+    margin-top:1.8rem;
+    padding:1rem 0 .5rem;
+  }
+  .hero-editorial__monogram {font-size:clamp(7.1rem,36vw,12rem);}
+  .hero-editorial__eyebrow,.hero-editorial__foot {font-size:.55rem;letter-spacing:.085em;}
+  .hero-editorial__line {margin-bottom:1rem;}
+  .hero-bottom {display:none;}
+  .portfolio-signature {padding:1rem 0;}
+}
+@media(max-width:390px) {
+  .hero-editorial__monogram {font-size:clamp(6.5rem,34vw,8.6rem);}
+  .hero-editorial__foot span {font-size:.48rem;}
+}
+@media(prefers-reduced-motion:reduce) {
+  .ambient-editorial__grid,.ambient-editorial__glow {will-change:auto;transform:none!important;}
+  .hero-editorial__monogram {transform:none!important;}
+  .portfolio-signature-track {transform:none!important;}
+}
