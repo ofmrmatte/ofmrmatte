@@ -15,13 +15,12 @@ function Words({ text, start, visible }: {
   start: number;
   visible: number;
 }) {
-  let nextIndex = start;
+  const words = text.split(" ");
   return (
     <>
-      {text.split(" ").map((word, wordIndex) => {
-        const begin = nextIndex;
+      {words.map((word, wordIndex) => {
+        const begin = start + words.slice(0, wordIndex).reduce((sum, previous) => sum + Array.from(previous).length + 1, 0);
         const letters = Array.from(word);
-        nextIndex += letters.length + 1;
         return (
           <Fragment key={start + "-" + wordIndex}>
             {wordIndex > 0 ? " " : null}

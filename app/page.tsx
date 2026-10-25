@@ -13,8 +13,7 @@ import {
   GitBranch,
   GraduationCap,
   LinkedinLogo,
-  Robot,
-  Stack
+  Robot
 } from "@phosphor-icons/react/dist/ssr";
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
@@ -123,8 +122,8 @@ const deliveryStages = [
 
 function Monogram() {
   return (
-    <span className="monogram monogram-temporary" aria-hidden="true">
-      <span className="monogram-temporary__letters">MF</span>
+    <span className="monogram monogram-official" aria-hidden="true">
+      <Image src="/brand/mf-white.svg" alt="" width={42} height={38} />
     </span>
   );
 }
@@ -265,7 +264,7 @@ export default function Page() {
               <span>2026 / 01</span>
             </div>
             <div className="hero-editorial__light-veil" />
-            <div className="hero-editorial__monogram">MF<span className="hero-editorial__period">.</span></div>
+            <div className="hero-editorial__monogram"><Image src="/brand/mf-silver.svg" alt="" width={550} height={500} priority /></div>
             <div className="hero-editorial__line" />
             <div className="hero-editorial__foot">
               <span>GESTÃO &amp; SOFTWARE</span>
@@ -286,7 +285,7 @@ export default function Page() {
             <KineticEmphasisTitle first="Visão de operação." second="Mentalidade de produto." />
             <div className="about-portrait-signature">
               <div className="about-portrait-mini" aria-hidden="true">
-                <span className="about-portrait-mini__letters">MF</span>
+                <Image src="/brand/mf-white.svg" alt="" width={48} height={44} />
               </div>
               <div><strong>Matheus Ferreira Folgado</strong><span>ADMINISTRAÇÃO · SOFTWARE · AUTOMAÇÃO</span></div>
             </div>

@@ -4,221 +4,128 @@ import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-/**
- * Scroll-directed cinematic ambience.
- * Inspired by editorial aurora/shader compositions, not grids or orbit diagrams.
- * Every significant transition is tied to the visitor's actual scroll position.
- * No perpetual floating animations, WebGL, extra network assets, or photographs.
- */
+type Point = { x: number; y: number; z: number };
+type Face = { points: Point[]; shade: number; depth: number };
+
+/** Perspective-projected metal surfaces. Camera, twist and lighting follow scroll.
+ * One canvas, capped DPR, no React renders per frame, no external assets. */
 export function PortfolioDepthExperience() {
-  const root = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    if (!root.current) return;
-
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext("2d", { alpha: true });
+    if (!canvas || !ctx) return;
     gsap.registerPlugin(ScrollTrigger);
-    const mm = gsap.matchMedia();
-    const scene = (key: string) => root.current!.querySelector<HTMLElement>(
-      ".cinema-flow__scene--" + key
-    );
+    const media = gsap.matchMedia();
+    let width = 0, height = 0, frame = 0, previous = 0;
+    let pointerX = 0, pointerY = 0, smoothX = 0, smoothY = 0;
+    let active = true;
+    let reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const camera = { turn: -0.35, travel: 0, zoom: 1, spread: 1, light: 0 };
 
-    mm.add("(prefers-reduced-motion: no-preference)", () => {
-      const hero = scene("hero");
-      const about = scene("about");
-      const projects = scene("projects");
-      const finale = scene("finale");
-      const monogram = document.querySelector<HTMLElement>(".hero-editorial__monogram");
-      const heroCopy = document.querySelector<HTMLElement>(".hero-content");
-      const heroLight = document.querySelector<HTMLElement>(".hero-editorial__light-veil");
-
-      // Light gains definition on entry. Keep the hero scene itself fully
-      // visible from first paint so the intro never fights the scrub timeline.
-      const cloud = root.current?.querySelector<HTMLElement>(".cinema-flow__copper-cloud");
-      if (cloud) {
-        gsap.fromTo(cloud,
-          { opacity: 0.62, scale: 1.08 },
-          { opacity: 1, scale: 1, duration: 1.5, ease: "power3.out" }
-        );
-      }
-
-      const scrub = window.matchMedia("(max-width: 767px)").matches ? 0.45 : 0.85;
-      const heroTl = gsap.timeline({
-        scrollTrigger: {
-          trigger: ".hero",
-          start: "top top",
-          end: "bottom top",
-          scrub,
-          invalidateOnRefresh: true
+    const resize = () => {
+      width = window.innerWidth; height = window.innerHeight;
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      canvas.width = Math.round(width * dpr); canvas.height = Math.round(height * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      draw();
+    };
+    const point = (t: number, u: number, ribbon: number): Point => {
+      const phase = ribbon * 2.25;
+      const twist = t * 1.65 + phase + camera.turn * 0.45;
+      const breadth = ribbon === 0 ? 145 : 98;
+      const x = Math.sin(t * 1.15 + phase) * 220 * camera.spread + u * Math.cos(twist) * breadth;
+      const y = t * 470 + camera.travel;
+      const z = Math.cos(t * 1.15 + phase) * 200 + u * Math.sin(twist) * breadth;
+      const angle = camera.turn + smoothX * 0.12;
+      const rx = x * Math.cos(angle) + z * Math.sin(angle);
+      const rz = -x * Math.sin(angle) + z * Math.cos(angle);
+      const ry = y * 0.94 - rz * 0.34;
+      const depth = y * 0.34 + rz * 0.94;
+      const perspective = 1050 / (1050 + depth);
+      const scale = Math.min(width / 1350, height / 850) * camera.zoom;
+      return { x: width * (width < 768 ? 0.86 : 0.77) + (rx + smoothX * 24) * perspective * scale,
+        y: height * 0.5 + (ry + smoothY * 20) * perspective * scale, z: depth };
+    };
+    function draw() {
+      if (!ctx) return;
+      ctx.clearRect(0, 0, width, height);
+      const faces: Face[] = [];
+      const steps = width < 768 ? 64 : 100;
+      const lanes = 8;
+      for (let ribbon = 0; ribbon < 2; ribbon++) {
+        for (let i = 0; i < steps; i++) {
+          const t = -1.75 + i / steps * 3.5;
+          for (let j = 0; j < lanes; j++) {
+            const u = -1 + j / lanes * 2;
+            const points = [point(t,u,ribbon),point(t+3.5/steps,u,ribbon),
+              point(t+3.5/steps,u+2/lanes,ribbon),point(t,u+2/lanes,ribbon)];
+            const normal = Math.cos(t * 1.65 + ribbon * 2.25 + camera.turn * 1.45 + camera.light);
+            const specular = Math.pow(Math.max(0, Math.cos(t * 1.65 + ribbon * 2.25 + camera.turn - 0.55 + u * .6)), 18);
+            const shade = Math.min(245, 35 + Math.abs(normal) * 92 + specular * 130 + (j === 0 ? 34 : 0));
+            faces.push({points, shade, depth: points.reduce((sum,p)=>sum+p.z,0)/4});
+          }
         }
-      });
-      if (hero) heroTl.to(hero, { xPercent: -15, yPercent: -22, scale: 1.2, opacity: 0.13, ease: "none" }, 0);
-      if (monogram) heroTl.to(monogram, { yPercent: -29, xPercent: 7, scale: 0.71, rotate: -4, opacity: 0.47, ease: "none" }, 0);
-      if (heroCopy) heroTl.to(heroCopy, { y: -100, opacity: 0.48, ease: "none" }, 0);
-      if (heroLight) heroTl.to(heroLight, { xPercent: 55, rotate: 18, opacity: 0.17, ease: "none" }, 0);
-
-      // Independent, section-scoped scene timelines. Their progress follows
-      // scroll position in both directions (not a one-shot opacity reveal).
-      const chapters: Array<{
-        target: HTMLElement | null;
-        trigger: string;
-        entryX: number;
-        travelX: number;
-        exitY: number;
-        exitScale: number;
-        peak: number;
-      }> = [
-        { target: about, trigger: "#sobre", entryX: -18, travelX: 10, exitY: -12, exitScale: 1.17, peak: 0.9 },
-        { target: projects, trigger: "#projetos", entryX: 18, travelX: -16, exitY: -22, exitScale: 1.24, peak: 0.98 },
-        { target: finale, trigger: "#competencias", entryX: -15, travelX: 14, exitY: -8, exitScale: 1.19, peak: 0.86 }
-      ];
-
-      chapters.forEach(({ target, trigger, entryX, travelX, exitY, exitScale, peak }) => {
-        if (!target) return;
-        gsap.timeline({
-          scrollTrigger: {
-            trigger,
-            start: "top 95%",
-            end: "bottom 5%",
-            scrub,
-            invalidateOnRefresh: true
-          }
-        })
-          .fromTo(target,
-            { opacity: 0, xPercent: entryX, yPercent: 8, scale: 0.87 },
-            { opacity: peak, xPercent: 0, yPercent: 0, scale: 1, ease: "none", duration: 0.36 })
-          .to(target,
-            { xPercent: travelX, yPercent: exitY, scale: exitScale, opacity: 0.08, ease: "none", duration: 0.64 }
-          );
-      });
-
-      // True scrubbed scene actions: selected visual accents expand into view
-      // as their real chapter reaches the viewport.
-      const visual = document.querySelector<HTMLElement>(".architecture-visual");
-      if (visual) {
-        gsap.fromTo(visual,
-          { scale: 0.91, rotateY: -6, filter: "brightness(.65)" },
-          {
-            scale: 1, rotateY: 0, filter: "brightness(1)",
-            ease: "none",
-            scrollTrigger: {
-              trigger: visual,
-              start: "top bottom",
-              end: "center center",
-              scrub: 0.65
-            }
-          }
-        );
       }
-
-      const editorialRule = document.querySelector<HTMLElement>(".hero-editorial__line");
-      if (editorialRule) {
-        gsap.fromTo(editorialRule,
-          { scaleX: 0.04, transformOrigin: "left center" },
-          { scaleX: 1, duration: 1.3, delay: 0.22, ease: "power3.out" }
-        );
+      faces.sort((a,b)=>b.depth-a.depth);
+      for (const {points,shade} of faces) {
+        ctx.beginPath();ctx.moveTo(points[0].x,points[0].y);
+        for (let i=1;i<4;i++)ctx.lineTo(points[i].x,points[i].y);
+        ctx.closePath();
+        ctx.fillStyle = `rgb(${Math.round(shade*.91)},${Math.round(shade*.95)},${Math.round(shade)})`;
+        ctx.fill();
+        // Matching thin stroke seals antialias seams without exposing a mesh.
+        ctx.strokeStyle=ctx.fillStyle;ctx.lineWidth=.65;ctx.stroke();
       }
-
-      // Real scroll progression for professional history: each role settles
-      // into place as it approaches the reading zone, reversible on scroll up.
-      gsap.utils.toArray<HTMLElement>(".about-career-row").forEach((row) => {
-        gsap.fromTo(row,
-          { x: 52, opacity: 0.24 },
-          {
-            x: 0, opacity: 1, ease: "none",
-            scrollTrigger: {
-              trigger: row,
-              start: "top 94%",
-              end: "top 62%",
-              scrub: 0.55
-            }
-          }
-        );
+    }
+    const tick = (now: number) => {
+      if (now - previous > 1000/40) {
+        smoothX += (pointerX-smoothX)*.075; smoothY += (pointerY-smoothY)*.075;
+        draw(); previous=now;
+      }
+      frame=requestAnimationFrame(tick);
+    };
+    const track = (event: PointerEvent) => {
+      if (event.pointerType !== "mouse") return;
+      pointerX = event.clientX / width - .5; pointerY = event.clientY / height - .5;
+    };
+    const visibility = () => {
+      cancelAnimationFrame(frame);
+      if (!document.hidden && !reduced) frame=requestAnimationFrame(tick);
+    };
+    media.add("(prefers-reduced-motion: no-preference)", () => {
+      reduced=false;
+      // One master camera timeline prevents competing section transforms.
+      const timeline=gsap.timeline({scrollTrigger:{trigger:".site-shell",start:"top top",end:"bottom bottom",scrub:.65,invalidateOnRefresh:true}});
+      timeline.to(camera,{turn:1.05,travel:200,zoom:1.25,spread:1.3,light:.5,ease:"none",duration:1})
+        .to(camera,{turn:2.45,travel:-170,zoom:.85,spread:1.8,light:1.3,ease:"none",duration:1.5})
+        .to(camera,{turn:4.1,travel:130,zoom:1.12,spread:.85,light:2.4,ease:"none",duration:1.5});
+      gsap.to(".hero-editorial__monogram",{y:-150,rotationY:32,rotationX:12,rotationZ:-8,scale:.78,ease:"none",
+        scrollTrigger:{trigger:".hero",start:"top top",end:"bottom top",scrub:.6}});
+      gsap.to(".hero-editorial__eyebrow",{y:-55,ease:"none",scrollTrigger:{trigger:".hero",start:"top top",end:"bottom top",scrub:.6}});
+      gsap.to(".hero-content",{y:-45,ease:"none",scrollTrigger:{trigger:".hero",start:"top top",end:"bottom top",scrub:.6}});
+      gsap.utils.toArray<HTMLElement>(".project-media").forEach(element=>{
+        gsap.fromTo(element,{y:38},{y:-38,ease:"none",scrollTrigger:{trigger:element.closest("article") || element,start:"top bottom",end:"bottom top",scrub:.6}});
       });
-
-      // The methodology advances as the actual row enters the viewport.
-      gsap.utils.toArray<HTMLElement>(".delivery-stage h3").forEach((heading) => {
-        gsap.fromTo(heading,
-          { y: 21, opacity: 0.38 },
-          {
-            y: 0, opacity: 1, ease: "none",
-            scrollTrigger: {
-              trigger: heading,
-              start: "top 96%",
-              end: "top 63%",
-              scrub: 0.55
-            }
-          }
-        );
+      gsap.utils.toArray<HTMLElement>(".about-career-row").forEach(element=>{
+        gsap.fromTo(element,{x:38,opacity:.35},{x:0,opacity:1,ease:"none",scrollTrigger:{trigger:element,start:"top 94%",end:"top 66%",scrub:.4}});
       });
+      // The project diagram settles into perspective as its chapter enters.
+      const diagram=document.querySelector<HTMLElement>(".architecture-visual");
+      if(diagram)gsap.fromTo(diagram,{rotateY:-12,scale:.92},{rotateY:0,scale:1,ease:"none",scrollTrigger:{trigger:diagram,start:"top bottom",end:"center center",scrub:.6}});
+      visibility();
+      return ()=>cancelAnimationFrame(frame);
     });
+    media.add("(prefers-reduced-motion: reduce)",()=>{reduced=true;cancelAnimationFrame(frame);draw();});
+    resize();
+    window.addEventListener("resize",resize,{passive:true});
+    window.addEventListener("pointermove",track,{passive:true});
+    document.addEventListener("visibilitychange",visibility);
+    const refresh=()=>{if(active)ScrollTrigger.refresh();};
+    document.fonts.ready.then(refresh);
+    return ()=>{active=false;media.revert();cancelAnimationFrame(frame);window.removeEventListener("resize",resize);window.removeEventListener("pointermove",track);document.removeEventListener("visibilitychange",visibility);};
+  },[]);
 
-    mm.add("(prefers-reduced-motion: reduce)", () => {
-      gsap.set(root.current!.querySelectorAll(".cinema-flow__scene:not(.cinema-flow__scene--hero)"), { opacity: 0 });
-      gsap.set(root.current!.querySelector(".cinema-flow__scene--hero"), { opacity: 1, x: 0, y: 0, scale: 1 });
-    });
-
-    return () => mm.revert();
-  }, []);
-
-  return (
-    <div ref={root} className="cinema-flow" aria-hidden="true">
-      <div className="cinema-flow__base" />
-      <div className="cinema-flow__scene cinema-flow__scene--hero">
-        <div className="cinema-flow__copper-cloud" />
-        <svg className="cinema-flow__ribbons" viewBox="0 0 1600 1000"
-          preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <linearGradient id="film-copper" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#e6ba8b" stopOpacity="0" />
-              <stop offset="22%" stopColor="#c88758" stopOpacity=".34" />
-              <stop offset="58%" stopColor="#b66f47" stopOpacity=".7" />
-              <stop offset="83%" stopColor="#eec59c" stopOpacity=".45" />
-              <stop offset="100%" stopColor="#eec59c" stopOpacity="0" />
-            </linearGradient>
-            <linearGradient id="film-edge" x1="5%" y1="15%" x2="95%" y2="90%">
-              <stop offset="0%" stopColor="#e8bd92" stopOpacity="0" />
-              <stop offset="40%" stopColor="#ffd4a3" stopOpacity=".6" />
-              <stop offset="70%" stopColor="#b88258" stopOpacity=".5" />
-              <stop offset="100%" stopColor="#ddb18d" stopOpacity="0" />
-            </linearGradient>
-            <filter id="film-cloud-blur" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="53" />
-            </filter>
-            <filter id="film-soft-blur" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="17" />
-            </filter>
-          </defs>
-          <path d="M 1780 -150 C 1450 130, 1510 285, 1130 414 S 712 677, 318 902 S -180 1090, -370 1220"
-            stroke="url(#film-copper)" strokeWidth="330" strokeLinecap="round"
-            fill="none" filter="url(#film-cloud-blur)" opacity=".82" />
-          <path d="M 1765 -145 C 1458 135, 1445 282, 1160 405 S 720 660, 302 886 S -180 1090, -380 1180"
-            stroke="url(#film-copper)" strokeWidth="115" strokeLinecap="round"
-            fill="none" filter="url(#film-soft-blur)" opacity=".77" />
-          <path d="M 1755 -140 C 1450 143, 1428 275, 1160 391 S 705 650, 311 873 S -180 1070, -360 1140"
-            stroke="url(#film-edge)" strokeWidth="4" strokeLinecap="round"
-            fill="none" opacity=".58" />
-        </svg>
-        <div className="cinema-flow__sheen" />
-      </div>
-
-      <div className="cinema-flow__scene cinema-flow__scene--about">
-        <div className="cinema-flow__diffusion cinema-flow__diffusion--about" />
-        <div className="cinema-flow__soft-edge cinema-flow__soft-edge--about" />
-      </div>
-
-      <div className="cinema-flow__scene cinema-flow__scene--projects">
-        <div className="cinema-flow__diffusion cinema-flow__diffusion--projects" />
-        <div className="cinema-flow__blade cinema-flow__blade--one" />
-        <div className="cinema-flow__blade cinema-flow__blade--two" />
-      </div>
-
-      <div className="cinema-flow__scene cinema-flow__scene--finale">
-        <div className="cinema-flow__diffusion cinema-flow__diffusion--finale" />
-        <div className="cinema-flow__finale-wash" />
-      </div>
-
-      <div className="cinema-flow__texture" />
-      <div className="cinema-flow__vignette" />
-    </div>
-  );
+  return <div className="metal-scene" aria-hidden="true"><div className="metal-scene__light"/><canvas ref={canvasRef}/><div className="metal-scene__shade"/></div>;
 }

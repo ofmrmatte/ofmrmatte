@@ -4,6 +4,7 @@ import "./globals.css";
 import "./aureon-depth.css";
 import "./portfolio-refinements.css";
 import "./minimal-ambient.css";
+import "./metal-depth.css";
 import { PortfolioDepthExperience } from "./components/PortfolioDepthExperience";
 
 const inter = Inter({
@@ -48,7 +49,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "/og.svg",
+        url: "/og.png",
         width: 1200,
         height: 630,
         alt: "Matheus Ferreira Folgado - Engenharia de Software, Sistemas e IA aplicada"
