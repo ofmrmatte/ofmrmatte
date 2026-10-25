@@ -20,7 +20,7 @@ import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
 import { archiSubsystems, portfolioProjects } from "../lib/portfolio-data";
 import { Reveal, ScrollProgress, SpotlightGrid } from "./components/ImmersiveEffects";
-import { AtmosphericField } from "./components/AtmosphericField";
+import { HeroCamera, KineticEmphasisTitle, KineticHeroTitle, KineticSectionTitle, ScrollSignature } from "./components/CinematicTypography";
 
 const navItems = [
   { href: "#sobre", label: "Sobre" },
@@ -150,7 +150,7 @@ function SectionHeading({
     <Reveal className="section-heading">
       <div className="section-heading-copy">
         <div className="section-tag"><span>{index} /</span> {label}</div>
-        <h2>{title}</h2>
+        <KineticSectionTitle text={title} />
       </div>
       {description ? <p>{description}</p> : null}
     </Reveal>
@@ -224,7 +224,6 @@ function StackTags({ items }: { items: readonly string[] }) {
 export default function Page() {
   return (
     <main id="top" className="site-shell">
-      <AtmosphericField />
       <ScrollProgress />
 
       <header className="site-header">
@@ -254,7 +253,7 @@ export default function Page() {
           <div className="hero-content">
             <div className="hero-kicker"><span className="pulse-dot" /> SISTEMAS / PROCESSOS / IA APLICADA</div>
             <div className="hero-eyebrow-hint"><span>✦</span> PROJETOS REAIS · SOLUÇÕES DIGITAIS</div>
-            <h1 id="hero-title">Tecnologia com <span className="hero-italic">visão de negócio.</span><br />Resultado com <span className="hero-highlight">propósito.</span></h1>
+            <KineticHeroTitle />
             <p className="hero-description">Transformo necessidades operacionais em sistemas, automações e experiências digitais. Da regra de negócio à validação da solução — conectando processos, dados e engenharia de software.</p>
             <div className="hero-actions">
               <Button asChild size="lg" className="btn-primary"><a href="#projetos">Explorar projetos <ArrowUpRight size={19} weight="bold" /></a></Button>
@@ -266,7 +265,7 @@ export default function Page() {
             </div>
           </div>
 
-          <div className="hero-art hero-portrait-art" aria-label="Retrato profissional e representação visual da atuação">
+          <HeroCamera>
             <div className="portrait-light-trail" aria-hidden="true" />
             <div className="portrait-orbit portrait-orbit-one" aria-hidden="true" />
             <div className="portrait-orbit portrait-orbit-two" aria-hidden="true" />
@@ -300,18 +299,19 @@ export default function Page() {
               </div>
             </div>
             <div className="float-note float-note-b"><span className="float-icon"><Code size={17} /></span><div><small>ATUAÇÃO</small><strong>Sistemas & IA aplicada</strong></div></div>
-          </div>
+          </HeroCamera>
         </div>
         <div className="container hero-bottom"><span>ESTRATÉGIA ENCONTRA EXECUÇÃO</span><a href="#projetos" aria-label="Rolar para projetos"><span>ROLE PARA EXPLORAR</span><ArrowDown size={16} /></a></div>
       </section>
 
+      <ScrollSignature />
       <div className="container"><div className="horizon-divider" aria-hidden="true"><i /><span>01 · MEU CAMPO DE ATUAÇÃO</span><i /></div></div>
 
       <section id="sobre" className="section section-about">
         <div className="container about-layout">
           <Reveal className="about-heading">
             <div className="section-tag"><span>01 /</span> QUEM SOU</div>
-            <h2>Visão de operação.<br /><em>Mentalidade de produto.</em></h2>
+            <KineticEmphasisTitle first="Visão de operação." second="Mentalidade de produto." />
             <div className="about-portrait-signature">
               <div className="about-portrait-mini">
                 <Image
@@ -485,7 +485,7 @@ export default function Page() {
           <Reveal className="footer-cta">
             <div className="footer-cta-copy">
               <div className="section-tag"><span>06 /</span> CONTATO</div>
-              <h2>Seu desafio merece<br />uma solução <em>à altura.</em></h2>
+              <KineticEmphasisTitle footer first="Seu desafio merece" second="uma solução à altura." />
               <p>Um processo difícil de executar ou uma ideia que precisa sair do papel? Posso contribuir com o entendimento da operação, estruturação de requisitos, automação e evolução de sistemas.</p>
               <div className="footer-actions">
                 <Button asChild size="lg" className="btn-primary btn-footer"><a href="mailto:matheus_frafou@outlook.com?subject=Conversa%20sobre%20projeto">Vamos conversar <ArrowUpRight size={20} weight="bold" /></a></Button>
