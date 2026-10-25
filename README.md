@@ -48,19 +48,19 @@ Portal institucional multipágina de logística.
 
 ## Experiência visual do portfólio
 
-O site utiliza uma identidade visual editorial escura com constelações assimétricas, trilhas orbitais luminosas, fotografia local e interações responsivas. Não utiliza quadriculados nem controle visual de pausa.
+Portfólio pessoal com direção visual editorial em grafite e bronze. O cenário anterior de órbitas 3D e os retratos pessoais foram removidos enquanto o novo brand kit está em desenvolvimento.
 
-- **Motion for React:** animações de entrada e barra de leitura, com preferência de movimento reduzido respeitada.
-- **shadcn/ui:** composição sobre os componentes locais de Button e Card, com Radix Slot.
-- **21st.dev:** inspiração para layout de hero e cartões com spotlight, implementados localmente com CSS variables.
-- **Acessibilidade e desempenho:** fundo Canvas 2D com constelações agrupadas e órbitas parciais, sem malha quadriculada; FPS/DPR limitado, pausado automaticamente em abas inativas, com suporte a `prefers-reduced-motion`.
-- **Fotografia:** retrato profissional local (`public/matheus-profissional.webp`) e captura real do MLDDS, sem depender de avatar externo para a foto pessoal.
+- **21st.dev:** referência visual para grade escura com máscara radial e iluminação difusa, adaptada com CSS próprio.
+- **GSAP e ScrollTrigger:** movimento sutil de fundo e assinatura tipográfica somente durante a rolagem, sem animações decorativas contínuas.
+- **Motion for React:** animação de títulos e transições de conteúdo.
+- **Acessibilidade:** suporte a `prefers-reduced-motion`; o fundo permanece estático para quem prefere menos movimento.
+- **Identidade provisória:** monograma textual `MF` na navegação, sem logotipo definitivo ou fotografia pessoal.
+- **UI:** botões e cards locais construídos com shadcn/ui e Radix Slot.
 - **Publicação:** Railway, serviço `ofmrmatte`, branch `main`.
 
-Além dos projetos, o site destaca o método de trabalho — investigar, estruturar, implementar e validar — sem alegar resultados quantitativos não auditados. Os únicos projetos mostrados como trabalhos independentes são ARCHI, MLDDS e o site institucional da ALC. Prevenção de Perdas e Atendimento são subsistemas apresentados dentro do ARCHI; o Painel do Motorista está descontinuado e não aparece.
+Além dos projetos, o site destaca o método — investigar, estruturar, implementar e validar — sem alegar resultados quantitativos não auditados. Os únicos trabalhos independentes em destaque são ARCHI, MLDDS e o site institucional da ALC; Prevenção de Perdas e Atendimento estão integrados ao ARCHI.
 
-
-O cabeçalho exibe **Matheus Ferreira Folgado** como nome completo; `PORTFÓLIO / SISTEMAS & IA` é um subtítulo separado. A fotografia principal permanece no arquivo já versionado `public/matheus-profissional.webp`.
+O cabeçalho apresenta o nome completo, com `PORTFÓLIO / SISTEMAS & IA` como subtítulo. A imagem pessoal foi removida do repositório até a criação do novo brand kit.
 
 ## Como trabalho nos projetos
 
