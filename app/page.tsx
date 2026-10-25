@@ -331,7 +331,7 @@ export default function Page() {
         <div className="container">
           <SectionHeading index="02" label="TRABALHOS SELECIONADOS" title="Projetos que saíram do contexto e viraram solução." description="Sistemas concebidos para operações e necessidades concretas. Explore a arquitetura, os fluxos e as tecnologias envolvidas." />
           <SpotlightGrid className="showcase-grid">
-            <Reveal className="showcase-feature">
+            <div className="showcase-feature">
               <Card className="showcase-card showcase-archi" data-spotlight-card>
                 <div className="showcase-feature-upper">
                   <CardContent className="showcase-copy">
@@ -372,9 +372,9 @@ export default function Page() {
                   </div>
                 </details>
               </Card>
-            </Reveal>
+            </div>
 
-            <Reveal className="showcase-half" delay={0.06}>
+            <div className="showcase-half">
               <Card className="showcase-card showcase-secondary" data-spotlight-card>
                 <SystemPreview />
                 <CardContent className="showcase-secondary-copy">
@@ -384,8 +384,8 @@ export default function Page() {
                   <StackTags items={mldds.stack} />
                 </CardContent>
               </Card>
-            </Reveal>
-            <Reveal className="showcase-half" delay={0.12}>
+            </div>
+            <div className="showcase-half">
               <Card className="showcase-card showcase-secondary" data-spotlight-card>
                 <div className="alc-preview">
                   <Image
@@ -404,7 +404,7 @@ export default function Page() {
                   <StackTags items={alcSite.stack} />
                 </CardContent>
               </Card>
-            </Reveal>
+            </div>
           </SpotlightGrid>
         </div>
       </section>
@@ -425,12 +425,13 @@ export default function Page() {
             <span className="delivery-proof-end">PROCESSOS → SISTEMAS → VALIDAÇÃO</span>
           </Reveal>
           <div className="delivery-track">
+            <span className="delivery-progress" aria-hidden="true" />
             {deliveryStages.map((stage, index) => (
-              <Reveal key={stage.number} className="delivery-stage" delay={index * 0.07}>
+              <div key={stage.number} className="delivery-stage">
                 <div className="delivery-stage-heading"><span>{stage.number}</span>{index < deliveryStages.length - 1 ? <ArrowRight size={18} aria-hidden="true" /> : <CheckCircle size={18} weight="fill" aria-hidden="true" />}</div>
                 <h3>{stage.title}</h3>
                 <p>{stage.detail}</p>
-              </Reveal>
+              </div>
             ))}
           </div>
         </div>
@@ -440,18 +441,17 @@ export default function Page() {
         <div className="container">
           <SectionHeading index="04" label="COMPETÊNCIAS" title="Tecnologia é meio. Resolver é o objetivo." description="Minha atuação percorre o problema, a solução e a validação — com entendimento das restrições e da rotina operacional." />
           <SpotlightGrid className="expertise-grid">
-            {capabilities.map(({ number, icon: Icon, title, description, tags }, index) => (
-              <Reveal key={title} delay={index * 0.08}>
+            {capabilities.map(({ number, icon: Icon, title, description, tags }) => (
+              <div key={title}>
                 <Card className="expertise-card" data-spotlight-card>
                   <CardContent>
                     <div className="expertise-top"><span>{number}</span><span className="expertise-icon"><Icon size={25} weight="duotone" /></span></div>
                     <h3>{title}</h3>
                     <p>{description}</p>
                     <div className="expertise-tags">{tags.map((tag) => <span key={tag}>{tag}</span>)}</div>
-                    <div className="expertise-bottom"><span>ATUAÇÃO</span><span className="expertise-rule" /></div>
                   </CardContent>
                 </Card>
-              </Reveal>
+              </div>
             ))}
           </SpotlightGrid>
         </div>
@@ -462,13 +462,13 @@ export default function Page() {
           <SectionHeading index="05" label="JORNADA ACADÊMICA" title="Uma base de gestão. Uma direção em tecnologia." description="Formações complementares que aproximam estratégia, engenharia de software e inteligência artificial aplicada." />
           <div className="education-grid">
             {education.map(({ type, degree, place, detail, Icon }, index) => (
-              <Reveal key={degree} delay={index * 0.08}>
+              <div key={degree}>
                 <div className="education-card">
                   <div className="education-top"><span>0{index + 1} / {type.toUpperCase()}</span><Icon size={24} weight="duotone" /></div>
                   <div><h3>{degree}</h3><strong>{place}</strong><p>{detail}</p></div>
                   <span className="education-bottom">FORMAÇÃO CONTINUADA <span>↗</span></span>
                 </div>
-              </Reveal>
+              </div>
             ))}
           </div>
         </div>

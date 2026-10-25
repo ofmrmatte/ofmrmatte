@@ -38,10 +38,10 @@ export function KineticSectionTitle({ text }: { text: string }) {
     <h2 className="portfolio-section-title" aria-label={text}>
       {text.split(" ").map((word, index) => (
         <motion.span key={index} className="portfolio-kinetic-word"
-          initial={reduced ? false : { opacity: 0, y: 22, filter: "blur(8px)" }}
+          initial={reduced ? false : { opacity: 0, y: 14, filter: "blur(3px)" }}
           whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-          viewport={{ once: true, amount: 0.3, margin: "0px 0px -40px 0px" }}
-          transition={{ duration: 0.58, delay: Math.min(index * 0.05, 0.6), ease: [0.2, 0.75, 0.18, 1] }}>
+          viewport={{ once: true, amount: 0.15, margin: "0px 0px -10px 0px" }}
+          transition={{ duration: 0.48, delay: Math.min(index * 0.035, 0.3), ease: [0.2, 0.75, 0.18, 1] }}>
           {word}{" "}
         </motion.span>
       ))}

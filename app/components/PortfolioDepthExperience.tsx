@@ -22,7 +22,7 @@ export function PortfolioDepthExperience() {
     let pointerX = 0, pointerY = 0, smoothX = 0, smoothY = 0;
     let active = true;
     let reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const camera = { turn: -0.35, travel: 0, zoom: 1, spread: 1, light: 0 };
+    const camera = { turn: -0.35, travel: 0, zoom: 1, spread: 1, light: 0, shift: 0, roll: 0 };
 
     const resize = () => {
       width = window.innerWidth; height = window.innerHeight;
@@ -37,16 +37,20 @@ export function PortfolioDepthExperience() {
       const breadth = ribbon === 0 ? 145 : 98;
       const x = Math.sin(t * 1.15 + phase) * 220 * camera.spread + u * Math.cos(twist) * breadth;
       const y = t * 470 + camera.travel;
-      const z = Math.cos(t * 1.15 + phase) * 200 + u * Math.sin(twist) * breadth;
-      const angle = camera.turn + smoothX * 0.12;
+      const z = Math.cos(t * 1.15 + phase) * 200 + u * Math.sin(twist) * breadth + (ribbon === 0 ? -45 : 245);
+      const angle = camera.turn + smoothX * (ribbon === 0 ? 0.22 : 0.08);
       const rx = x * Math.cos(angle) + z * Math.sin(angle);
       const rz = -x * Math.sin(angle) + z * Math.cos(angle);
       const ry = y * 0.94 - rz * 0.34;
       const depth = y * 0.34 + rz * 0.94;
       const perspective = 1050 / (1050 + depth);
       const scale = Math.min(width / 1350, height / 850) * camera.zoom;
-      return { x: width * (width < 768 ? 0.86 : 0.77) + (rx + smoothX * 24) * perspective * scale,
-        y: height * 0.5 + (ry + smoothY * 20) * perspective * scale, z: depth };
+      const roll = camera.roll;
+      const screenX = rx * Math.cos(roll) - ry * Math.sin(roll);
+      const screenY = rx * Math.sin(roll) + ry * Math.cos(roll);
+      const pointerDepth = ribbon === 0 ? 65 : 20;
+      return { x: width * (width < 768 ? 0.86 : 0.77) + (screenX + smoothX * pointerDepth + camera.shift) * perspective * scale,
+        y: height * 0.5 + (screenY + smoothY * pointerDepth * .65) * perspective * scale, z: depth };
     };
     function draw() {
       if (!ctx) return;
@@ -97,25 +101,57 @@ export function PortfolioDepthExperience() {
     };
     media.add("(prefers-reduced-motion: no-preference)", () => {
       reduced=false;
-      // One master camera timeline prevents competing section transforms.
-      const timeline=gsap.timeline({scrollTrigger:{trigger:".site-shell",start:"top top",end:"bottom bottom",scrub:.65,invalidateOnRefresh:true}});
-      timeline.to(camera,{turn:1.05,travel:200,zoom:1.25,spread:1.3,light:.5,ease:"none",duration:1})
-        .to(camera,{turn:2.45,travel:-170,zoom:.85,spread:1.8,light:1.3,ease:"none",duration:1.5})
-        .to(camera,{turn:4.1,travel:130,zoom:1.12,spread:.85,light:2.4,ease:"none",duration:1.5});
-      gsap.to(canvas,{opacity:.35,ease:"none",scrollTrigger:{trigger:".hero",start:"top top",end:"bottom top",scrub:.6}});
+      // Camera chapters follow real section positions, including responsive reflow.
+      // One timeline owns all camera values; refresh rebuilds the same timeline.
+      const timeline = gsap.timeline();
+      const rebuild = () => {
+        const maximum = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+        const chapters = [
+          { selector: "#sobre", turn:.8, travel:160, zoom:1.2, spread:1.3, light:.5, shift:-65, roll:-.1 },
+          { selector: "#projetos", turn:1.7, travel:-130, zoom:.95, spread:1.65, light:1.1, shift:70, roll:.12 },
+          { selector: "#entregas", turn:2.65, travel:180, zoom:1.15, spread:1.15, light:1.8, shift:-100, roll:-.15 },
+          { selector: "#competencias", turn:3.4, travel:-90, zoom:.95, spread:1.6, light:2.1, shift:60, roll:.08 },
+          { selector: "#formacao", turn:4.25, travel:100, zoom:1.12, spread:1.05, light:2.7, shift:-40, roll:-.1 },
+          { selector: "#contato", turn:5.1, travel:-80, zoom:1.25, spread:1.35, light:3.3, shift:50, roll:.06 }
+        ];
+        timeline.clear();
+        let previousPosition = 0;
+        const initial = { turn:-.35,travel:0,zoom:1,spread:1,light:0,shift:0,roll:0 };
+        chapters.forEach(({selector,...values},index) => {
+          const section=document.querySelector(selector);
+          if(!section)return;
+          const position=Math.min(maximum,Math.max(previousPosition+1,section.getBoundingClientRect().top+window.scrollY-120));
+          const tween={...values,duration:position-previousPosition,ease:"none"};
+          if(index===0)timeline.fromTo(camera,initial,{...tween,immediateRender:false},0);
+          else timeline.to(camera,tween,previousPosition);
+          previousPosition=position;
+        });
+        if(previousPosition<maximum)timeline.to(camera,{turn:5.6,zoom:1.15,duration:maximum-previousPosition,ease:"none"});
+      };
+      rebuild();
+      ScrollTrigger.create({animation:timeline,trigger:".site-shell",start:"top top",end:"bottom bottom",scrub:.65,onRefreshInit:rebuild,invalidateOnRefresh:true});
+      gsap.to(canvas,{opacity:.42,ease:"none",scrollTrigger:{trigger:".hero",start:"top top",end:"bottom top",scrub:.6}});
       gsap.to(".hero-editorial__monogram",{y:-150,rotationY:32,rotationX:12,rotationZ:-8,scale:.78,ease:"none",
         scrollTrigger:{trigger:".hero",start:"top top",end:"bottom top",scrub:.6}});
       gsap.to(".hero-editorial__eyebrow",{y:-55,ease:"none",scrollTrigger:{trigger:".hero",start:"top top",end:"bottom top",scrub:.6}});
       gsap.to(".hero-content",{y:-45,ease:"none",scrollTrigger:{trigger:".hero",start:"top top",end:"bottom top",scrub:.6}});
-      gsap.utils.toArray<HTMLElement>(".project-media").forEach(element=>{
-        gsap.fromTo(element,{y:38},{y:-38,ease:"none",scrollTrigger:{trigger:element.closest("article") || element,start:"top bottom",end:"bottom top",scrub:.6}});
+      // Move images inside clipped frames, never the card or its copy.
+      gsap.utils.toArray<HTMLElement>(".system-preview-real img, .alc-preview > img").forEach(image=>{
+        gsap.fromTo(image,{yPercent:-5,scale:1.13},{yPercent:5,scale:1.13,ease:"none",scrollTrigger:{trigger:image.parentElement,start:"top bottom",end:"bottom top",scrub:.65}});
+      });
+      gsap.fromTo(".delivery-progress",{scaleX:0},{scaleX:1,ease:"none",scrollTrigger:{trigger:".delivery-track",start:"top 85%",end:"bottom 40%",scrub:.5}});
+      gsap.utils.toArray<HTMLElement>(".delivery-stage-heading").forEach(heading=>{
+        gsap.fromTo(heading,{color:"#737d8d"},{color:"#e3e8f0",ease:"none",scrollTrigger:{trigger:heading,start:"top 90%",end:"top 55%",scrub:.4}});
+      });
+      gsap.utils.toArray<HTMLElement>(".expertise-icon, .education-top svg").forEach(icon=>{
+        gsap.fromTo(icon,{scale:.85,opacity:.5},{scale:1,opacity:1,ease:"none",scrollTrigger:{trigger:icon,start:"top 92%",end:"top 67%",scrub:.45}});
       });
       gsap.utils.toArray<HTMLElement>(".about-career-row").forEach(element=>{
         gsap.fromTo(element,{x:38,opacity:.35},{x:0,opacity:1,ease:"none",scrollTrigger:{trigger:element,start:"top 94%",end:"top 66%",scrub:.4}});
       });
-      // The project diagram settles into perspective as its chapter enters.
-      const diagram=document.querySelector<HTMLElement>(".architecture-visual");
-      if(diagram)gsap.fromTo(diagram,{rotateY:-12,scale:.92},{rotateY:0,scale:1,ease:"none",scrollTrigger:{trigger:diagram,start:"top bottom",end:"center center",scrub:.6}});
+      // Keep diagram edges aligned while its core and connectors gain depth.
+      gsap.fromTo(".architecture-core",{scale:.86},{scale:1,ease:"none",scrollTrigger:{trigger:".architecture-visual",start:"top 90%",end:"center 50%",scrub:.6}});
+      gsap.fromTo(".architecture-line",{opacity:.06},{opacity:.45,ease:"none",scrollTrigger:{trigger:".architecture-visual",start:"top 85%",end:"center 50%",scrub:.6}});
       visibility();
       return ()=>cancelAnimationFrame(frame);
     });
@@ -126,7 +162,14 @@ export function PortfolioDepthExperience() {
     document.addEventListener("visibilitychange",visibility);
     const refresh=()=>{if(active)ScrollTrigger.refresh();};
     document.fonts.ready.then(refresh);
-    return ()=>{active=false;media.revert();cancelAnimationFrame(frame);window.removeEventListener("resize",resize);window.removeEventListener("pointermove",track);document.removeEventListener("visibilitychange",visibility);};
+    let refreshFrame = 0;
+    const shell = document.querySelector(".site-shell");
+    const observer = new ResizeObserver(() => {
+      cancelAnimationFrame(refreshFrame);
+      refreshFrame = requestAnimationFrame(refresh);
+    });
+    if (shell) observer.observe(shell);
+    return ()=>{active=false;observer.disconnect();cancelAnimationFrame(refreshFrame);media.revert();cancelAnimationFrame(frame);window.removeEventListener("resize",resize);window.removeEventListener("pointermove",track);document.removeEventListener("visibilitychange",visibility);};
   },[]);
 
   return <div className="metal-scene" aria-hidden="true"><div className="metal-scene__light"/><canvas ref={canvasRef}/><div className="metal-scene__shade"/></div>;
