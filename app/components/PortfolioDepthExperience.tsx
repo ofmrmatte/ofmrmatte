@@ -5,7 +5,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 type Point = { x: number; y: number; z: number };
-type Face = { points: Point[]; shade: number; depth: number };
+type Face = { points: Point[]; shades: number[]; depth: number };
 
 /** Perspective-projected metal surfaces. Camera, twist and lighting follow scroll.
  * One canvas, capped DPR, no React renders per frame, no external assets. */
@@ -52,28 +52,29 @@ export function PortfolioDepthExperience() {
       if (!ctx) return;
       ctx.clearRect(0, 0, width, height);
       const faces: Face[] = [];
-      const steps = width < 768 ? 64 : 100;
-      const lanes = 8;
+      const steps = width < 768 ? 160 : 280;
       for (let ribbon = 0; ribbon < 2; ribbon++) {
         for (let i = 0; i < steps; i++) {
           const t = -1.75 + i / steps * 3.5;
-          for (let j = 0; j < lanes; j++) {
-            const u = -1 + j / lanes * 2;
-            const points = [point(t,u,ribbon),point(t+3.5/steps,u,ribbon),
-              point(t+3.5/steps,u+2/lanes,ribbon),point(t,u+2/lanes,ribbon)];
-            const normal = Math.cos(t * 1.65 + ribbon * 2.25 + camera.turn * 1.45 + camera.light);
-            const specular = Math.pow(Math.max(0, Math.cos(t * 1.65 + ribbon * 2.25 + camera.turn - 0.55 + u * .6)), 18);
-            const shade = Math.min(245, 35 + Math.abs(normal) * 92 + specular * 130 + (j === 0 ? 34 : 0));
-            faces.push({points, shade, depth: points.reduce((sum,p)=>sum+p.z,0)/4});
-          }
+          const points = [point(t,-1,ribbon),point(t+3.5/steps,-1,ribbon),
+            point(t+3.5/steps,1,ribbon),point(t,1,ribbon)];
+          const normal = Math.cos(t * 1.65 + ribbon * 2.25 + camera.turn * 1.45 + camera.light);
+          const shades = [0,.25,.5,.75,1].map(offset=>{
+            const u=offset*2-1;
+            const specular=Math.pow(Math.max(0,Math.cos(t*1.65+ribbon*2.25+camera.turn-.55+u*.6)),18);
+            return Math.min(245,35+Math.abs(normal)*92+specular*130);
+          });
+          faces.push({points,shades,depth:points.reduce((sum,p)=>sum+p.z,0)/4});
         }
       }
       faces.sort((a,b)=>b.depth-a.depth);
-      for (const {points,shade} of faces) {
+      for (const {points,shades} of faces) {
         ctx.beginPath();ctx.moveTo(points[0].x,points[0].y);
         for (let i=1;i<4;i++)ctx.lineTo(points[i].x,points[i].y);
         ctx.closePath();
-        ctx.fillStyle = `rgb(${Math.round(shade*.91)},${Math.round(shade*.95)},${Math.round(shade)})`;
+        const gradient=ctx.createLinearGradient(points[0].x,points[0].y,points[3].x,points[3].y);
+        shades.forEach((shade,index)=>gradient.addColorStop(index/4,`rgb(${Math.round(shade*.91)},${Math.round(shade*.95)},${Math.round(shade)})`));
+        ctx.fillStyle = gradient;
         ctx.fill();
         // Matching thin stroke seals antialias seams without exposing a mesh.
         ctx.strokeStyle=ctx.fillStyle;ctx.lineWidth=.65;ctx.stroke();
@@ -101,6 +102,7 @@ export function PortfolioDepthExperience() {
       timeline.to(camera,{turn:1.05,travel:200,zoom:1.25,spread:1.3,light:.5,ease:"none",duration:1})
         .to(camera,{turn:2.45,travel:-170,zoom:.85,spread:1.8,light:1.3,ease:"none",duration:1.5})
         .to(camera,{turn:4.1,travel:130,zoom:1.12,spread:.85,light:2.4,ease:"none",duration:1.5});
+      gsap.to(canvas,{opacity:.35,ease:"none",scrollTrigger:{trigger:".hero",start:"top top",end:"bottom top",scrub:.6}});
       gsap.to(".hero-editorial__monogram",{y:-150,rotationY:32,rotationX:12,rotationZ:-8,scale:.78,ease:"none",
         scrollTrigger:{trigger:".hero",start:"top top",end:"bottom top",scrub:.6}});
       gsap.to(".hero-editorial__eyebrow",{y:-55,ease:"none",scrollTrigger:{trigger:".hero",start:"top top",end:"bottom top",scrub:.6}});

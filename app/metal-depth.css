@@ -58,3 +58,14 @@ body {background:#08090b;color:#f5f5f7;}
  .hero-editorial__monogram {will-change:auto;transform:none!important;}
  .section-about .about-heading {position:static;}
 }
+
+/* Match the specificity of the earlier editorial theme. */
+.site-shell .hero .hero-actions .btn-primary,
+.site-shell .footer-actions .btn-primary {background:linear-gradient(120deg,#f5f5f7,#b7bdc8);color:#101114;border-color:#e1e4ea;box-shadow:0 8px 32px #0005;}
+.site-shell .hero .hero-actions .btn-secondary {background:#10121780;border-color:#c8cbd140;color:#e4e7ec;}
+.site-shell .hero h1.portfolio-kinetic-title .hero-highlight {background:linear-gradient(120deg,#f5f5f7,#b7bdc8);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent;color:#c8cbd1;}
+
+.site-shell .portfolio-emphasis-title .portfolio-emphasis-line:nth-child(2),
+.site-shell .portfolio-emphasis-title.portfolio-footer-title .portfolio-emphasis-line:nth-child(2),
+.site-shell .about-right > p strong {color:#dce0e7;}
+@media(prefers-reduced-motion:reduce) {.metal-scene canvas {opacity:.35;}}
