@@ -24,7 +24,7 @@ export function PortfolioDepthExperience() {
     let scene: ReturnType<typeof import("../../lib/metal-scene")["createMetalScene"]> | undefined;
     let previousView = "";
     const render = () => {
-      const view=Object.values(camera).map(value=>value.toFixed(4)).join(",")+smoothX.toFixed(4)+smoothY.toFixed(4);
+      const view=[camera.eyeX,camera.eyeY,camera.eyeZ,camera.lookX,camera.lookY,camera.lookZ,camera.roll,camera.light].map(value=>value.toFixed(4)).join(",")+smoothX.toFixed(4)+smoothY.toFixed(4);
       if(view!==previousView){scene?.draw(smoothX,smoothY);previousView=view;}
     };
 

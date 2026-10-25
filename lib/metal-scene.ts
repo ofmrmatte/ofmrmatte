@@ -8,9 +8,8 @@ export type MetalCamera = {
 };
 
 /** A closed, softly bevelled metal strip swept along an authored spatial curve. */
-function sculptedRibbon(points: number[][], breadth: number, twist: number) {
+function sculptedRibbon(points: number[][], breadth: number, twist: number, lengthSegments = 240, radialSegments = 40) {
   const curve = new THREE.CatmullRomCurve3(points.map(p => new THREE.Vector3(...p)), false, "centripetal");
-  const lengthSegments = 240, radialSegments = 40;
   const frames = curve.computeFrenetFrames(lengthSegments, false);
   const positions: number[] = [], indices: number[] = [];
   const side = new THREE.Vector3(), normal = new THREE.Vector3();
@@ -57,7 +56,10 @@ function sculptedRibbon(points: number[][], breadth: number, twist: number) {
 }
 
 export function createMetalScene(canvas: HTMLCanvasElement, controls: MetalCamera) {
-  const renderer = new THREE.WebGLRenderer({canvas,alpha:true,antialias:true,powerPreference:"low-power"});
+  const context=canvas.getContext("webgl2",{alpha:true,antialias:true,powerPreference:"low-power"});
+  if(!context)return createSoftwareMetalScene(canvas,controls);
+  canvas.dataset.renderer="webgl";
+  const renderer = new THREE.WebGLRenderer({canvas,context,alpha:true,antialias:true,powerPreference:"low-power"});
   renderer.setClearColor(0x08090b,0);
   renderer.outputColorSpace=THREE.SRGBColorSpace;
   renderer.toneMapping=THREE.ACESFilmicToneMapping;
@@ -121,4 +123,61 @@ export function createMetalScene(canvas: HTMLCanvasElement, controls: MetalCamer
     canvas.removeEventListener("webglcontextlost",lost);canvas.removeEventListener("webglcontextrestored",restored);
     mainGeometry.dispose();rearGeometry.dispose();silver.dispose();titanium.dispose();environment.dispose();renderer.dispose();renderer.forceContextLoss();
   }};
+}
+
+
+/** The same sculpted geometry, camera and lighting projected without a GPU. */
+function createSoftwareMetalScene(canvas: HTMLCanvasElement, controls: MetalCamera) {
+  const ctx=canvas.getContext("2d");
+  if(!ctx)throw new Error("No graphics context available");
+  canvas.dataset.renderer="software";
+  const steps=88,radial=12;
+  const geometries=[
+    sculptedRibbon([[-1.4,-9,0],[-2.1,-5.8,.8],[.3,-2.8,1.7],[1.35,.1,.25],[-.7,3.15,-.95],[-2,6.2,-.1],[-.8,9,1.1]],1.62,-.25,steps,radial),
+    sculptedRibbon([[1.1,-9,-2.5],[2.8,-5.8,-2],[1,-2.2,-3.1],[.8,1.6,-2.65],[3,5.1,-1.6],[2,9,-2.3]],1.12,1.4,steps,radial)
+  ];
+  const meshes=geometries.map(geometry=>{
+    const position=geometry.getAttribute("position"),normal=geometry.getAttribute("normal");
+    return Array.from({length:(steps+1)*radial},(_,i)=>({p:new THREE.Vector3().fromBufferAttribute(position,i),n:new THREE.Vector3().fromBufferAttribute(normal,i)}));
+  });
+  const camera=new THREE.PerspectiveCamera(37,1,.1,90);
+  let width=1,height=1;
+  const target=new THREE.Vector3(),light=new THREE.Vector3(),view=new THREE.Vector3(),half=new THREE.Vector3(),projected=new THREE.Vector3();
+  const draw=(px=0,py=0)=>{
+    camera.position.set(controls.eyeX+px*.48,controls.eyeY-py*.24,controls.eyeZ);
+    target.set(controls.lookX+px*.06,controls.lookY,controls.lookZ);
+    camera.up.set(0,1,0);camera.lookAt(target);camera.rotateZ(controls.roll);camera.updateMatrixWorld();
+    ctx.clearRect(0,0,width,height);
+    const faces:{p:{x:number;y:number;z:number;shade:number}[];depth:number}[]=[];
+    meshes.forEach((vertices,meshIndex)=>{
+      const points=vertices.map(({p,n})=>{
+        projected.copy(p).project(camera);
+        light.set(-4+controls.light,6,8).sub(p).normalize();view.copy(camera.position).sub(p).normalize();half.copy(light).add(view).normalize();
+        const diffuse=Math.max(0,n.dot(light));
+        const specular=Math.pow(Math.max(0,n.dot(half)),42);
+        const fresnel=Math.pow(1-Math.abs(n.dot(view)),3);
+        const shade=Math.min(248,(35+diffuse*98+specular*120+fresnel*60)*(meshIndex===0?1:.62));
+        return {x:(projected.x*.5+.5)*width,y:(-.5*projected.y+.5)*height,z:projected.z,shade};
+      });
+      for(let i=0;i<steps;i++)for(let j=0;j<radial;j++){
+        const a=i*radial+j,b=(i+1)*radial+j,c=(i+1)*radial+(j+1)%radial,d=i*radial+(j+1)%radial;
+        const p=[points[a],points[b],points[c],points[d]];
+        faces.push({p,depth:p.reduce((sum,item)=>sum+item.z,0)/4});
+      }
+    });
+    faces.sort((a,b)=>b.depth-a.depth);
+    const color=(s:number)=>`rgb(${Math.round(s*.91)},${Math.round(s*.95)},${Math.round(s)})`;
+    for(const {p} of faces){
+      ctx.beginPath();ctx.moveTo(p[0].x,p[0].y);for(let i=1;i<4;i++)ctx.lineTo(p[i].x,p[i].y);ctx.closePath();
+      const gradient=ctx.createLinearGradient(p[0].x,p[0].y,p[3].x,p[3].y);
+      gradient.addColorStop(0,color((p[0].shade+p[1].shade)*.5));gradient.addColorStop(1,color((p[2].shade+p[3].shade)*.5));
+      ctx.fillStyle=gradient;ctx.fill();ctx.strokeStyle=gradient;ctx.lineWidth=.6;ctx.stroke();
+    }
+  };
+  const resize=(w:number,h:number)=>{
+    width=w;height=h;const dpr=Math.min(window.devicePixelRatio||1,1.25);
+    canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);
+    camera.aspect=w/h;camera.setViewOffset(w,h,-w*(w<768?.26:.245),0,w,h);camera.updateProjectionMatrix();draw();
+  };
+  return {draw,resize,dispose:()=>geometries.forEach(geometry=>geometry.dispose())};
 }
