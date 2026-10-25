@@ -22,7 +22,6 @@ body,html { overflow-x:clip; }
 ::selection { color:#140e0b; background:#e9ba87; }
 :focus-visible { outline-color:#e7bc8b; }
 .site-shell { position:relative; z-index:1; background:transparent!important; }
-.site-shell > :not(.reading-progress) { position:relative; }
 .container { width:min(1250px,calc(100% - 4rem)); }
 .section { isolation:isolate; }
 .section::before { content:"";pointer-events:none;position:absolute;inset:0;z-index:-1; }
