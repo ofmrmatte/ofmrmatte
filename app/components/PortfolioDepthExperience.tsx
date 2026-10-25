@@ -117,21 +117,38 @@ export function PortfolioDepthExperience() {
         );
       }
 
-      // A legible horizontal progress trace that crosses the About and Projects
-      // chapters; does not pin the page or hijack native scroll behavior.
-      const trace = document.querySelector<HTMLElement>(".portfolio-signature-track");
-      if (trace) {
-        gsap.to(trace, {
-          x: -310,
-          ease: "none",
-          scrollTrigger: {
-            trigger: ".portfolio-signature",
-            start: "top bottom",
-            end: "bottom top",
-            scrub: 0.75
+      // Real scroll progression for professional history: each role settles
+      // into place as it approaches the reading zone, reversible on scroll up.
+      gsap.utils.toArray<HTMLElement>(".about-career-row").forEach((row) => {
+        gsap.fromTo(row,
+          { x: 52, opacity: 0.24 },
+          {
+            x: 0, opacity: 1, ease: "none",
+            scrollTrigger: {
+              trigger: row,
+              start: "top 94%",
+              end: "top 62%",
+              scrub: 0.55
+            }
           }
-        });
-      }
+        );
+      });
+
+      // The methodology advances as the actual row enters the viewport.
+      gsap.utils.toArray<HTMLElement>(".delivery-stage h3").forEach((heading) => {
+        gsap.fromTo(heading,
+          { y: 21, opacity: 0.38 },
+          {
+            y: 0, opacity: 1, ease: "none",
+            scrollTrigger: {
+              trigger: heading,
+              start: "top 96%",
+              end: "top 63%",
+              scrub: 0.55
+            }
+          }
+        );
+      });
     });
 
     mm.add("(prefers-reduced-motion: reduce)", () => {
