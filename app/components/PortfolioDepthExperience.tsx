@@ -4,95 +4,57 @@ import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-type Point = { x: number; y: number; z: number };
-type Face = { points: Point[]; shades: number[]; depth: number };
+import type { MetalCamera } from "../../lib/metal-scene";
 
-/** Perspective-projected metal surfaces. Camera, twist and lighting follow scroll.
- * One canvas, capped DPR, no React renders per frame, no external assets. */
+/** Studio-lit 3D sculpture with a section-directed camera and a static fallback. */
 export function PortfolioDepthExperience() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    const ctx = canvas?.getContext("2d", { alpha: true });
-    if (!canvas || !ctx) return;
+    if (!canvas) return;
     gsap.registerPlugin(ScrollTrigger);
     const media = gsap.matchMedia();
     let width = 0, height = 0, frame = 0, previous = 0;
     let pointerX = 0, pointerY = 0, smoothX = 0, smoothY = 0;
     let active = true;
     let reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const camera = { turn: -0.35, travel: 0, zoom: 1, spread: 1, light: 0, shift: 0, roll: 0 };
+    const initial: MetalCamera = {eyeX:-1.8,eyeY:1.6,eyeZ:18,lookX:0,lookY:.25,lookZ:0,roll:-.035,light:0};
+    const camera: MetalCamera = {...initial};
+    let scene: ReturnType<typeof import("../../lib/metal-scene")["createMetalScene"]> | undefined;
+    let previousView = "";
+    const render = () => {
+      const view=Object.values(camera).map(value=>value.toFixed(4)).join(",")+smoothX.toFixed(4)+smoothY.toFixed(4);
+      if(view!==previousView){scene?.draw(smoothX,smoothY);previousView=view;}
+    };
 
     const resize = () => {
-      width = window.innerWidth; height = window.innerHeight;
-      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-      canvas.width = Math.round(width * dpr); canvas.height = Math.round(height * dpr);
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      draw();
+      width=window.innerWidth;height=window.innerHeight;
+      scene?.resize(width,height);
+      previousView="";
+      render();
     };
-    const point = (t: number, u: number, ribbon: number): Point => {
-      const phase = ribbon * 2.25;
-      const twist = t * 1.65 + phase + camera.turn * 0.45;
-      const breadth = ribbon === 0 ? 145 : 98;
-      const x = Math.sin(t * 1.15 + phase) * 220 * camera.spread + u * Math.cos(twist) * breadth;
-      const y = t * 470 + camera.travel;
-      const z = Math.cos(t * 1.15 + phase) * 200 + u * Math.sin(twist) * breadth + (ribbon === 0 ? -45 : 245);
-      const angle = camera.turn + smoothX * (ribbon === 0 ? 0.22 : 0.08);
-      const rx = x * Math.cos(angle) + z * Math.sin(angle);
-      const rz = -x * Math.sin(angle) + z * Math.cos(angle);
-      const ry = y * 0.94 - rz * 0.34;
-      const depth = y * 0.34 + rz * 0.94;
-      const perspective = 1050 / (1050 + depth);
-      const scale = Math.min(width / 1350, height / 850) * camera.zoom;
-      const roll = camera.roll;
-      const screenX = rx * Math.cos(roll) - ry * Math.sin(roll);
-      const screenY = rx * Math.sin(roll) + ry * Math.cos(roll);
-      const pointerDepth = ribbon === 0 ? 65 : 20;
-      return { x: width * (width < 768 ? 0.86 : 0.77) + (screenX + smoothX * pointerDepth + camera.shift) * perspective * scale,
-        y: height * 0.5 + (screenY + smoothY * pointerDepth * .65) * perspective * scale, z: depth };
-    };
-    function draw() {
-      if (!ctx) return;
-      ctx.clearRect(0, 0, width, height);
-      const faces: Face[] = [];
-      const steps = width < 768 ? 160 : 280;
-      for (let ribbon = 0; ribbon < 2; ribbon++) {
-        for (let i = 0; i < steps; i++) {
-          const t = -1.75 + i / steps * 3.5;
-          const points = [point(t,-1,ribbon),point(t+3.5/steps,-1,ribbon),
-            point(t+3.5/steps,1,ribbon),point(t,1,ribbon)];
-          const normal = Math.cos(t * 1.65 + ribbon * 2.25 + camera.turn * 1.45 + camera.light);
-          const shades = [0,.25,.5,.75,1].map(offset=>{
-            const u=offset*2-1;
-            const specular=Math.pow(Math.max(0,Math.cos(t*1.65+ribbon*2.25+camera.turn-.55+u*.6)),18);
-            return Math.min(245,35+Math.abs(normal)*92+specular*130);
-          });
-          faces.push({points,shades,depth:points.reduce((sum,p)=>sum+p.z,0)/4});
-        }
+    // Load the renderer separately so the portfolio content is never blocked by 3D.
+    import("../../lib/metal-scene").then(({createMetalScene})=>{
+      if(!active)return;
+      try {
+        scene=createMetalScene(canvas,camera);
+        resize();
+        canvas.dataset.ready="true";
+      } catch {
+        // The CSS sculpture remains visible when WebGL is unavailable.
+        canvas.dataset.ready="false";
       }
-      faces.sort((a,b)=>b.depth-a.depth);
-      for (const {points,shades} of faces) {
-        ctx.beginPath();ctx.moveTo(points[0].x,points[0].y);
-        for (let i=1;i<4;i++)ctx.lineTo(points[i].x,points[i].y);
-        ctx.closePath();
-        const gradient=ctx.createLinearGradient(points[0].x,points[0].y,points[3].x,points[3].y);
-        shades.forEach((shade,index)=>gradient.addColorStop(index/4,`rgb(${Math.round(shade*.91)},${Math.round(shade*.95)},${Math.round(shade)})`));
-        ctx.fillStyle = gradient;
-        ctx.fill();
-        // Matching thin stroke seals antialias seams without exposing a mesh.
-        ctx.strokeStyle=ctx.fillStyle;ctx.lineWidth=.65;ctx.stroke();
-      }
-    }
+    }).catch(()=>{if(active)canvas.dataset.ready="false";});
     const tick = (now: number) => {
       if (now - previous > 1000/40) {
         smoothX += (pointerX-smoothX)*.075; smoothY += (pointerY-smoothY)*.075;
-        draw(); previous=now;
+        render(); previous=now;
       }
       frame=requestAnimationFrame(tick);
     };
     const track = (event: PointerEvent) => {
-      if (event.pointerType !== "mouse") return;
+      if (reduced || event.pointerType !== "mouse") return;
       pointerX = event.clientX / width - .5; pointerY = event.clientY / height - .5;
     };
     const visibility = () => {
@@ -107,30 +69,29 @@ export function PortfolioDepthExperience() {
       const rebuild = () => {
         const maximum = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
         const chapters = [
-          { selector: "#sobre", turn:.8, travel:160, zoom:1.2, spread:1.3, light:.5, shift:-65, roll:-.1 },
-          { selector: "#projetos", turn:1.7, travel:-130, zoom:.95, spread:1.65, light:1.1, shift:70, roll:.12 },
-          { selector: "#entregas", turn:2.65, travel:180, zoom:1.15, spread:1.15, light:1.8, shift:-100, roll:-.15 },
-          { selector: "#competencias", turn:3.4, travel:-90, zoom:.95, spread:1.6, light:2.1, shift:60, roll:.08 },
-          { selector: "#formacao", turn:4.25, travel:100, zoom:1.12, spread:1.05, light:2.7, shift:-40, roll:-.1 },
-          { selector: "#contato", turn:5.1, travel:-80, zoom:1.25, spread:1.35, light:3.3, shift:50, roll:.06 }
+          {selector:"#sobre",eyeX:3.8,eyeY:.5,eyeZ:16,lookX:.3,lookY:1.2,lookZ:0,roll:.025,light:1},
+          {selector:"#projetos",eyeX:5.6,eyeY:-1.1,eyeZ:14.6,lookX:.6,lookY:-.5,lookZ:-.5,roll:-.045,light:2.2},
+          {selector:"#entregas",eyeX:1.3,eyeY:-3,eyeZ:15.7,lookX:0,lookY:-1,lookZ:0,roll:.035,light:1.6},
+          {selector:"#competencias",eyeX:-4.2,eyeY:-.5,eyeZ:17.2,lookX:-.2,lookY:.2,lookZ:0,roll:.015,light:.4},
+          {selector:"#formacao",eyeX:-5.5,eyeY:2.5,eyeZ:15.4,lookX:0,lookY:1.2,lookZ:-.5,roll:-.035,light:-1.2},
+          {selector:"#contato",eyeX:-.8,eyeY:1.7,eyeZ:16.6,lookX:.4,lookY:.2,lookZ:0,roll:.02,light:0}
         ];
         timeline.clear();
         let previousPosition = 0;
-        const initial = { turn:-.35,travel:0,zoom:1,spread:1,light:0,shift:0,roll:0 };
         chapters.forEach(({selector,...values},index) => {
           const section=document.querySelector(selector);
           if(!section)return;
           const position=Math.min(maximum,Math.max(previousPosition+1,section.getBoundingClientRect().top+window.scrollY-120));
-          const tween={...values,duration:position-previousPosition,ease:"none"};
+          const tween={...values,duration:position-previousPosition,ease:"sine.inOut"};
           if(index===0)timeline.fromTo(camera,initial,{...tween,immediateRender:false},0);
           else timeline.to(camera,tween,previousPosition);
           previousPosition=position;
         });
-        if(previousPosition<maximum)timeline.to(camera,{turn:5.6,zoom:1.15,duration:maximum-previousPosition,ease:"none"});
+        if(previousPosition<maximum)timeline.to(camera,{eyeX:1.2,eyeY:1,eyeZ:17.3,duration:maximum-previousPosition,ease:"sine.inOut"});
       };
       rebuild();
       ScrollTrigger.create({animation:timeline,trigger:".site-shell",start:"top top",end:"bottom bottom",scrub:.65,onRefreshInit:rebuild,invalidateOnRefresh:true});
-      gsap.to(canvas,{opacity:.42,ease:"none",scrollTrigger:{trigger:".hero",start:"top top",end:"bottom top",scrub:.6}});
+      gsap.to(".metal-scene__content",{opacity:.42,ease:"none",scrollTrigger:{trigger:".hero",start:"top top",end:"bottom top",scrub:.6}});
       gsap.to(".hero-editorial__monogram",{y:-150,rotationY:32,rotationX:12,rotationZ:-8,scale:.78,ease:"none",
         scrollTrigger:{trigger:".hero",start:"top top",end:"bottom top",scrub:.6}});
       gsap.to(".hero-editorial__eyebrow",{y:-55,ease:"none",scrollTrigger:{trigger:".hero",start:"top top",end:"bottom top",scrub:.6}});
@@ -155,7 +116,7 @@ export function PortfolioDepthExperience() {
       visibility();
       return ()=>cancelAnimationFrame(frame);
     });
-    media.add("(prefers-reduced-motion: reduce)",()=>{reduced=true;cancelAnimationFrame(frame);draw();});
+    media.add("(prefers-reduced-motion: reduce)",()=>{reduced=true;cancelAnimationFrame(frame);Object.assign(camera,initial);render();});
     resize();
     window.addEventListener("resize",resize,{passive:true});
     window.addEventListener("pointermove",track,{passive:true});
@@ -169,8 +130,8 @@ export function PortfolioDepthExperience() {
       refreshFrame = requestAnimationFrame(refresh);
     });
     if (shell) observer.observe(shell);
-    return ()=>{active=false;observer.disconnect();cancelAnimationFrame(refreshFrame);media.revert();cancelAnimationFrame(frame);window.removeEventListener("resize",resize);window.removeEventListener("pointermove",track);document.removeEventListener("visibilitychange",visibility);};
+    return ()=>{active=false;observer.disconnect();cancelAnimationFrame(refreshFrame);media.revert();cancelAnimationFrame(frame);scene?.dispose();window.removeEventListener("resize",resize);window.removeEventListener("pointermove",track);document.removeEventListener("visibilitychange",visibility);};
   },[]);
 
-  return <div className="metal-scene" aria-hidden="true"><div className="metal-scene__light"/><canvas ref={canvasRef}/><div className="metal-scene__shade"/></div>;
+  return <div className="metal-scene" aria-hidden="true"><div className="metal-scene__light"/><div className="metal-scene__content"><div className="metal-scene__fallback"><i/><i/></div><canvas ref={canvasRef}/></div><div className="metal-scene__shade"/></div>;
 }
