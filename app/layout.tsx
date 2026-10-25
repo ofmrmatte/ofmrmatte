@@ -3,6 +3,7 @@ import { Inter, Newsreader } from "next/font/google";
 import "./globals.css";
 import "./aureon-depth.css";
 import "./portfolio-refinements.css";
+import "./minimal-ambient.css";
 import { PortfolioDepthExperience } from "./components/PortfolioDepthExperience";
 
 const inter = Inter({
