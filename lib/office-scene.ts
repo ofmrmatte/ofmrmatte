@@ -105,27 +105,30 @@ function createSoftwareRenderer(canvas: HTMLCanvasElement, root: THREE.Group, mo
   });
   const keyDirection = new THREE.Vector3(.3, .9, .8).normalize(), rimDirection = new THREE.Vector3(-.8, .4, .3).normalize();
   const viewDirection = new THREE.Vector3(), reflected = new THREE.Vector3(), color = new THREE.Color();
-  let w = 1, h = 1, dpr = 1;
-  function texturedTriangle(image: CanvasImageSource, face: Face, points: THREE.Vector3[]) {
-    const source = image as HTMLCanvasElement;
-    const uv = face.vertices.map(vertex => ({ x: vertex.uv.x * source.width, y: (1 - vertex.uv.y) * source.height }));
-    const [a, b, c] = uv, [p, q, r] = points;
-    const det = a.x * (b.y - c.y) + b.x * (c.y - a.y) + c.x * (a.y - b.y);
-    if (Math.abs(det) < .001) return false;
-    const ax = (p.x * (b.y - c.y) + q.x * (c.y - a.y) + r.x * (a.y - b.y)) / det;
-    const bx = (p.x * (c.x - b.x) + q.x * (a.x - c.x) + r.x * (b.x - a.x)) / det;
-    const cx = (p.x * (b.x * c.y - c.x * b.y) + q.x * (c.x * a.y - a.x * c.y) + r.x * (a.x * b.y - b.x * a.y)) / det;
-    const ay = (p.y * (b.y - c.y) + q.y * (c.y - a.y) + r.y * (a.y - b.y)) / det;
-    const by = (p.y * (c.x - b.x) + q.y * (a.x - c.x) + r.y * (b.x - a.x)) / det;
-    const cy = (p.y * (b.x * c.y - c.x * b.y) + q.y * (c.x * a.y - a.x * c.y) + r.y * (a.x * b.y - b.x * a.y)) / det;
-    ctx.save(); ctx.clip(); ctx.transform(ax, ay, bx, by, cx, cy); ctx.drawImage(image, 0, 0); ctx.restore(); return true;
-  }
+  let w = 1, h = 1;
+  let pixels: ImageData, depthBuffer: Float32Array;
+  const textureCache = new Map<THREE.Texture, {version:number; width:number; height:number; data:Uint8ClampedArray}>();
+  const getTexture = (texture: THREE.Texture | null) => {
+    if (!texture) return;
+    const cached=textureCache.get(texture);
+    if(cached?.version===texture.version)return cached;
+    const source=texture.image as HTMLCanvasElement;
+    if(!source?.getContext)return;
+    const context=source.getContext("2d");
+    if(!context)return;
+    const entry={version:texture.version,width:source.width,height:source.height,data:context.getImageData(0,0,source.width,source.height).data};
+    textureCache.set(texture,entry);return entry;
+  };
   return {
-    resize(width: number, height: number) { w = width; h = height; dpr = Math.min(window.devicePixelRatio || 1, 1.15); canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr); },
+    resize(width: number, height: number) {
+      const scale=Math.min(.7,800/width,600/height);
+      w=Math.max(1,Math.round(width*scale));h=Math.max(1,Math.round(height*scale));
+      canvas.width=w;canvas.height=h;pixels=ctx.createImageData(w,h);depthBuffer=new Float32Array(w*h);
+    },
     draw(camera: THREE.PerspectiveCamera) {
       moving.updateMatrixWorld(true);
       const movingFaces: Face[] = []; movingMeshes.forEach(mesh => gather(mesh, movingFaces, mesh.matrixWorld));
-      const projected: { face: Face; points: THREE.Vector3[]; depth: number }[] = [];
+      const projected: { face: Face; points: THREE.Vector3[]; inverseW: number[]; depth: number }[] = [];
       for (const face of [...staticFaces, ...movingFaces]) {
         viewDirection.subVectors(camera.position, face.center);
         if (face.normal.dot(viewDirection) < 0 && face.material.side !== THREE.DoubleSide) continue;
@@ -133,26 +136,54 @@ function createSoftwareRenderer(canvas: HTMLCanvasElement, root: THREE.Group, mo
         if (points.some(point => point.z < -1 || point.z > 1)) continue;
         if (points.every(point => point.x < -1) || points.every(point => point.x > 1) || points.every(point => point.y < -1) || points.every(point => point.y > 1)) continue;
         const depth = (points[0].z + points[1].z + points[2].z) / 3;
+        const inverseW=face.vertices.map(vertex=>-1/vertex.point.clone().applyMatrix4(camera.matrixWorldInverse).z);
         points.forEach(point => { point.x = (point.x + 1) * w / 2; point.y = (1 - point.y) * h / 2; });
-        projected.push({ face, points, depth });
+        projected.push({ face, points, inverseW, depth });
       }
-      projected.sort((a, b) => b.depth - a.depth);
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, w, h);
-      for (const { face, points } of projected) {
-        const [p, q, r] = points; ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.lineTo(r.x, r.y); ctx.closePath();
-        const image = face.material.map?.image as HTMLCanvasElement | undefined;
-        if (image && (image.width >= 768 || image.width === 128) && texturedTriangle(image, face, points)) continue;
-        const intensity = .27 + Math.max(0, face.normal.dot(keyDirection)) * .67 + Math.max(0, face.normal.dot(rimDirection)) * .18;
-        const isBasic = face.material instanceof THREE.MeshBasicMaterial;
-        color.copy(face.material.color).multiplyScalar(isBasic ? 1 : intensity);
-        if (!isBasic && face.material instanceof THREE.MeshStandardMaterial && face.material.metalness > .4) {
-          viewDirection.subVectors(camera.position, face.center).normalize(); reflected.copy(keyDirection).reflect(face.normal).negate();
-          const specular = Math.pow(Math.max(0, reflected.dot(viewDirection)), 24) * .22; color.addScalar(specular);
+      // A real depth buffer prevents walls, floor boards and desktops crossing one another.
+      projected.sort((a, b) => a.depth - b.depth);
+      depthBuffer.fill(Infinity);pixels.data.fill(0);
+      for (const { face, points, inverseW } of projected) {
+        const [p,q,r]=points;
+        const denominator=(q.y-r.y)*(p.x-r.x)+(r.x-q.x)*(p.y-r.y);
+        if(Math.abs(denominator)<.01)continue;
+        const minX=Math.max(0,Math.floor(Math.min(p.x,q.x,r.x))),maxX=Math.min(w-1,Math.ceil(Math.max(p.x,q.x,r.x)));
+        const minY=Math.max(0,Math.floor(Math.min(p.y,q.y,r.y))),maxY=Math.min(h-1,Math.ceil(Math.max(p.y,q.y,r.y)));
+        const intensity=.27+Math.max(0,face.normal.dot(keyDirection))*.67+Math.max(0,face.normal.dot(rimDirection))*.18;
+        const isBasic=face.material instanceof THREE.MeshBasicMaterial;
+        color.copy(face.material.color).multiplyScalar(isBasic?1:intensity);
+        if(!isBasic&&face.material instanceof THREE.MeshStandardMaterial&&face.material.metalness>.4){
+          viewDirection.subVectors(camera.position,face.center).normalize();reflected.copy(keyDirection).reflect(face.normal).negate();
+          color.addScalar(Math.pow(Math.max(0,reflected.dot(viewDirection)),24)*.22);
         }
-        const style = color.getStyle(THREE.SRGBColorSpace); ctx.fillStyle = style; ctx.strokeStyle = style; ctx.lineWidth = .45; ctx.fill(); ctx.stroke();
+        color.convertLinearToSRGB();
+        const red=Math.min(1,color.r),green=Math.min(1,color.g),blue=Math.min(1,color.b);
+        const texture=getTexture(face.material.map),map=face.material.map;
+        const uv=face.vertices.map((vertex,i)=>({u:vertex.uv.x*inverseW[i],v:vertex.uv.y*inverseW[i]}));
+        for(let y=minY;y<=maxY;y++)for(let x=minX;x<=maxX;x++){
+          const a=((q.y-r.y)*(x+.5-r.x)+(r.x-q.x)*(y+.5-r.y))/denominator;
+          const b=((r.y-p.y)*(x+.5-r.x)+(p.x-r.x)*(y+.5-r.y))/denominator;
+          const c=1-a-b;
+          if(a<-.0001||b<-.0001||c<-.0001)continue;
+          const depth=a*p.z+b*q.z+c*r.z,index=y*w+x;
+          if(depth>=depthBuffer[index])continue;
+          depthBuffer[index]=depth;
+          const offset=index*4;
+          if(texture&&map){
+            const divisor=a*inverseW[0]+b*inverseW[1]+c*inverseW[2];
+            let u=(a*uv[0].u+b*uv[1].u+c*uv[2].u)/divisor*map.repeat.x+map.offset.x;
+            let v=(a*uv[0].v+b*uv[1].v+c*uv[2].v)/divisor*map.repeat.y+map.offset.y;
+            u=map.wrapS===THREE.RepeatWrapping?u-Math.floor(u):Math.min(1,Math.max(0,u));
+            v=map.wrapT===THREE.RepeatWrapping?v-Math.floor(v):Math.min(1,Math.max(0,v));
+            const tx=Math.min(texture.width-1,Math.floor(u*texture.width)),ty=Math.min(texture.height-1,Math.floor((1-v)*texture.height));
+            const source=(ty*texture.width+tx)*4;
+            pixels.data[offset]=texture.data[source]*red;pixels.data[offset+1]=texture.data[source+1]*green;pixels.data[offset+2]=texture.data[source+2]*blue;
+          }else{pixels.data[offset]=red*255;pixels.data[offset+1]=green*255;pixels.data[offset+2]=blue*255;}
+          pixels.data[offset+3]=255;
+        }
       }
-      canvas.dataset.faces = String(projected.length);
+      ctx.putImageData(pixels,0,0);canvas.dataset.faces=String(projected.length);
     },
-    dispose() { staticFaces.length = 0; movingMeshes.length = 0; },
+    dispose() { staticFaces.length=0;movingMeshes.length=0;textureCache.clear(); },
   };
 }

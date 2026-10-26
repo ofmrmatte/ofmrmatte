@@ -29,7 +29,7 @@ const SOURCE = [
 export function createStudioScreen(kind: "code" | "preview" | "terminal"): StudioScreen {
   const canvas = document.createElement("canvas");
   canvas.width = 1024; canvas.height = 640;
-  const ctx = canvas.getContext("2d")!;
+  const ctx = canvas.getContext("2d", {willReadFrequently:true})!;
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
   texture.minFilter = THREE.LinearFilter;
