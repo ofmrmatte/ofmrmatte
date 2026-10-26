@@ -260,15 +260,14 @@ export default function Page() {
 
           <div className="hero-editorial" aria-hidden="true">
             <div className="hero-editorial__eyebrow">
-              <span>PORTFÓLIO PESSOAL</span>
-              <span>2026 / 01</span>
+              <span>MF / ESTÚDIO DIGITAL</span>
+              <span>2026</span>
             </div>
-            <div className="hero-editorial__light-veil" />
-            <div className="hero-editorial__monogram"><Image src="/brand/mf-silver.svg" alt="" width={550} height={500} priority /></div>
+            <div className="hero-editorial__monogram"><Image src="/brand/mf-silver.svg" alt="" width={88} height={80} priority /></div>
             <div className="hero-editorial__line" />
             <div className="hero-editorial__foot">
-              <span>GESTÃO &amp; SOFTWARE</span>
-              <span>PROCESSOS · AUTOMAÇÃO · IA</span>
+              <span>DO CÓDIGO À SOLUÇÃO</span>
+              <span>EXPLORE COM A ROLAGEM ↓</span>
             </div>
           </div>
         </div>
@@ -501,7 +500,7 @@ export default function Page() {
               <a href="https://github.com/ofmrmatte" target="_blank" rel="noopener noreferrer" aria-label="GitHub"><GithubLogo size={20} /></a>
               <a href="mailto:matheus_frafou@outlook.com" aria-label="Enviar e-mail"><EnvelopeSimple size={20} /></a>
             </div>
-            <small>© 2026 · Desenvolvido com foco em experiência e clareza.</small>
+            <small>© 2026 · Matheus Ferreira Folgado. Todos os direitos reservados.</small>
           </div>
         </div>
       </footer>

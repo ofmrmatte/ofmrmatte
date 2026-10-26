@@ -4,9 +4,9 @@ import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-import type { MetalCamera } from "../../lib/metal-scene";
+import type { OfficeCamera } from "../../lib/office-scene";
 
-/** Studio-lit 3D sculpture with a section-directed camera and a static fallback. */
+/** Scroll-directed office with animated screen textures and reduced-motion support. */
 export function PortfolioDepthExperience() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -18,36 +18,42 @@ export function PortfolioDepthExperience() {
     let width = 0, height = 0, frame = 0, previous = 0;
     let pointerX = 0, pointerY = 0, smoothX = 0, smoothY = 0;
     let active = true;
+    let inViewport = true;
     let reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const initial: MetalCamera = {eyeX:1.2,eyeY:.8,eyeZ:18.5,lookX:0,lookY:0,lookZ:0,roll:0,light:0,spin:.28};
-    const camera: MetalCamera = {...initial};
-    let scene: ReturnType<typeof import("../../lib/metal-scene")["createMetalScene"]> | undefined;
-    let previousView = "";
-    const render = () => {
-      const view=[camera.eyeX,camera.eyeY,camera.eyeZ,camera.lookX,camera.lookY,camera.lookZ,camera.roll,camera.light,camera.spin].map(value=>value.toFixed(4)).join(",")+smoothX.toFixed(4)+smoothY.toFixed(4);
-      if(view!==previousView){scene?.draw(smoothX,smoothY);previousView=view;}
-    };
+    const initial: OfficeCamera = {eyeX:7.4,eyeY:5.4,eyeZ:10.8,lookX:0,lookY:1.8,lookZ:-.5,chapter:0};
+    const camera: OfficeCamera = {...initial};
+    let scene: ReturnType<typeof import("../../lib/office-scene")["createOfficeScene"]> | undefined;
+    let elapsed = 0;
+    const render = () => scene?.draw(elapsed,smoothX,smoothY,reduced);
 
     const resize = () => {
       width=window.innerWidth;height=window.innerHeight;
+      const stage=document.querySelector(".hero-editorial");
+      const wrapper=canvas.closest<HTMLElement>(".office-scene");
+      if(width<=900 && stage && wrapper){
+        const bounds=stage.getBoundingClientRect();
+        height=bounds.height;
+        wrapper.style.setProperty("--office-top",`${bounds.top+window.scrollY}px`);
+        wrapper.style.setProperty("--office-height",`${height}px`);
+      }
       scene?.resize(width,height);
-      previousView="";
       render();
     };
     // Load the renderer separately so the portfolio content is never blocked by 3D.
-    import("../../lib/metal-scene").then(({createMetalScene})=>{
+    import("../../lib/office-scene").then(({createOfficeScene})=>{
       if(!active)return;
       try {
-        scene=createMetalScene(canvas,camera);
+        scene=createOfficeScene(canvas,camera);
         resize();
         canvas.dataset.ready="true";
       } catch {
-        // The CSS sculpture remains visible when WebGL is unavailable.
+        // Keep the page usable if a renderer cannot be initialized.
         canvas.dataset.ready="false";
       }
     }).catch(()=>{if(active)canvas.dataset.ready="false";});
     const tick = (now: number) => {
-      if (now - previous > 1000/40) {
+      if (now - previous > 1000/(scene?.fps ?? 30)) {
+        elapsed += previous ? Math.min((now-previous)/1000,.2) : 0;
         smoothX += (pointerX-smoothX)*.075; smoothY += (pointerY-smoothY)*.075;
         render(); previous=now;
       }
@@ -59,7 +65,7 @@ export function PortfolioDepthExperience() {
     };
     const visibility = () => {
       cancelAnimationFrame(frame);
-      if (!document.hidden && !reduced) frame=requestAnimationFrame(tick);
+      if (!document.hidden && !reduced && inViewport) {previous=0;frame=requestAnimationFrame(tick);}
     };
     media.add("(prefers-reduced-motion: no-preference)", () => {
       reduced=false;
@@ -69,12 +75,12 @@ export function PortfolioDepthExperience() {
       const rebuild = () => {
         const maximum = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
         const chapters = [
-          {selector:"#sobre",eyeX:1.2,eyeY:.5,eyeZ:18,lookX:0,lookY:.2,lookZ:0,roll:0,light:.3,spin:Math.PI*.65},
-          {selector:"#projetos",eyeX:1.2,eyeY:.2,eyeZ:17.8,lookX:0,lookY:0,lookZ:0,roll:0,light:.6,spin:Math.PI*1.4},
-          {selector:"#entregas",eyeX:1.2,eyeY:-.4,eyeZ:18.2,lookX:0,lookY:-.2,lookZ:0,roll:0,light:.2,spin:Math.PI*2.1},
-          {selector:"#competencias",eyeX:1.2,eyeY:.2,eyeZ:18.4,lookX:0,lookY:0,lookZ:0,roll:0,light:-.3,spin:Math.PI*2.8},
-          {selector:"#formacao",eyeX:1.2,eyeY:.6,eyeZ:18,lookX:0,lookY:.1,lookZ:0,roll:0,light:0,spin:Math.PI*3.45},
-          {selector:"#contato",eyeX:1.2,eyeY:.8,eyeZ:18.5,lookX:0,lookY:0,lookZ:0,roll:0,light:.2,spin:Math.PI*4.1}
+          {selector:"#sobre",eyeX:5.5,eyeY:4.4,eyeZ:9.5,lookX:0,lookY:1.85,lookZ:-.35,chapter:1},
+          {selector:"#projetos",eyeX:2.2,eyeY:3.6,eyeZ:8.1,lookX:.1,lookY:2,lookZ:-.45,chapter:2},
+          {selector:"#entregas",eyeX:-2.3,eyeY:3.8,eyeZ:9.4,lookX:0,lookY:1.9,lookZ:-.55,chapter:3},
+          {selector:"#competencias",eyeX:-4.2,eyeY:4.4,eyeZ:10.2,lookX:0,lookY:1.8,lookZ:-.6,chapter:4},
+          {selector:"#formacao",eyeX:1.2,eyeY:5.6,eyeZ:10.2,lookX:0,lookY:1.65,lookZ:-.5,chapter:5},
+          {selector:"#contato",eyeX:6.6,eyeY:5,eyeZ:10.6,lookX:0,lookY:1.8,lookZ:-.5,chapter:6}
         ];
         timeline.clear();
         let previousPosition = 0;
@@ -87,15 +93,11 @@ export function PortfolioDepthExperience() {
           else timeline.to(camera,tween,previousPosition);
           previousPosition=position;
         });
-        if(previousPosition<maximum)timeline.to(camera,{spin:Math.PI*4.5,duration:maximum-previousPosition,ease:"none"});
+        if(previousPosition<maximum)timeline.to(camera,{chapter:7,duration:maximum-previousPosition,ease:"none"});
       };
       rebuild();
       ScrollTrigger.create({animation:timeline,trigger:".site-shell",start:"top top",end:"bottom bottom",scrub:.65,onRefreshInit:rebuild,invalidateOnRefresh:true});
-      gsap.to(".metal-scene__content",{opacity:.42,ease:"none",scrollTrigger:{trigger:".hero",start:"top top",end:"bottom top",scrub:.6}});
-      gsap.to(".hero-editorial__monogram",{y:-150,rotationY:32,rotationX:12,rotationZ:-8,scale:.78,ease:"none",
-        scrollTrigger:{trigger:".hero",start:"top top",end:"bottom top",scrub:.6}});
-      gsap.to(".hero-editorial__eyebrow",{y:-55,ease:"none",scrollTrigger:{trigger:".hero",start:"top top",end:"bottom top",scrub:.6}});
-      gsap.to(".hero-content",{y:-45,ease:"none",scrollTrigger:{trigger:".hero",start:"top top",end:"bottom top",scrub:.6}});
+      gsap.to(".office-scene__content",{opacity:.2,ease:"none",scrollTrigger:{trigger:".hero",start:"top top",end:"bottom top",scrub:.6}});
       // Move images inside clipped frames, never the card or its copy.
       gsap.utils.toArray<HTMLElement>(".system-preview-real img, .alc-preview > img").forEach(image=>{
         gsap.fromTo(image,{yPercent:-5,scale:1.13},{yPercent:5,scale:1.13,ease:"none",scrollTrigger:{trigger:image.parentElement,start:"top bottom",end:"bottom top",scrub:.65}});
@@ -106,9 +108,6 @@ export function PortfolioDepthExperience() {
       });
       gsap.utils.toArray<HTMLElement>(".expertise-icon, .education-top svg").forEach(icon=>{
         gsap.fromTo(icon,{scale:.85,opacity:.5},{scale:1,opacity:1,ease:"none",scrollTrigger:{trigger:icon,start:"top 92%",end:"top 67%",scrub:.45}});
-      });
-      gsap.utils.toArray<HTMLElement>(".about-career-row").forEach(element=>{
-        gsap.fromTo(element,{x:38,opacity:.35},{x:0,opacity:1,ease:"none",scrollTrigger:{trigger:element,start:"top 94%",end:"top 66%",scrub:.4}});
       });
       // Keep diagram edges aligned while its core and connectors gain depth.
       gsap.fromTo(".architecture-core",{scale:.86},{scale:1,ease:"none",scrollTrigger:{trigger:".architecture-visual",start:"top 90%",end:"center 50%",scrub:.6}});
@@ -121,7 +120,7 @@ export function PortfolioDepthExperience() {
     window.addEventListener("resize",resize,{passive:true});
     window.addEventListener("pointermove",track,{passive:true});
     document.addEventListener("visibilitychange",visibility);
-    const refresh=()=>{if(active)ScrollTrigger.refresh();};
+    const refresh=()=>{if(active){resize();ScrollTrigger.refresh();}};
     document.fonts.ready.then(refresh);
     let refreshFrame = 0;
     const shell = document.querySelector(".site-shell");
@@ -130,8 +129,10 @@ export function PortfolioDepthExperience() {
       refreshFrame = requestAnimationFrame(refresh);
     });
     if (shell) observer.observe(shell);
-    return ()=>{active=false;observer.disconnect();cancelAnimationFrame(refreshFrame);media.revert();cancelAnimationFrame(frame);scene?.dispose();window.removeEventListener("resize",resize);window.removeEventListener("pointermove",track);document.removeEventListener("visibilitychange",visibility);};
+    const intersection=new IntersectionObserver(([entry])=>{inViewport=entry.isIntersecting;visibility();});
+    intersection.observe(canvas);
+    return ()=>{active=false;observer.disconnect();intersection.disconnect();cancelAnimationFrame(refreshFrame);media.revert();cancelAnimationFrame(frame);scene?.dispose();window.removeEventListener("resize",resize);window.removeEventListener("pointermove",track);document.removeEventListener("visibilitychange",visibility);};
   },[]);
 
-  return <div className="metal-scene" aria-hidden="true"><div className="metal-scene__light"/><div className="metal-scene__content"><div className="metal-scene__fallback"><i/><i/></div><canvas ref={canvasRef}/></div><div className="metal-scene__shade"/></div>;
+  return <div className="office-scene" aria-hidden="true"><div className="office-scene__light"/><div className="office-scene__content"><canvas ref={canvasRef}/></div><div className="office-scene__shade"/></div>;
 }

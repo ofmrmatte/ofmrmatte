@@ -5,6 +5,7 @@ import "./aureon-depth.css";
 import "./portfolio-refinements.css";
 import "./minimal-ambient.css";
 import "./metal-depth.css";
+import "./office-studio.css";
 import { PortfolioDepthExperience } from "./components/PortfolioDepthExperience";
 
 const inter = Inter({
