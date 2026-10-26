@@ -500,7 +500,7 @@ export default function Page() {
               <a href="https://github.com/ofmrmatte" target="_blank" rel="noopener noreferrer" aria-label="GitHub"><GithubLogo size={20} /></a>
               <a href="mailto:matheus_frafou@outlook.com" aria-label="Enviar e-mail"><EnvelopeSimple size={20} /></a>
             </div>
-            <small>© 2026 · Matheus Ferreira Folgado. Todos os direitos reservados.</small>
+            <small>© 2026 · Matheus Ferreira Folgado. Todos os direitos reservados. <a className="office-asset-credit" href="/office/ASSET_CREDITS.md" target="_blank" rel="noreferrer">Créditos do cenário 3D ↗</a></small>
           </div>
         </div>
       </footer>

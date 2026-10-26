@@ -48,17 +48,19 @@ Portal institucional multipágina de logística.
 
 ## Experiência visual do portfólio
 
-A direção visual do portfólio é editorial, em grafite e bronze, com **luz volumétrica, fitas de luminosidade e transições perceptíveis ligadas à rolagem**. Não usa grades, constelações ou órbitas decorativas, e não publica fotografias pessoais enquanto o brand kit definitivo não estiver pronto.
+A direção visual do portfólio é editorial, em grafite e prata, com um escritório 3D como fundo e conteúdo estável acima da cena. O projeto fornecido em `archviz-dev-office.zip` está versionado em `integrations/office-background/`, com sua versão compilada em `public/office/`.
 
-- **GSAP ScrollTrigger:** scrub de verdade, reversível, ligado à rolagem do usuário e organizado por capítulos: hero, sobre, projetos e seções finais. Anima iluminação, perspectiva e o monograma provisório, sem depender de animação de fundo em looping.
+- **GSAP ScrollTrigger:** mantém as transições do conteúdo e ajusta a intensidade do fundo conforme a rolagem; a câmera da cena faz um movimento discreto independente.
 - **GSAP nos conteúdos:** evolução do histórico profissional e da metodologia conforme cada elemento atravessa a viewport; animação de perspectiva da visualização ARCHI.
 - **Motion for React:** preserva o reveal tipográfico dos títulos e a barra de progresso de leitura.
-- **Cenário visual:** SVG com caminhos luminosos e gradientes de cobre, volumes atmosféricos difusos e textura leve; sem WebGL e sem downloads visuais adicionais.
+- **Cenário visual:** Three.js / React Three Fiber em um iframe local, isolando o React 18 da cena do React 19 do site. Texturas legíveis, chuva leve, até 30 fps no desktop e 24 no celular, carregamento adiado e pausa em abas inativas.
 - **Acessibilidade:** respeita `prefers-reduced-motion` e preserva a leitura com conteúdo sem animação obrigatória.
-- **Identidade provisória:** monograma tipográfico `MF`; nenhuma fotografia pessoal é exibida, aguardando o brand kit.
+- **Identidade:** monograma `MF` do brand kit local, preservado com os demais conteúdos do site.
 - **Publicação:** Railway, serviço `ofmrmatte`, branch `main`.
 
 Os trabalhos independentes em destaque continuam sendo ARCHI, MLDDS e o site institucional da ALC. Prevenção de Perdas e Atendimento são apresentados dentro do ARCHI. Não há alegações de resultados quantitativos não auditados.
+
+Para atualizar a cena, execute `npm run build:office`, versione o código e a saída juntos e rode `npm run lint` e `npm run build`. O Railway continua construindo somente o aplicativo Next na raiz. Detalhes em [integrations/office-background/INTEGRATION.md](integrations/office-background/INTEGRATION.md). Os créditos dos assets ficam acessíveis pelo rodapé, em `/office/ASSET_CREDITS.md`.
 
 ## Como trabalho nos projetos
 
