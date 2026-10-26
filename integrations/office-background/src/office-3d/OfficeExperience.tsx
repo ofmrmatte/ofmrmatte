@@ -81,7 +81,7 @@ export function OfficeExperience({ debugHUD = false, externalScrollProgress, mod
   const updateProgress = (value: number, velocity = 0) => {
     const progress = clamp(value); scrollState.current.progress = progress; scrollState.current.velocity = velocity;
     const scene = STAGE_PROGRESS.reduce<number>((a, p, i) => Math.abs(p - progress) < Math.abs(STAGE_PROGRESS[a] - progress) ? i : a, 0);
-    setHud(previous => Math.round(previous.progress * 100) === Math.round(progress * 100) && previous.scene === scene ? previous : { progress, scene });
+    if (!background || debugHUD) setHud(previous => Math.round(previous.progress * 100) === Math.round(progress * 100) && previous.scene === scene ? previous : { progress, scene });
   };
   useEffect(() => { if (external) updateProgress(externalScrollProgress!); }, [externalScrollProgress]);
   useEffect(() => {

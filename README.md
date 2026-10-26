@@ -50,13 +50,15 @@ Portal institucional multipágina de logística.
 
 A direção visual do portfólio é editorial, em grafite e prata, com um escritório 3D como fundo e conteúdo estável acima da cena. O projeto fornecido em `archviz-dev-office.zip` está versionado em `integrations/office-background/`, com sua versão compilada em `public/office/`.
 
-- **GSAP ScrollTrigger:** mantém as transições do conteúdo e ajusta a intensidade do fundo conforme a rolagem; a câmera da cena faz um movimento discreto independente.
+- **GSAP ScrollTrigger:** uma timeline mantém a câmera estática até metade da página, aproxima fisicamente a estação na segunda metade e retorna ao enquadramento centralizado na seção final. O percurso é reversível com o scroll e não usa órbita automática nem zoom por CSS.
 - **GSAP nos conteúdos:** evolução do histórico profissional e da metodologia conforme cada elemento atravessa a viewport; animação de perspectiva da visualização ARCHI.
 - **Motion for React:** preserva o reveal tipográfico dos títulos e a barra de progresso de leitura.
 - **Cenário visual:** Three.js / React Three Fiber em um iframe local, isolando o React 18 da cena do React 19 do site. Texturas legíveis, chuva leve, até 30 fps no desktop e 24 no celular, carregamento adiado e pausa em abas inativas.
 - **Acessibilidade:** respeita `prefers-reduced-motion` e preserva a leitura com conteúdo sem animação obrigatória.
 - **Identidade:** monograma `MF` do brand kit local, preservado com os demais conteúdos do site.
 - **Publicação:** Railway, serviço `ofmrmatte`, branch `main`.
+
+A logo principal do Hero mantém o tamanho original de 440 px no desktop, 290 px no tablet e 230 px no celular, preservando a proporção e sem animação de subida. Após o contato, `#imersao` deixa a aproximação da estação visível sem cartões sobre os monitores. A seção `#escritorio` oferece 160svh para o encerramento: câmera estabilizada, escritório em tela cheia, cabeçalho oculto e uma assinatura institucional discreta.
 
 Os trabalhos independentes em destaque continuam sendo ARCHI, MLDDS e o site institucional da ALC. Prevenção de Perdas e Atendimento são apresentados dentro do ARCHI. Não há alegações de resultados quantitativos não auditados.
 

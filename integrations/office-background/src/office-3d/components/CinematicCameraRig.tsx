@@ -12,20 +12,23 @@ export function CinematicCameraRig({ scrollState, profile, screenEngine, backgro
   const path = useMemo(() => createCameraPath(profile), [profile]);
   const desired = useMemo(() => new THREE.Vector3(), []), target = useMemo(() => new THREE.Vector3(), []);
   const look = useMemo(() => new THREE.Vector3(...path.waypoints[0].target), [path]);
+  const rotationMatrix = useMemo(() => new THREE.Matrix4(), []), rotation = useMemo(() => new THREE.Quaternion(), []);
   const first = useRef(true), elapsed = useRef(0), frames = useRef(0), lastReport = useRef(0);
   const boundsCache = useRef({ geometries: -1, value: { overlaps: [], objects: [] } as ReturnType<typeof validateSceneBounds> });
   useFrame((_, delta) => {
     const progress = THREE.MathUtils.clamp(scrollState.current.progress, 0, 1);
     scrollState.current.activeSceneIndex = STAGE_PROGRESS.reduce<number>((best, p, i) => Math.abs(p - progress) < Math.abs(STAGE_PROGRESS[best] - progress) ? i : best, 0);
-    const fov = sampleCamera(path, scrollState.current.reducedMotion && !background ? 0 : progress, desired, target);
-    if (background && !scrollState.current.reducedMotion) {
-      const time = screenEngine.coordinator.elapsed;
-      desired.x += Math.sin(time * .045) * .035;
-      desired.y += Math.sin(time * .031) * .015;
-      target.x += Math.sin(time * .035) * .012;
-    }
-    const damp = first.current || scrollState.current.reducedMotion ? 1 : 1 - Math.exp(-(background ? 2.2 : 5) * Math.min(delta, .1));
-    first.current = false; camera.position.lerp(desired, damp); look.lerp(target, damp); camera.lookAt(look);
+    // Reduced motion uses two still compositions, with a cut at the finale.
+    const cameraProgress = scrollState.current.reducedMotion ? (background && progress >= .9999 ? 1 : 0) : progress;
+    const sampledFov = sampleCamera(path, cameraProgress, desired, target);
+    const fov = background ? path.waypoints[0].fov : sampledFov;
+    const damp = first.current || scrollState.current.reducedMotion ? 1 : 1 - Math.exp(-5 * Math.min(delta, .1));
+    first.current = false; camera.position.lerp(desired, damp); look.lerp(target, damp);
+    if (camera.position.distanceToSquared(desired) < 1e-10) camera.position.copy(desired);
+    if (look.distanceToSquared(target) < 1e-10) look.copy(target);
+    rotation.setFromRotationMatrix(rotationMatrix.lookAt(camera.position, look, camera.up));
+    camera.quaternion.slerp(rotation, damp);
+    if (camera.quaternion.angleTo(rotation) < .00001) camera.quaternion.copy(rotation);
     if (camera instanceof THREE.PerspectiveCamera) {
       camera.fov = THREE.MathUtils.lerp(camera.fov, fov, damp); camera.updateProjectionMatrix();
     }

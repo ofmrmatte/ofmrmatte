@@ -8,8 +8,10 @@ O portfólio usa Next.js 16 e React 19. A cena usa React 18 / React Three Fiber 
 
 - A entrada espera um período ocioso do navegador (até 1,2 s) para preservar a primeira renderização do conteúdo.
 - O iframe é inerte, oculto para tecnologias assistivas e não captura cliques ou rolagem.
-- Mensagens de pausa aceitam somente o pai e a mesma origem. O pai retransmite visibilidade; o filho também mantém sua pausa e preferência de movimento reduzido.
-- A câmera permanece discreta; o scroll do site controla apenas a intensidade visual do fundo.
+- Mensagens de pausa e progresso aceitam somente o pai e a mesma origem. O pai retransmite visibilidade e `office:scroll`, com valores limitados de 0 a 1; o filho mantém sua pausa e preferência de movimento reduzido.
+- Uma única timeline `office-cinematic-scroll` mantém a câmera em 0 até 50% do documento e percorre os cinco pontos até a entrada de `#escritorio`. O FOV permanece constante no fundo: a aproximação é um deslocamento físico. A interpolação usa curvas de posição/alvo e quaternions, sem deriva automática.
+- Após o contato, `#imersao` reserva um trecho transparente de navegação para a aproximação ficar visível sem cartões sobre os monitores. A seção final transparente ocupa 160svh e estabiliza o enquadramento em 1. Sombreado, cabeçalho e barra de leitura desaparecem antes da imersão; só uma assinatura discreta aparece no fim.
+- O scroll inverso refaz a trajetória. ResizeObserver, refresh do ScrollTrigger e resolução da viewport recalculam a duração e os enquadramentos. Com movimento reduzido há duas composições estáticas e um corte para a composição final, sem aproximação animada.
 - A cena continua a 30 fps no máximo no desktop e 24 no mobile, sem compositor pesado; esses valores são limites, não garantias de desempenho.
 - Os créditos da planta estão em `/office/ASSET_CREDITS.md`, vinculados no rodapé do site. O crédito interno fica oculto apenas no modo incorporado.
 

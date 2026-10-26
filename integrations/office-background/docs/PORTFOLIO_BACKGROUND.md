@@ -36,7 +36,7 @@ export function PortfolioHero() {
 /* Reserve espaço no canto inferior direito para o pequeno link de créditos. */
 ```
 
-Para acompanhar a página inteira, passe `style={{ position: 'fixed', inset: 0 }}` e posicione o conteúdo acima do fundo. Para sincronizar com seu próprio scroll, passe `externalScrollProgress={progresso}` entre 0 e 1. Sem essa prop, a câmera mantém o enquadramento geral com uma deriva de poucos centímetros. `paused={true}` suspende o loop; `overlayOpacity={0}` remove o sombreado. O fundo não captura mouse nem cria listener de scroll.
+Para acompanhar a página inteira, passe `style={{ position: 'fixed', inset: 0 }}` e posicione o conteúdo acima do fundo. Para sincronizar com seu próprio scroll, passe `externalScrollProgress={progresso}` entre 0 e 1. Sem essa prop, a câmera mantém o enquadramento geral estático. `paused={true}` suspende o loop; `overlayOpacity={0}` remove o sombreado. O fundo não captura mouse nem cria listener de scroll. No portfólio, o pai transmite esse progresso por `office:scroll` e oferece a seção final `#escritorio`.
 
 ## Custo de renderização
 

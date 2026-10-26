@@ -504,6 +504,19 @@ export default function Page() {
           </div>
         </div>
       </footer>
+      <section id="imersao" className="office-camera-passage" aria-labelledby="office-passage-title">
+        <h2 id="office-passage-title" className="sr-only">Entre no escritório e conheça a estação de trabalho.</h2>
+      </section>
+      <section id="escritorio" className="office-finale" aria-labelledby="office-finale-title">
+        <h2 id="office-finale-title" className="sr-only">O escritório, por inteiro.</h2>
+        <div className="office-finale-signature">
+          <span>MF / ESTÚDIO DIGITAL <span className="office-finale-name">· MATHEUS FERREIRA FOLGADO</span></span>
+          <div>
+            <a href="/office/ASSET_CREDITS.md" target="_blank" rel="noreferrer">CRÉDITOS 3D ↗</a>
+            <a href="#top">VOLTAR AO INÍCIO ↑</a>
+          </div>
+        </div>
+      </section>
     </main>
   );
 }
