@@ -19,12 +19,12 @@ export function PortfolioDepthExperience() {
     let pointerX = 0, pointerY = 0, smoothX = 0, smoothY = 0;
     let active = true;
     let reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const initial: MetalCamera = {eyeX:-1.8,eyeY:1.6,eyeZ:18,lookX:0,lookY:.25,lookZ:0,roll:-.035,light:0};
+    const initial: MetalCamera = {eyeX:1.2,eyeY:.8,eyeZ:18.5,lookX:0,lookY:0,lookZ:0,roll:0,light:0,spin:.28};
     const camera: MetalCamera = {...initial};
     let scene: ReturnType<typeof import("../../lib/metal-scene")["createMetalScene"]> | undefined;
     let previousView = "";
     const render = () => {
-      const view=[camera.eyeX,camera.eyeY,camera.eyeZ,camera.lookX,camera.lookY,camera.lookZ,camera.roll,camera.light].map(value=>value.toFixed(4)).join(",")+smoothX.toFixed(4)+smoothY.toFixed(4);
+      const view=[camera.eyeX,camera.eyeY,camera.eyeZ,camera.lookX,camera.lookY,camera.lookZ,camera.roll,camera.light,camera.spin].map(value=>value.toFixed(4)).join(",")+smoothX.toFixed(4)+smoothY.toFixed(4);
       if(view!==previousView){scene?.draw(smoothX,smoothY);previousView=view;}
     };
 
@@ -69,12 +69,12 @@ export function PortfolioDepthExperience() {
       const rebuild = () => {
         const maximum = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
         const chapters = [
-          {selector:"#sobre",eyeX:3.8,eyeY:.5,eyeZ:16,lookX:.3,lookY:1.2,lookZ:0,roll:.025,light:1},
-          {selector:"#projetos",eyeX:5.6,eyeY:-1.1,eyeZ:14.6,lookX:.6,lookY:-.5,lookZ:-.5,roll:-.045,light:2.2},
-          {selector:"#entregas",eyeX:1.3,eyeY:-3,eyeZ:15.7,lookX:0,lookY:-1,lookZ:0,roll:.035,light:1.6},
-          {selector:"#competencias",eyeX:-4.2,eyeY:-.5,eyeZ:17.2,lookX:-.2,lookY:.2,lookZ:0,roll:.015,light:.4},
-          {selector:"#formacao",eyeX:-5.5,eyeY:2.5,eyeZ:15.4,lookX:0,lookY:1.2,lookZ:-.5,roll:-.035,light:-1.2},
-          {selector:"#contato",eyeX:-.8,eyeY:1.7,eyeZ:16.6,lookX:.4,lookY:.2,lookZ:0,roll:.02,light:0}
+          {selector:"#sobre",eyeX:1.2,eyeY:.5,eyeZ:18,lookX:0,lookY:.2,lookZ:0,roll:0,light:.3,spin:Math.PI*.65},
+          {selector:"#projetos",eyeX:1.2,eyeY:.2,eyeZ:17.8,lookX:0,lookY:0,lookZ:0,roll:0,light:.6,spin:Math.PI*1.4},
+          {selector:"#entregas",eyeX:1.2,eyeY:-.4,eyeZ:18.2,lookX:0,lookY:-.2,lookZ:0,roll:0,light:.2,spin:Math.PI*2.1},
+          {selector:"#competencias",eyeX:1.2,eyeY:.2,eyeZ:18.4,lookX:0,lookY:0,lookZ:0,roll:0,light:-.3,spin:Math.PI*2.8},
+          {selector:"#formacao",eyeX:1.2,eyeY:.6,eyeZ:18,lookX:0,lookY:.1,lookZ:0,roll:0,light:0,spin:Math.PI*3.45},
+          {selector:"#contato",eyeX:1.2,eyeY:.8,eyeZ:18.5,lookX:0,lookY:0,lookZ:0,roll:0,light:.2,spin:Math.PI*4.1}
         ];
         timeline.clear();
         let previousPosition = 0;
@@ -82,12 +82,12 @@ export function PortfolioDepthExperience() {
           const section=document.querySelector(selector);
           if(!section)return;
           const position=Math.min(maximum,Math.max(previousPosition+1,section.getBoundingClientRect().top+window.scrollY-120));
-          const tween={...values,duration:position-previousPosition,ease:"sine.inOut"};
+          const tween={...values,duration:position-previousPosition,ease:"none"};
           if(index===0)timeline.fromTo(camera,initial,{...tween,immediateRender:false},0);
           else timeline.to(camera,tween,previousPosition);
           previousPosition=position;
         });
-        if(previousPosition<maximum)timeline.to(camera,{eyeX:1.2,eyeY:1,eyeZ:17.3,duration:maximum-previousPosition,ease:"sine.inOut"});
+        if(previousPosition<maximum)timeline.to(camera,{spin:Math.PI*4.5,duration:maximum-previousPosition,ease:"none"});
       };
       rebuild();
       ScrollTrigger.create({animation:timeline,trigger:".site-shell",start:"top top",end:"bottom bottom",scrub:.65,onRefreshInit:rebuild,invalidateOnRefresh:true});

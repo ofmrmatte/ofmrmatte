@@ -284,3 +284,7 @@ body {background:#08090b;color:#f5f5f7;}
  .metal-scene__content {opacity:.42;}
  .metal-scene canvas[data-ready="true"] {opacity:1;}
 }
+
+/* The foreground brand has its own focal plane, away from the helix. */
+.hero-editorial__monogram {isolation:isolate;}
+.hero-editorial__monogram::before {content:"";position:absolute;inset:7% -9%;z-index:-1;pointer-events:none;background:radial-gradient(ellipse,#08090bd9 12%,#08090b80 48%,transparent 72%);filter:blur(18px);}
