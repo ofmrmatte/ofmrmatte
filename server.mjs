@@ -323,7 +323,7 @@ async function route(req,res) {
       if(req.headers.origin&&req.headers.origin!==new URL(appBase).origin)return send(res,403,{error:'Origem não autorizada.'});
     }
     if(pathname==='/api/access/register'&&req.method==='POST'){
-      try{const body=await getJsonBody(req);const local=['127.0.0.1','::1','::ffff:127.0.0.1'].includes(req.socket.remoteAddress)&&['localhost','127.0.0.1'].includes(String(req.headers.host||'').split(':')[0]);if(local&&!await access.hasUsers()&&!body.code)body.code=process.env.REGISTRATION_CODE;await access.register(body);return send(res,201,{ok:true});}catch(error){return send(res,Number.isInteger(error.status)?error.status:400,{error:Number.isInteger(error.status)?error.message:'Não foi possível criar o acesso. Confira e-mail e senha (mínimo 10 caracteres).'});}
+      try{const body=await getJsonBody(req);await access.register(body);return send(res,201,{ok:true});}catch(error){return send(res,Number.isInteger(error.status)?error.status:400,{error:Number.isInteger(error.status)?error.message:'Não foi possível criar o acesso. Confira e-mail e senha (mínimo 10 caracteres).'});}
     }
     identity=await access.identity(req);if(!identity)return send(res,401,{error:'Entre na sua conta para continuar.'});
     if(pathname==='/api/profiles'){

@@ -3,11 +3,11 @@
 ## Contas, perfis e acesso permanente
 
 - A lista é definida por `XTREAM_URL`, `XTREAM_USERNAME` e `XTREAM_PASSWORD` no ambiente do servidor. A instalação local já utiliza um `.env` privado; essas credenciais não fazem parte do repositório nem do JavaScript entregue ao navegador.
-- Tela de login sem rolagem, com criação de acesso por convite, sessão persistente de 30 dias e até cinco perfis por conta. Contas e senhas são geridas pelo Better Auth; não existe senha padrão.
+- Tela de login sem rolagem, com código de convite opcional no cadastro, sessão persistente de 30 dias e até cinco perfis por conta. Contas e senhas são geridas pelo Better Auth; não existe senha padrão.
 - SQLite local em `.data/stream.sqlite` e PostgreSQL opcional por `DATABASE_URL`. Favoritos, histórico e progresso ficam separados por perfil e sincronizam com o servidor. A proteção parental vale para a conta inteira.
 - Player Plyr com controles de ±10s, próximo episódio, volume, velocidade e tela cheia dentro do vídeo. HLS continua usando hls.js. Os controles são acessíveis por teclado e toque.
 - Busca, título, atualização e ordenação em uma faixa compacta. Os cartões visíveis consultam metadados gradualmente e atualizam a classificação sem precisar abrir a ficha. Onde nenhuma fonte tiver correspondência confiável, aparece um traço com explicação; não são inventadas classificações.
-- Testes automatizados cobrem autenticação, sessão após reabrir o banco, convites, isolamento de perfis, persistência de preferências e o fluxo Xtream. O login foi conferido em 320×568, 390×844, 844×390, 768×1024 e 1440×900.
+- Testes automatizados cobrem autenticação, sessão após reabrir o banco, cadastro com e sem convite, isolamento de perfis, persistência de preferências e o fluxo Xtream. O login foi conferido em 320×568, 390×844, 844×390, 768×1024 e 1440×900.
 
 Veja [DEPLOY_RAILWAY.md](DEPLOY_RAILWAY.md) para publicação do serviço separado do portfólio, armazenamento persistente e configuração das variáveis.
 

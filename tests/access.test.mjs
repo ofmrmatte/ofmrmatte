@@ -12,6 +12,8 @@ test('login persistente, convites e perfis isolados com preferências em banco',
  await assert.rejects(access.register({email:'a@example.test',password:'FixturePassword2026!',name:'A',code:'wrong'}),/convite/);
  const a=await access.register({email:'a@example.test',password:'FixturePassword2026!',name:'A',code:'fixture-invite'});
  const b=await access.register({email:'b@example.test',password:'OtherFixture2026!',name:'B',code:'fixture-invite'});
+ const withoutInvite=await access.register({email:'c@example.test',password:'NoInvite2026!',name:'C'});
+ assert.ok(withoutInvite.id);
  const profiles=await access.profiles(a.id);assert.equal(profiles.length,1);
  assert.equal(await access.profile(b.id,profiles[0].id),null);
  await assert.rejects(access.updateProfile(b.id,profiles[0].id,{name:'Invadido',avatar:1}),/encontrado/);
@@ -26,4 +28,13 @@ test('login persistente, convites e perfis isolados com preferências em banco',
  await assert.rejects(access.createProfile(a.id,'Excesso',1),/cinco/);
  assert.equal((await access.profiles(b.id)).length,1);
  assert.equal((await readFile(join(dir,'stream.sqlite'))).includes(Buffer.from('FixturePassword2026!')),false);
+});
+
+test('cadastro sem código configurado não exige convite',async t=>{
+ const dir=await mkdtemp(join(tmpdir(),'mfstream-access-'));
+ const access=await createAccess({dataDir:dir,baseURL:'http://localhost:3000',secret:randomBytes(48).toString('hex')});
+ t.after(async()=>{await access.close();await rm(dir,{force:true,recursive:true});});
+ const user=await access.register({email:'sem-convite@example.test',password:'OpenRegister2026!',name:'Sem convite'});
+ assert.ok(user.id);
+ await assert.rejects(access.register({email:'invalido@example.test',password:'OtherFixture2026!',name:'Inválido',code:'wrong'}),/convite/);
 });
