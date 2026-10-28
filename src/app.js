@@ -230,7 +230,7 @@ function mediaCard(item) {
   const art=el('div','card-art');
   const placeholder=el('span','card-fallback',item.type==='live'?item.name.slice(0,9).toUpperCase():'MF');art.append(placeholder);
   const src=safeHttp(item.logo);
-  if(src){const image=el('img');image.alt='';image.loading='lazy';image.referrerPolicy='no-referrer';image.src=src;image.onerror=()=>image.remove();art.append(image);}
+  if(src){const image=el('img');image.alt='';image.loading='lazy';image.referrerPolicy='no-referrer';image.src=src;image.onerror=()=>{image.hidden=true;};art.append(image);}
   if(item.type==='live'){const live=el('span','card-live-badge');live.append(el('span'),document.createTextNode('AO VIVO'));art.append(live);}
   else{art.append(el('span','card-category-tag',item.type==='series'?'SÉRIE':'FILME'));art.append(el('span','age-badge age-'+(item.age??'nc'),item.ageLabel==='Não informada'?'NC':item.ageLabel));}
   const fav=el('button','card-fav'+(state.favorites.has(item.id)?' active':''));fav.type='button';fav.title='Adicionar ou remover favorito';fav.setAttribute('aria-label',fav.title);fav.innerHTML=icon('heart',16);fav.addEventListener('click',event=>{event.stopPropagation();favorite(item.id);});

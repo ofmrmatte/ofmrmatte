@@ -1,7 +1,7 @@
 import { createServer } from 'node:http';
 import http from 'node:http';
 import https from 'node:https';
-import { readFile, stat } from 'node:fs/promises';
+import { readFile, stat, writeFile, rename, mkdir } from 'node:fs/promises';
 import { extname, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { lookup, resolve4, resolve6 } from 'node:dns/promises';
@@ -25,6 +25,10 @@ const appBase=process.env.BETTER_AUTH_URL||(process.env.RAILWAY_PUBLIC_DOMAIN?'h
 const access=fixedMode?await createAccess({dataDir:process.env.APP_DATA_DIR||resolve(root,'.data'),baseURL:appBase,secret:process.env.BETTER_AUTH_SECRET,registrationCode:process.env.REGISTRATION_CODE,adminSetupToken:process.env.ADMIN_SETUP_TOKEN,databaseURL:process.env.DATABASE_URL,cookiePrefix:process.env.AUTH_COOKIE_PREFIX||'mf-stream'}):null;
 const privateHosts = process.env.ALLOW_PRIVATE_XTREAM_HOSTS === '1';
 const sessions = new Map();
+const globalConfigPath=resolve(process.env.APP_DATA_DIR||resolve(root,'.data'),'xtream-global.json');
+let globalXtream={};try{globalXtream=JSON.parse(await readFile(globalConfigPath,'utf8'))}catch(error){if(error.code!=='ENOENT')console.error('Global Xtream configuration:',error.message)}
+const activeXtream=()=>({name:globalXtream.name||'MF Stream',url:globalXtream.url||process.env.XTREAM_URL,username:globalXtream.username||process.env.XTREAM_USERNAME,password:globalXtream.password||process.env.XTREAM_PASSWORD});
+
 const parental=await createParentalStore(resolve(process.env.PARENTAL_DATA_DIR || resolve(root,'.data'),'parental.json'));
 const SESSION_IDLE_MS = 2 * 60 * 60_000;
 const MAX_BODY = 8_000;
@@ -332,6 +336,16 @@ async function route(req,res) {
     }
     const identity=await access.identity(req);
     if(!identity||!await access.isOwner(identity.user.id))return send(res,403,{error:'Acesso exclusivo do proprietário.'});
+    if(pathname==='/api/admin/xtream'&&req.method==='GET'){const c=activeXtream();return send(res,200,{name:c.name,url:c.url,username:c.username,configured:!!(c.url&&c.username&&c.password)});}
+    if(pathname==='/api/admin/xtream'&&req.method==='POST'){
+      try{
+        const body=await getJsonBody(req),current=activeXtream();const name=String(body.name||'').trim().slice(0,60),url=normalizeServerUrl(String(body.url||'')),username=String(body.username||'').trim(),password=String(body.password||'')||current.password;
+        if(!name||!url||!username||!password||username.length>200||password.length>200)return send(res,400,{error:'Preencha os dados válidos da conexão.'});
+        const response=await providerJson(apiUrl(url,username,password),{withEndpoint:true});const info=response.data?.user_info;
+        if(!info||!(info.auth===1||info.auth==='1'||info.auth===true)||info.status&&String(info.status).toLowerCase()!=='active')return send(res,422,{error:'O servidor Xtream não confirmou uma conta ativa. A configuração anterior foi preservada.'});
+        const verifiedUrl=normalizeServerUrl(new URL('.',response.finalUrl).href);const next={name,url:verifiedUrl,username,password},temp=globalConfigPath+'.tmp';await mkdir(resolve(globalConfigPath,'..'),{recursive:true});await writeFile(temp,JSON.stringify(next),{mode:0o600});await rename(temp,globalConfigPath);globalXtream=next;sessions.clear();return send(res,200,{ok:true,message:'Conexão validada e salva. Os espectadores precisarão reconectar.'});
+      }catch(error){return send(res,422,{error:'Não foi possível validar a nova conexão. A lista anterior foi preservada.'});}
+    }
     if(pathname==='/api/admin/users'&&req.method==='GET')return send(res,200,{users:await access.listUsers(identity.user.id)});
     const action=/^\/api\/admin\/users\/([A-Za-z0-9_-]{1,128})\/(suspension|revoke-sessions)$/.exec(pathname);
     if(action&&req.method==='POST'){
@@ -378,7 +392,7 @@ async function route(req,res) {
     if (req.method === 'POST' && (pathname === '/api/login'||pathname==='/api/connect'&&access)) {
       try {
         let body = await getJsonBody(req),profile=null;
-        if(access){profile=await access.profile(identity.user.id,body.profileId);if(!profile)return send(res,404,{error:'Perfil não encontrado.'});body={listName:'MF Stream',url:process.env.XTREAM_URL,username:process.env.XTREAM_USERNAME,password:process.env.XTREAM_PASSWORD};}
+        if(access){profile=await access.profile(identity.user.id,body.profileId);if(!profile)return send(res,404,{error:'Perfil não encontrado.'});{const c=activeXtream();body={listName:c.name,url:c.url,username:c.username,password:c.password};}}
         const base = normalizeServerUrl(body.url);
         const username = String(body.username || '').trim(), password = String(body.password || '');
         const listName = String(body.listName || 'Minha lista').trim();
