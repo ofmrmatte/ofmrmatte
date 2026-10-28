@@ -2,7 +2,7 @@ FROM node:24-slim
 WORKDIR /app
 COPY package.json package-lock.json .npmrc ./
 RUN npm ci --omit=dev
-COPY server.mjs index.html manifest.webmanifest service-worker.js ./
+COPY server.mjs index.html admin.html manifest.webmanifest service-worker.js ./
 COPY src ./src
 COPY lib ./lib
 COPY assets ./assets

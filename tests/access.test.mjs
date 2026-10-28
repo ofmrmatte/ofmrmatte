@@ -38,3 +38,22 @@ test('cadastro sem código configurado não exige convite',async t=>{
  assert.ok(user.id);
  await assert.rejects(access.register({email:'invalido@example.test',password:'OtherFixture2026!',name:'Inválido',code:'wrong'}),/convite/);
 });
+
+test('proprietário único independente de contas de espectadores',async t=>{
+ const dir=await mkdtemp(join(tmpdir(),'mfstream-access-'));
+ const a=await createAccess({dataDir:dir,baseURL:'http://localhost:3000',secret:randomBytes(48).toString('hex'),adminSetupToken:'teste-de-token-seguro-com-mais-de-32-caracteres'});
+ t.after(async()=>{await a.close();await rm(dir,{force:true,recursive:true});});
+ const viewer=await a.register({name:'Espectador',email:'viewer@example.test',password:'ViewerPassword2026!'});
+ assert.equal(await a.isOwner(viewer.id),false);
+ await assert.rejects(a.setupOwner({name:'Admin',email:'admin@example.test',password:'AdminPassword2026!',token:'errado'}),/ativação inválida/);
+ const owner=await a.setupOwner({name:'Admin',email:'admin@example.test',password:'AdminPassword2026!',token:'teste-de-token-seguro-com-mais-de-32-caracteres'});
+ assert.equal(await a.isOwner(owner.id),true);assert.equal((await a.profiles(owner.id)).length,0);
+ await assert.rejects(a.setupOwner({name:'Outro',email:'outro@example.test',password:'OutroPassword2026!',token:'teste-de-token-seguro-com-mais-de-32-caracteres'}),/já foi configurado/);
+ await assert.rejects(a.listUsers(viewer.id),/exclusivo/);
+ const users=await a.listUsers(owner.id);assert.equal(users.length,1);assert.equal(users[0].email,'viewer@example.test');
+ await a.setSuspended(owner.id,viewer.id,true);assert.equal(await a.isSuspended(viewer.id),true);
+ await a.setSuspended(owner.id,viewer.id,false);assert.equal(await a.isSuspended(viewer.id),false);
+ await assert.rejects(a.setSuspended(owner.id,owner.id,true),/protegida/);
+ await assert.rejects(a.revokeSessions(viewer.id,owner.id),/exclusivo/);
+ assert.deepEqual(await a.revokeSessions(owner.id,viewer.id),{ok:true});
+});

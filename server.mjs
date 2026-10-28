@@ -22,7 +22,7 @@ const port = Number.parseInt(process.env.PORT || '3000', 10);
 const fixedMode=process.env.APP_AUTH_ENABLED!=='0'&&!!(process.env.XTREAM_URL&&process.env.XTREAM_USERNAME&&process.env.XTREAM_PASSWORD);
 if(process.env.APP_AUTH_ENABLED==='1'&&!fixedMode)throw new Error('Configure as variáveis XTREAM_URL, XTREAM_USERNAME e XTREAM_PASSWORD.');
 const appBase=process.env.BETTER_AUTH_URL||(process.env.RAILWAY_PUBLIC_DOMAIN?'https://'+process.env.RAILWAY_PUBLIC_DOMAIN:`http://localhost:${port||3000}`);
-const access=fixedMode?await createAccess({dataDir:process.env.APP_DATA_DIR||resolve(root,'.data'),baseURL:appBase,secret:process.env.BETTER_AUTH_SECRET,registrationCode:process.env.REGISTRATION_CODE,databaseURL:process.env.DATABASE_URL,cookiePrefix:process.env.AUTH_COOKIE_PREFIX||'mf-stream'}):null;
+const access=fixedMode?await createAccess({dataDir:process.env.APP_DATA_DIR||resolve(root,'.data'),baseURL:appBase,secret:process.env.BETTER_AUTH_SECRET,registrationCode:process.env.REGISTRATION_CODE,adminSetupToken:process.env.ADMIN_SETUP_TOKEN,databaseURL:process.env.DATABASE_URL,cookiePrefix:process.env.AUTH_COOKIE_PREFIX||'mf-stream'}):null;
 const privateHosts = process.env.ALLOW_PRIVATE_XTREAM_HOSTS === '1';
 const sessions = new Map();
 const parental=await createParentalStore(resolve(process.env.PARENTAL_DATA_DIR || resolve(root,'.data'),'parental.json'));
@@ -32,7 +32,7 @@ const MAX_API_JSON = 30_000_000;
 const MAX_MANIFEST = 2_000_000;
 const DNS_WAIT_MS = 5500;
 const CONNECT_WAIT_MS = 12000;
-const staticPaths = new Set(['/', '/index.html', '/manifest.webmanifest', '/service-worker.js', '/src/favicon.svg', '/src/styles.css', '/src/app.js', '/src/access-ui.mjs', '/src/xtream.mjs', '/src/content.mjs', '/src/playback.mjs', '/src/library.css', '/assets/icon-192.png', '/assets/icon-512.png']);
+const staticPaths = new Set(['/', '/index.html', '/manifest.webmanifest', '/service-worker.js', '/src/favicon.svg', '/src/styles.css', '/src/app.js', '/src/access-ui.mjs', '/src/xtream.mjs', '/src/content.mjs', '/src/playback.mjs', '/src/library.css', '/admin', '/admin/', '/admin.html', '/src/admin.mjs', '/src/admin.css', '/assets/icon-192.png', '/assets/icon-512.png']);
 const vendorPaths=new Map(['/vendor/plyr.js','/vendor/plyr.css','/vendor/plyr.svg'].map(path=>[path,resolve(root,'node_modules/plyr/dist',path.endsWith('.js')?'plyr.min.js':path.endsWith('.css')?'plyr.css':'plyr.svg')]));for(const path of vendorPaths.keys())staticPaths.add(path);
 const types = { '.html':'text/html; charset=utf-8', '.css':'text/css; charset=utf-8', '.js':'text/javascript; charset=utf-8', '.mjs':'text/javascript; charset=utf-8', '.svg':'image/svg+xml', '.png':'image/png', '.webmanifest':'application/manifest+json' };
 const securityHeaders = { 'Cache-Control':'no-store', 'X-Content-Type-Options':'nosniff', 'Referrer-Policy':'no-referrer', 'X-Frame-Options':'DENY' };
@@ -310,11 +310,48 @@ async function route(req,res) {
   try { url = new URL(req.url, 'http://localhost'); } catch { return send(res,400,{error:'URL inválida.'}); }
   const pathname = url.pathname;
   if(pathname==='/healthz')return send(res,200,{ok:true,version:'4.0.0'});
-  if(access&&pathname.startsWith('/api/auth/'))return access.handler(req,res);
+  if(access&&pathname.startsWith('/api/auth/')){
+    // Nenhum endpoint de administração do plugin fica acessível publicamente.
+    if(!new Set(['/api/auth/sign-in/email','/api/auth/sign-out','/api/auth/get-session']).has(pathname))return send(res,404,{error:'Rota indisponível.'});
+    return access.handler(req,res);
+  }
+  if(pathname==='/api/admin/bootstrap'){
+    const identity=access?await access.identity(req):null;
+    const owner=!!identity&&await access.isOwner(identity.user.id);
+    return send(res,200,{enabled:!!access,configured:access?await access.hasOwner():false,owner,user:owner?{id:identity.user.id,name:identity.user.name,email:identity.user.email}:null});
+  }
+  if(pathname.startsWith('/api/admin/')){
+    if(!access)return send(res,503,{error:'Autenticação não configurada.'});
+    if(req.method!=='GET'&&req.method!=='HEAD'){
+      if(!String(req.headers['content-type']||'').includes('application/json'))return send(res,415,{error:'Use JSON.'});
+      if(req.headers.origin&&req.headers.origin!==new URL(appBase).origin)return send(res,403,{error:'Origem não autorizada.'});
+    }
+    if(pathname==='/api/admin/setup'&&req.method==='POST'){
+      try{await access.setupOwner(await getJsonBody(req));return send(res,201,{ok:true});}
+      catch(error){return send(res,error.status||400,{error:error.status?error.message:'Não foi possível criar o proprietário. Use e-mail ainda não cadastrado.'});}
+    }
+    const identity=await access.identity(req);
+    if(!identity||!await access.isOwner(identity.user.id))return send(res,403,{error:'Acesso exclusivo do proprietário.'});
+    if(pathname==='/api/admin/users'&&req.method==='GET')return send(res,200,{users:await access.listUsers(identity.user.id)});
+    const action=/^\/api\/admin\/users\/([A-Za-z0-9_-]{1,128})\/(suspension|revoke-sessions)$/.exec(pathname);
+    if(action&&req.method==='POST'){
+      try{
+        if(action[2]==='suspension'){
+          const body=await getJsonBody(req);
+          if(typeof body.suspended!=='boolean')return send(res,400,{error:'Informe suspended como boolean.'});
+          return send(res,200,await access.setSuspended(identity.user.id,action[1],body.suspended));
+        }
+        return send(res,200,await access.revokeSessions(identity.user.id,action[1]));
+      }catch(error){return send(res,error.status||500,{error:error.status?error.message:'Não foi possível atualizar o usuário.'});}
+    }
+    return send(res,404,{error:'Rota administrativa não encontrada.'});
+  }
   if(pathname==='/api/access/bootstrap'){
     const local=['127.0.0.1','::1','::ffff:127.0.0.1'].includes(req.socket.remoteAddress)&&['localhost','127.0.0.1'].includes(String(req.headers.host||'').split(':')[0]);
     const identity=access?await access.identity(req):null;
-    return send(res,200,{fixedMode,user:identity?{id:identity.user.id,name:identity.user.name,email:identity.user.email}:null,canSetup:!!access&&local&&!await access.hasUsers()});
+    const owner=!!identity&&await access.isOwner(identity.user.id);
+    const suspended=!!identity&&!owner&&await access.isSuspended(identity.user.id);
+    return send(res,200,{fixedMode,owner,user:identity&&!owner&&!suspended?{id:identity.user.id,name:identity.user.name,email:identity.user.email}:null,canSetup:!!access&&local&&!await access.hasUsers()});
   }
   let identity=null;
   if(access&&pathname.startsWith('/api/')){
@@ -326,6 +363,8 @@ async function route(req,res) {
       try{const body=await getJsonBody(req);await access.register(body);return send(res,201,{ok:true});}catch(error){return send(res,Number.isInteger(error.status)?error.status:400,{error:Number.isInteger(error.status)?error.message:'Não foi possível criar o acesso. Confira e-mail e senha (mínimo 10 caracteres).'});}
     }
     identity=await access.identity(req);if(!identity)return send(res,401,{error:'Entre na sua conta para continuar.'});
+    if(await access.isOwner(identity.user.id))return send(res,403,{error:'Conta administrativa: utilize /admin.'});
+    if(await access.isSuspended(identity.user.id))return send(res,403,{error:'Sua conta está suspensa pelo administrador.'});
     if(pathname==='/api/profiles'){
       try{if(req.method==='GET')return send(res,200,{profiles:await access.profiles(identity.user.id)});if(req.method==='POST'){const body=await getJsonBody(req);return send(res,201,await access.createProfile(identity.user.id,body.name,body.avatar));}if(req.method==='PATCH'){const body=await getJsonBody(req);return send(res,200,await access.updateProfile(identity.user.id,body.id,body));}}catch(error){return send(res,error.status||500,{error:error.status?error.message:'Não foi possível salvar o perfil.'});}
     }
@@ -492,7 +531,7 @@ async function route(req,res) {
   }
   if (req.method !== 'GET' && req.method !== 'HEAD') return send(res,405,{error:'Método não permitido.'});
   if (!staticPaths.has(pathname)) return send(res,404,{error:'Arquivo não encontrado.'});
-  const path = vendorPaths.get(pathname)||resolve(root, '.' + pathname);
+  const path = pathname==='/admin'||pathname==='/admin/'?resolve(root,'admin.html'):vendorPaths.get(pathname)||resolve(root, '.' + pathname);
   if (path !== root && !path.startsWith(root + sep)) return send(res,403,{error:'Acesso negado.'});
   try {
     const filePath = (await stat(path)).isDirectory() ? resolve(path,'index.html') : path;

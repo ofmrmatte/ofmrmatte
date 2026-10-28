@@ -41,3 +41,8 @@ Railway hospeda PostgreSQL; a autenticação dos espectadores é feita pelo **Be
 `npm ci`, `npm test`, iniciar o serviço e conferir `/healthz`. Abra o domínio HTTPS, crie uma conta sem convite e escolha um perfil. Verifique também que um código incorreto, quando fornecido, é rejeitado. Reinicie a implantação e confirme que a sessão e o progresso continuam disponíveis. O servidor de streaming precisa permitir requisições originadas da região do Railway; testes locais não garantem a disponibilidade do provedor a partir da nuvem.
 
 Use uma réplica enquanto a proteção parental e os limites de consultas estiverem no processo/volume. Os streams usam o backend como proxy: CPU, tráfego e limites de conexões do provedor continuam se aplicando.
+
+
+## Master Admin separado
+
+Acesse `/admin` para entrar no painel administrativo, separado do streaming. Configure `ADMIN_SETUP_TOKEN` no Railway, crie a conta proprietária com um e-mail exclusivo e uma senha própria; após o cadastro inicial, a chave pode ser removida. A tabela `stream_owner` identifica exclusivamente o dono. O primeiro espectador não vira administrador. O painel permite consultar espectadores, suspender e reativar contas e revogar sessões, mas a conta Master Admin não pode abrir a biblioteca de streaming.
