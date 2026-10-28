@@ -1,112 +1,149 @@
-# Matheus Ferreira Folgado
+# MF Stream 4.0
 
-### Administrador · Sistemas e Automação com IA · Requisitos, Processos e Engenharia de Software
+## Contas, perfis e acesso permanente
 
-Atuo na interseção entre negócio, operações e tecnologia, transformando necessidades operacionais em requisitos, fluxos, automações e sistemas.
+- A lista é definida por `XTREAM_URL`, `XTREAM_USERNAME` e `XTREAM_PASSWORD` no ambiente do servidor. A instalação local já utiliza um `.env` privado; essas credenciais não fazem parte do repositório nem do JavaScript entregue ao navegador.
+- Tela de login sem rolagem, com criação de acesso por convite, sessão persistente de 30 dias e até cinco perfis por conta. Contas e senhas são geridas pelo Better Auth; não existe senha padrão.
+- SQLite local em `.data/stream.sqlite` e PostgreSQL opcional por `DATABASE_URL`. Favoritos, histórico e progresso ficam separados por perfil e sincronizam com o servidor. A proteção parental vale para a conta inteira.
+- Player Plyr com controles de ±10s, próximo episódio, volume, velocidade e tela cheia dentro do vídeo. HLS continua usando hls.js. Os controles são acessíveis por teclado e toque.
+- Busca, título, atualização e ordenação em uma faixa compacta. Os cartões visíveis consultam metadados gradualmente e atualizam a classificação sem precisar abrir a ficha. Onde nenhuma fonte tiver correspondência confiável, aparece um traço com explicação; não são inventadas classificações.
+- Testes automatizados cobrem autenticação, sessão após reabrir o banco, convites, isolamento de perfis, persistência de preferências e o fluxo Xtream. O login foi conferido em 320×568, 390×844, 844×390, 768×1024 e 1440×900.
 
-Sou administrador com experiência em gestão administrativa, prevenção de perdas, análise operacional, indicadores e melhoria de processos. Também atuo na criação e evolução de sistemas, dashboards e automações voltados a processos administrativos e logísticos.
+Veja [DEPLOY_RAILWAY.md](DEPLOY_RAILWAY.md) para publicação do serviço separado do portfólio, armazenamento persistente e configuração das variáveis.
 
-No desenvolvimento, utilizo ferramentas de inteligência artificial como apoio à implementação, revisão e evolução de código. Minha atuação concentra-se principalmente no levantamento de requisitos, definição de regras de negócio, desenho de fluxos, validação funcional, testes, identificação de falhas, integração de dados e direcionamento da evolução das soluções.
+### Executar a versão 4
 
-## Stack presente nos projetos
+Node.js 22.13+ (recomendado 24), `npm ci` e `npm start`. Configure `.env` a partir de `.env.example` em uma instalação nova. Abra `http://localhost:3000`, clique em Criar sua conta e escolha o acesso da aplicação. As seções abaixo documentam também os recursos e o modo Xtream de desenvolvimento das versões anteriores.
 
-`TypeScript` · `JavaScript` · `React` · `Next.js` · `Node.js` · `C#` · `.NET` · `SQL` · `PostgreSQL` · `Supabase` · `HTML/CSS` · `Git/GitHub` · `Railway` · `Motion`
+## Player e continuidade
 
-### Competências aplicadas
+- Controles de retroceder/avançar 10 segundos e atalhos ← / → no player. Os limites do vídeo e os intervalos de DVR são respeitados; canais ao vivo sem DVR desabilitam esses controles.
+- Botão Próximo episódio, com passagem entre temporadas e desativação no último episódio. A lateral permite escolher a temporada e identifica o episódio atual, os já assistidos e o progresso salvo. No celular, os episódios ficam abaixo do vídeo.
+- Progresso salvo a cada três segundos, ao pausar, buscar, fechar o player ou sair da página. O botão Continuar retoma o episódio e o tempo salvo, inclusive após recarregar. Conteúdo com pelo menos 95% assistido é considerado concluído. O progresso fica neste navegador, separado por conta; não é sincronizado com outros dispositivos. A reprodução deve suportar busca por tempo para retomar.
+- A classificação agora procura múltiplos campos e estruturas do provedor, incluindo certificados BR. Quando ausente, consulta a [API pública de busca da Apple](https://performance-partners.apple.com/search-api), preferindo o catálogo brasileiro e depois o dos EUA, com correspondência do título e do ano para filmes. Somente o título público e o ano são enviados, sem dados da conta Xtream. Há cache, limite de consultas e tolerância a falhas.
+- A origem é exibida: por exemplo, TV-14 · US · Apple TV é uma classificação estrangeira, não uma classificação brasileira. Para o filtro parental, TV-14 usa 14 como referência; PG-13 usa 14 e R/TV-MA/NC-17 usam 18 de forma conservadora. G/PG/TV-PG não são transformados em idade brasileira. O botão Atualizar classificação refaz a consulta; títulos sem correspondência confiável continuam como Não informada.
+- Validação: 25 testes automatizados, consulta real da classificação de Classroom of the Elite e teste em navegador com vídeo CC0 cobrindo ±10s, retomada após recarregar, troca de episódio e passagem de temporada.
 
-- Levantamento de requisitos
-- Definição e modelagem de regras de negócio
-- Desenho de processos e fluxos
-- Testes e validação funcional de software
-- Identificação de falhas e evolução de produto
-- Automação de processos
-- Integração de sistemas e APIs REST
-- Análise operacional e indicadores (KPIs)
-- Gestão e melhoria de processos
-- Desenvolvimento assistido por IA
-- Git/GitHub e acompanhamento de deploy
+## Biblioteca e proteção parental
 
-## Projetos em destaque
+- Navegação compacta, destaque com conteúdo da lista, fileiras de TV, filmes e séries e layout responsivo. Referências visuais: [Apple TV](https://www.apple.com/apple-tv-app/) e [21st](https://21st.dev/community/components). Transições de diálogo com [GSAP](https://gsap.com/docs/v3/), respeitando movimento reduzido; os diálogos funcionam também sem a CDN.
+- Ficha do título com sinopse, classificação, gênero, duração, direção e elenco quando fornecidos pela API. Ausência de classificação aparece como NC / Não informada; a nota de avaliação não é usada como idade.
+- Abra **Controle parental** no topo para criar um PIN de 4 a 8 dígitos. É possível ocultar +18, definir idade máxima e ocultar títulos sem classificação. As próximas alterações exigem o PIN atual. Cinco erros bloqueiam novas tentativas por cinco minutos; o bloqueio é compartilhado entre sessões da conta no mesmo processo.
+- A API filtra os catálogos e bloqueia detalhes, reprodução direta e episódios restritos. Alterações invalidam os links temporários de mídia e encerram transmissões em andamento. A detecção de adulto usa metadados, nomes e categorias e não substitui uma classificação confiável do provedor.
+- As preferências e somente o hash/salt do PIN são guardados em `.data/parental.json`, separados por conta. Não há armazenamento da senha Xtream. Mantenha esse diretório protegido e com backup. `PARENTAL_DATA_DIR` permite escolher o diretório; no Docker é `/data`. Em hospedagens como Railway, monte um volume persistente nesse caminho para preservar a proteção entre recriações e publicações. O produto pressupõe uma instância de servidor; múltiplas réplicas exigem armazenamento e limitação de tentativas compartilhados.
+- Não existe recuperação automática do PIN nesta versão. A recuperação administrativa exige remover o registro da conta no arquivo de preferências com o servidor parado; proteja o acesso ao servidor.
 
-### MF Stream — Filmes, séries e TV ao vivo
+**Validação 3.0:** testes automatizados cobrem persistência do PIN, limite de tentativas, filtragem de categorias e títulos, metadados, bloqueio de reprodução e propagação entre sessões. A biblioteca, a sinopse real e os diálogos foram conferidos no navegador. A reprodução de vídeo real não foi revalidada nesta atualização.
 
-Aplicativo responsivo com autenticação por conta, até cinco perfis, progresso salvo em banco, controle parental e player com controles integrados. Código independente em [apps/mf-stream](apps/mf-stream), com instruções de publicação em [DEPLOY_RAILWAY.md](apps/mf-stream/DEPLOY_RAILWAY.md). A configuração privada da lista e os bancos locais não são versionados. A publicação do streaming usa o ramo `mf-stream-deploy`, separado da aplicação Next.js do portfólio em `main`.
+**Correção de conexão de 28/10/2026:** o callback de DNS agora suporta `all: true`, usado pela seleção automática de IPv4/IPv6 do Node 20 ou superior. Antes, a conexão por domínio podia falhar com `ERR_INVALID_IP_ADDRESS` antes de autenticar. O IP validado e o hostname HTTP/TLS são preservados. O Dockerfile também passou a copiar `lib/`, necessário para iniciar o servidor. Os 16 testes passaram, incluindo conexão por hostname, redirecionamento de domínio, login, catálogos, mídia, interrupção de loops e bloqueio de destinos privados. As portas dos testes agora são alocadas pelo sistema para evitar conflitos.
 
-![Acesso ao MF Stream](public/projects/mf-stream.png)
+**Compatibilidade com redirecionamentos:** o app acompanha a mudança de domínio indicada pelo servidor quando o destino mantém o caminho `player_api.php` e todos os parâmetros originais, incluindo usuário, senha e ação. Cada destino passa novamente pela validação de DNS/IP, há limite de quatro redirecionamentos e conexões HTTPS não são rebaixadas para HTTP. Após autenticar, a sessão usa o endereço final para catálogos e mídia. Não é necessário editar a URL original ou adivinhar uma porta: HTTP sem porta utiliza 80 e HTTPS utiliza 443.
 
-### ALC ARCHI
+**Validação real:** o login com a URL original e as credenciais fornecidas retornou conta ativa no backend corrigido. Também foram carregadas as categorias de TV, filmes e séries e os canais de uma categoria. Nenhuma credencial foi gravada nos arquivos do projeto.
 
-**Plataforma corporativa · Identidade · Setores · SSO**
+**Atualização de 28/10/2026:** o formulário Xtream agora inclui **Nome da lista** (padrão `iptv`) além de URL, usuário e senha. O nome é apenas uma identificação local: é guardado na sessão do aplicativo, mostrado na tela de conta e **não** é enviado ao provedor Xtream. A conexão agora tenta os endereços IP públicos validados em sequência e espera até 12 segundos por conexão. O cache do PWA foi renovado para evitar manter versões anteriores.
 
-Central de gestão e acesso da ALC com identidade compartilhada, MFA, sessões revogáveis e permissões por setor. O ARCHI organiza os subsistemas corporativos em uma central de identidade e acesso. Prevenção de Perdas e Atendimento fazem parte desse conjunto, preservando serviços próprios até a homologação do SSO.
+**Limite de validação:** os testes automatizados usam provedor Xtream simulado; o teste real confirmou autenticação, carregamento de dados e interface em navegador. A reprodução de vídeo real não foi revalidada nesta atualização. A existência do campo Nome da lista não influencia a autenticação da API. Nunca envie o relatório com usuário ou senha.
 
-**Subsistemas e áreas:** Identidade e Acessos (operacional); Administrativo (SSO ativo e backend a homologar); RH (em preparação); Frotas, GR, Monitoramento, Operação e Captação (telas propostas); Financeiro e Fiscal (aplicativos independentes com implantação a homologar); Prevenção de Perdas e Atendimento (existentes, com entrada no ARCHI planejada).
+## Sobre o aplicativo
 
-### MLDDS — Automação de Processos Logísticos
+Player web **instalável como aplicativo (PWA)**, com interface para TV ao vivo, filmes e séries. O aplicativo não fornece canais ou catálogos: é necessário utilizar uma conta válida de um serviço autorizado que implemente Xtream Codes API.
 
-Solução desktop integrada para automação de processos logísticos, com aplicação de regras de negócio, integração de dados, roteirização, validações e rastreabilidade operacional.
+## Funcionalidades
 
-**Stack:** C# · .NET 8 · WPF · Integrações de dados · Automação
+- Conexão usando **URL do servidor + usuário + senha** por `player_api.php`.
+- Carregamento de categorias e catálogos de **TV ao vivo, filmes e séries**.
+- Navegação por categorias, pesquisa, favoritos e histórico de exibição.
+- Seleção de temporadas e episódios nas séries.
+- Reprodução de vídeos compatíveis com navegador e transmissões HLS (`.m3u8`) via `hls.js`.
+- Proxy integrado para streaming e HLS com chaves e segmentos reescritos, sem credenciais nas URLs retornadas ao frontend.
+- Interface responsiva, tema escuro e identidade **MF Stream IPTV**.
+- Instalação como PWA no Android, no Windows e em navegadores compatíveis; suporte de instalação no iPhone via menu Compartilhar > Adicionar à Tela de Início.
+- Testes automatizados da API, normalização de dados, login, diagnósticos, catálogos e encaminhamento de mídia.
+- Diagnóstico de conectividade sem transmitir credenciais e mensagens específicas para DNS, porta, timeout, bloqueios de API e incompatibilidade de resposta.
 
-### Site ALC & Pereira Filho
+## Executar
 
-Portal institucional multipágina de logística.
+Requisitos: Node.js 20 ou superior.
 
-## Experiência visual do portfólio
+```bash
+npm start
+```
 
-A direção visual do portfólio é editorial, em grafite e prata, com um escritório 3D como fundo e conteúdo estável acima da cena. O projeto fornecido em `archviz-dev-office.zip` está versionado em `integrations/office-background/`, com sua versão compilada em `public/office/`.
+Abra `http://localhost:3000` no navegador. O servidor Node também é necessário quando usado como PWA instalado, pois faz as requisições da API Xtream. Apenas a interface básica fica disponível offline.
 
-- **GSAP ScrollTrigger:** uma timeline mantém a câmera estática até metade da página, aproxima fisicamente a estação na segunda metade e retorna ao enquadramento centralizado na seção final. O percurso é reversível com o scroll e não usa órbita automática nem zoom por CSS.
-- **GSAP nos conteúdos:** evolução do histórico profissional e da metodologia conforme cada elemento atravessa a viewport; animação de perspectiva da visualização ARCHI.
-- **Motion for React:** preserva o reveal tipográfico dos títulos e a barra de progresso de leitura.
-- **Cenário visual:** Three.js / React Three Fiber em um iframe local, isolando o React 18 da cena do React 19 do site. Texturas legíveis, chuva leve, até 30 fps no desktop e 24 no celular, carregamento adiado e pausa em abas inativas.
-- **Acessibilidade:** respeita `prefers-reduced-motion` e preserva a leitura com conteúdo sem animação obrigatória.
-- **Identidade:** monograma `MF` do brand kit local, preservado com os demais conteúdos do site.
-- **Publicação:** Railway, serviço `ofmrmatte`, branch `main`.
+Para testes:
 
-A logo principal do Hero mantém o tamanho original de 440 px no desktop, 290 px no tablet e 230 px no celular, preservando a proporção e sem animação de subida. Após o contato, `#imersao` deixa a aproximação da estação visível sem cartões sobre os monitores. A seção `#escritorio` oferece 160svh para o encerramento: câmera estabilizada, escritório em tela cheia, cabeçalho oculto e uma assinatura institucional discreta.
+```bash
+npm test
+```
 
-Os trabalhos independentes em destaque continuam sendo ARCHI, MLDDS e o site institucional da ALC. Prevenção de Perdas e Atendimento são apresentados dentro do ARCHI. Não há alegações de resultados quantitativos não auditados.
+## Como conectar
 
-Para atualizar a cena, execute `npm run build:office`, versione o código e a saída juntos e rode `npm run lint` e `npm run build`. O Railway continua construindo somente o aplicativo Next na raiz. Detalhes em [integrations/office-background/INTEGRATION.md](integrations/office-background/INTEGRATION.md). Os créditos dos assets ficam acessíveis pelo rodapé, em `/office/ASSET_CREDITS.md`.
+1. Clique em **Conectar minha lista** ou **Minha conexão**.
+2. Informe a **URL base do servidor** (por exemplo, `http://servidor.exemplo:8080`), sem `/player_api.php`, usuário ou senha na URL.
+3. Informe o **usuário** e a **senha** e clique em **Entrar no MF Stream**.
+4. Explore TV ao vivo, filmes, séries, categorias e favoritos.
 
-## Como trabalho nos projetos
+A API deve responder à operação `player_api.php?username=...&password=...`. Os dados são obtidos da conta fornecida, sem listas pré-configuradas.
 
-Utilizo ferramentas de inteligência artificial como apoio à implementação, análise, refatoração e evolução de código.
+## Diagnosticar falha de acesso
 
-Minha participação envolve principalmente:
+Se o login não funcionar, clique em **Diagnosticar servidor**. O diagnóstico verifica o DNS, a porta e a resposta HTTP do endpoint `player_api.php` sem enviar usuário nem senha. O resultado não comprova que a conta é válida — isso só acontece após a autenticação.
 
-- transformar necessidades operacionais em requisitos de software;
-- definir comportamentos, regras de negócio e critérios de aceitação;
-- desenhar e validar fluxos;
-- testar funcionalidades e identificar inconsistências;
-- direcionar correções e melhorias;
-- acompanhar integrações de dados, banco de dados e APIs;
-- validar builds, deploys e evolução contínua dos produtos.
+- **DNS não encontrado:** domínio incorreto, removido ou temporariamente indisponível. Confirme com o provedor.
+- **Conexão recusada:** host existe, mas serviço/porta não está aceitando conexões. Confirme se a URL deveria incluir `:PORTA`.
+- **Tempo esgotado:** possível indisponibilidade, restrição de rede ou porta incorreta.
+- **HTTP 401/403/404:** o servidor respondeu, mas pode estar bloqueando a API ou o caminho `player_api.php` não está disponível.
+- **Resposta JSON inválida:** pode ser página HTML, painel ou portal que não implementa a API esperada.
+- **Credenciais rejeitadas:** o painel respondeu explicitamente que o usuário e/ou senha não foram aceitos.
 
-## Formação
+Este aplicativo **não tenta portas aleatórias** nem contorna bloqueios do provedor. Redirecionamentos compatíveis da própria API são seguidos automaticamente. Se o diagnóstico indicar DNS, conexão recusada ou serviço indisponível, confirme a URL com o provedor. O app permite conexões HTTP, mas nesses casos o trecho entre este servidor intermediário e o provedor não está criptografado. Prefira HTTPS quando oferecido pelo provedor.
 
-### Pós-Graduação Lato Sensu — Engenharia de Software
-**Universidade de Uberaba (Uniube)**
+## Instalar como app (PWA)
 
-Formação voltada a fundamentos de Engenharia de Software, ciclo de vida, engenharia de requisitos, gerenciamento de projetos, métodos ágeis, testes e qualidade de software.
+- **Android:** abra no Chrome, use o menu `⋮` > `Instalar aplicativo` ou o botão de instalação que o navegador oferecer.
+- **Computador:** Chrome/Edge > botão de instalar aplicativo na barra de endereços ou menu de aplicativos.
+- **iPhone:** Safari > Compartilhar > `Adicionar à Tela de Início`.
 
-### Pós-Graduação Lato Sensu — Inteligência Artificial para Devs
-**Faculdade Unyleya**
+Para instalação fora de `localhost`, **é obrigatório publicar em HTTPS** e acessar pelo endereço seguro do aplicativo. O PWA é um aplicativo instalável com aparência de app, **não um APK ou um aplicativo nativo para Smart TV**.
 
-Formação em Machine Learning, Deep Learning, NLP, engenharia de dados para IA, MLOps e aplicações de IA generativa.
+## Publicar no Railway
 
-### Bacharel em Administração
-**Centro Universitário FAM** · 02/2022 – 06/2026
+O `Dockerfile` e o arquivo `railway.json` já estão preparados. Crie um projeto Railway vinculado ao repositório do MF Stream IPTV e use o domínio HTTPS gerado pela plataforma. `PORT` é definido automaticamente pelo Railway. A senha Xtream não deve ser adicionada como variável de ambiente; cada usuário informa suas credenciais no login.
 
-Formação voltada à gestão empresarial, processos, finanças, pessoas, operações, planejamento e tomada de decisão.
+Não configure `ALLOW_PRIVATE_XTREAM_HOSTS=1` em produção. Esse modo é exclusivamente para testes locais com um provedor fictício na rede privada.
 
-## Contato
+## Segurança e privacidade
 
-- LinkedIn: [linkedin.com/in/mrmatte](https://linkedin.com/in/mrmatte)
-- GitHub: [github.com/ofmrmatte](https://github.com/ofmrmatte)
-- Portfólio: [ofmrmatte-production.up.railway.app](https://ofmrmatte-production.up.railway.app)
+- O servidor **mantém as credenciais apenas na memória da sessão**, não em arquivos ou banco de dados. Reiniciar o processo encerra as sessões.
+- O navegador armazena **somente o token de sessão em `sessionStorage`**; não salva a senha em `localStorage`.
+- Favoritos e histórico são armazenados localmente e separados por conta e servidor.
+- As transmissões são encaminhadas pelo backend por rotas temporárias. Evite compartilhar essas URLs: elas contêm o token de sessão, não a senha.
+- O proxy recusa, por padrão, destinos DNS resolvidos para IPs locais ou reservados, para reduzir riscos de SSRF.
+- O service worker não armazena nem intercepta dados da API, credenciais ou conteúdo de streaming.
+- Recomendado usar um servidor Xtream via HTTPS quando disponível e **sempre hospedar o próprio app em HTTPS**.
+- O produto não implementa autenticação de usuário própria ou permissões multiusuário; cada sessão Xtream corresponde ao usuário que se conectou.
 
----
+## Limitações conhecidas
 
-> Meu foco é conectar visão de negócio, processos e tecnologia para transformar problemas operacionais em soluções digitais confiáveis.
+- A disponibilidade, legalidade e estabilidade dos streams dependem do serviço do usuário.
+- Reprodução HLS depende de `hls.js` carregado da CDN ou do suporte nativo do navegador. O modo offline não reproduz vídeos.
+- Arquivos MKV, AVI, DTS ou codecs incompatíveis com o navegador podem não reproduzir. EPG, Chromecast, controles remotos de Smart TV e APK Android nativo não estão implementados.
+- Algumas listas exigem formato TS ou personalizações de rede e podem não ser compatíveis com HLS. A reprodução deve ser validada com uma conta Xtream legítima.
+- A autenticação e os catálogos também foram verificados com uma conta real. Ainda é necessário validar a reprodução real e a experiência visual em dispositivos reais.
+
+**Créditos:** MF Stream IPTV — Design e desenvolvimento por Matheus Ferreira.
+
+## Versão 2.2 — correção do fluxo de conexão
+
+- Diagnóstico detalhado de HTTP/HTTPS no mesmo domínio, com relatório copiável sem credenciais.
+- Login apresenta diagnóstico automático se houver falha (não envia usuário nem senha durante o diagnóstico).
+- DNS: usa resolução normal do sistema e, em caso de falha, tenta consulta DNS-over-HTTPS como contingência.
+- A proteção de redirecionamentos foi atualizada na versão 2.3.2 para permitir mudanças de domínio que preservam a consulta Xtream. O bloqueio de downgrade de HTTPS para HTTP permanece.
+- Se a URL original for HTTP sem porta e falhar por rede ou resposta inválida, verifica primeiro o endpoint HTTPS sem credenciais; somente se responder tenta autenticar por HTTPS.
+- Service worker network-first para corrigir versões antigas presas no cache; janela de login com rolagem em telas menores.
+
+**Limite externo:** nenhum software pode garantir a autenticação quando o domínio do provedor não resolve, a porta está fechada ou a API está desligada. Solicite ao provedor o hostname e a porta Xtream atuais se o relatório indicar erro de rede. O diagnóstico não testa portas arbitrárias nem tenta contornar restrições.
+
+**Instalação de atualização:** atualize os arquivos do aplicativo, reinicie `npm start` e atualize o navegador com Ctrl+Shift+R. Para versões hospedadas, publique novamente o projeto. Os testes (`npm test`) usam um serviço Xtream simulado; o login e os catálogos da conta real também foram verificados nesta correção.

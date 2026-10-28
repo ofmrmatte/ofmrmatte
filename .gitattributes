@@ -1,2 +1,0 @@
-# Preserve generated bundles (including embedded GLSL) byte for byte.
-public/office/assets/* -text -diff linguist-generated=true
