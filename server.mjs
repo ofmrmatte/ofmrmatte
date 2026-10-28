@@ -522,7 +522,7 @@ async function route(req,res) {
       } catch (err) { return sendFailure(res,502,err); }
     }
     // Image relay: derive URL from the authenticated catalog, never accept arbitrary user URLs.
-    const poster=/^\\/api\\/poster\\/([A-Za-z0-9_-]{20,60})\\/(live|vod|series)\\/(\\d{1,15})$/.exec(pathname);
+    const poster=/^\/api\/poster\/([A-Za-z0-9_-]{20,60})\/(live|vod|series)\/(\d{1,15})$/.exec(pathname);
     if(req.method==='GET'&&poster){
       const s=sessionFor(poster[1]);if(!s||access&&s.ownerId!==identity.user.id)return send(res,401,{error:'Sessão inválida.'});
       try{
