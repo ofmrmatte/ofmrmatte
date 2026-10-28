@@ -9,6 +9,5 @@ COPY assets ./assets
 ENV NODE_ENV=production
 ENV PARENTAL_DATA_DIR=/data
 ENV APP_DATA_DIR=/data
-VOLUME ["/data"]
 EXPOSE 3000
 CMD ["node", "server.mjs"]
