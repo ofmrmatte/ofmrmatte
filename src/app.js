@@ -394,9 +394,9 @@ let featuredId='';
 function renderHero(){
   const hero=document.querySelector('.hero');hero.hidden=state.section!=='home'||!!state.search;
   const item=state.catalog.vod.items.find(item=>item.logo&&contentAllowed(item,state.policy));
-  if(!state.token||!item){if(featuredId){document.querySelector('.hero-copy h1').textContent='O que vamos assistir hoje?';document.querySelector('.hero-copy p').textContent='Sua TV, seus filmes e suas séries. Tudo em um só lugar.';hero.querySelector('.feature-art')?.remove();featuredId='';}return;}
+  if(!state.token||!item){if(featuredId){document.querySelector('.hero-copy h1').textContent='O que vamos assistir hoje?';document.querySelector('.hero-copy p').textContent='Sua TV, seus filmes e suas séries. Tudo em um só lugar.';hero.querySelector('.feature-art')?.remove();hero.classList.remove('has-feature-art');featuredId='';}return;}
   if(item.id===featuredId)return;featuredId=item.id;
-  hero.querySelector('.feature-art')?.remove();const src=safeHttp(item.logo);if(src){const image=el('img','feature-art');image.src=src;image.alt='';image.referrerPolicy='no-referrer';image.onerror=()=>image.remove();hero.prepend(image);}
+  hero.querySelector('.feature-art')?.remove();const src=safeHttp(item.logo);if(src){const image=el('img','feature-art');const proxied=state.token?'/api/poster/'+encodeURIComponent(state.token)+'/'+item.type+'/'+encodeURIComponent(item.sourceId):src;image.src=proxied;image.alt='';image.referrerPolicy='no-referrer';image.onload=()=>hero.classList.add('has-feature-art');image.onerror=()=>{if(image.src!==src){image.src=src;return;}image.remove();hero.classList.remove('has-feature-art');};hero.prepend(image);}else hero.classList.remove('has-feature-art');
   document.querySelector('.hero-copy h1').textContent=item.name;document.querySelector('.hero-copy p').textContent=item.description||'Uma nova história espera por você. Conheça o título e escolha seu próximo play.';
   document.querySelector('.hero-kicker').textContent='EM DESTAQUE NA SUA LISTA';$('heroPrimaryLabel').textContent='Conhecer o filme';
 }

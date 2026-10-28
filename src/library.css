@@ -56,3 +56,14 @@ body{font-family:'DM Sans',sans-serif;background:#08090b}
 #detailsModal .modal-close{position:absolute;top:12px;right:12px;margin:0;z-index:4;background:#17171ddc}
 @media(hover:none), (max-width:760px){.card-peek{display:none!important}}
 @media(max-width:760px){#detailsModal .details-modal{width:min(100%,480px);max-height:92dvh;display:flex;flex-direction:column;overflow-y:auto}#detailsModal .details-art{height:230px;min-height:230px;flex:none}#detailsModal .details-art img{position:relative;object-fit:contain}#detailsModal .details-copy{overflow:visible;display:block;padding:22px 22px 28px}#detailsModal .details-copy h2{font-size:27px}#detailsModal .details-actions{margin-top:20px;padding-top:0}}
+
+/* Home feature: use reliable proxied Xtream artwork, never a giant blank placeholder. */
+.hero{position:relative;isolation:isolate;min-height:365px!important;padding:52px 5%!important;overflow:hidden;background:linear-gradient(115deg,#1c1b28 0%,#191922 62%,#29233d 100%)!important;border:1px solid #383440!important}
+.hero-copy{position:relative;z-index:3;max-width:min(52%,620px)!important}
+.hero h1{font-size:clamp(31px,3.6vw,53px)!important;line-height:1.1!important;letter-spacing:-1.4px!important;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.hero-copy p{font-size:14px!important;line-height:1.6!important;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.hero-visual{display:none!important}
+.hero .feature-art{position:absolute;z-index:1;inset:0 0 0 auto;width:48%;height:100%;object-fit:contain;object-position:center;opacity:1;mask-image:linear-gradient(90deg,transparent 0%,#000 25%);-webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 25%)}
+.hero.has-feature-art:after{content:'';position:absolute;inset:0;z-index:2;pointer-events:none;background:linear-gradient(90deg,#1c1b28 0%,#1c1b28e8 34%,transparent 76%)}
+.hero-actions{position:relative;z-index:4}
+@media(max-width:760px){.hero{min-height:300px!important;padding:32px 24px!important}.hero-copy{max-width:100%!important}.hero h1{font-size:clamp(27px,7vw,37px)!important;max-width:80%!important}.hero-copy p{max-width:75%!important}.hero .feature-art{width:58%;opacity:.55}.hero.has-feature-art:after{background:linear-gradient(90deg,#1c1b28 0%,#1c1b28c9 55%,transparent 100%)}.hero-actions{flex-wrap:wrap}}
