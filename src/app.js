@@ -49,7 +49,7 @@ const state = {
 const cachedItem = new Map();
 const ratingJobs=[],ratingPending=new Set(),ratingSeen=new Set();let ratingWorkers=0;
 const ratingObserver=new IntersectionObserver(entries=>{for(const entry of entries)if(entry.isIntersecting){ratingObserver.unobserve(entry.target);const item=cachedItem.get(entry.target.dataset.itemId);if(item&&!ratingSeen.has(item.id)&&!ratingPending.has(item.id)){ratingPending.add(item.id);ratingJobs.push({item,card:entry.target,token:state.token});pumpRatings();}}},{rootMargin:'100px'});
-async function pumpRatings(){while(ratingWorkers<2&&ratingJobs.length){const job=ratingJobs.shift();if(job.token!==state.token){ratingPending.delete(job.item.id);continue;}ratingWorkers++;(async()=>{const badge=job.card.querySelector('.age-badge');if(badge)badge.textContent='…';try{const metadata=(await api(`/api/catalog?section=${job.item.type}&kind=rating&${job.item.type==='vod'?'vod_id':'series_id'}=${job.item.sourceId}`)).data;if(job.token!==state.token)return;Object.assign(job.item,metadata);if(badge){badge.textContent=metadata.ageLabel==='Não informada'?'—':metadata.ageLabel;badge.className='age-badge age-'+(metadata.age??'nc');badge.title=ratingText(metadata);}}catch(error){if(error.status===403&&job.token===state.token){job.card.remove();state.catalog[job.item.type].items=state.catalog[job.item.type].items.filter(item=>item.id!==job.item.id);}else if(badge){badge.textContent='—';badge.title='Classificação indisponível. Abra o título para tentar novamente.';}}finally{if(job.token===state.token){ratingSeen.add(job.item.id);ratingPending.delete(job.item.id);}ratingWorkers--;pumpRatings();}})();}}
+async function pumpRatings(){while(ratingWorkers<3&&ratingJobs.length){const job=ratingJobs.shift();if(job.token!==state.token){ratingPending.delete(job.item.id);continue;}ratingWorkers++;(async()=>{const badge=job.card.querySelector('.age-badge');if(badge)badge.textContent='…';try{const metadata=(await api(`/api/catalog?section=${job.item.type}&kind=rating&${job.item.type==='vod'?'vod_id':'series_id'}=${job.item.sourceId}`)).data;if(job.token!==state.token)return;Object.assign(job.item,metadata);if(badge){badge.textContent=metadata.ageLabel==='Não informada'?'—':metadata.ageLabel;badge.className='age-badge age-'+(metadata.age??'nc');badge.title=ratingText(metadata);}}catch(error){if(error.status===403&&job.token===state.token){job.card.remove();state.catalog[job.item.type].items=state.catalog[job.item.type].items.filter(item=>item.id!==job.item.id);}else if(badge){badge.textContent='—';badge.title='Classificação indisponível. Abra o título para tentar novamente.';}}finally{if(job.token===state.token){ratingSeen.add(job.item.id);ratingPending.delete(job.item.id);}ratingWorkers--;pumpRatings();}})();}}
 state.progress={};state.seriesProgress={};state.episodeQueue=[];state.seriesRequest=0;
 function scopeKey() { return `mfstream:${state.host}:${state.account?.profile?.id||state.account?.username||''}`; }
 let cloudTimer,cloudSnapshot;
@@ -239,6 +239,17 @@ function mediaCard(item) {
   const hover=el('span','card-hover-play');const circle=el('span');circle.innerHTML=icon('play',24);hover.append(circle);art.append(hover);
   const caption=el('div','media-card-info');caption.append(el('strong','',item.name),el('small','',item.group || kindMap[item.type]));const saved=item.type==='series'?state.progress[state.seriesProgress[item.id]?.episodeId]:state.progress[item.id];if(saved&&!saved.completed&&saved.position>=5)caption.append(el('span','continue-label',item.type==='series'?'Continuar · T'+saved.season+' E'+saved.episodeNumber+' · '+formatTime(saved.position):'Continuar em '+formatTime(saved.position)));
   card.append(art,caption);
+  if(item.type!=='live'){
+    const preview=el('div','card-peek');preview.setAttribute('aria-hidden','true');
+    const peekTitle=el('strong','card-peek-title',item.name);
+    const peekMeta=el('div','card-peek-meta');
+    const peekAge=el('span','card-peek-age',item.ageLabel==='Não informada'?'Classificação pendente':ratingText(item));
+    peekMeta.append(peekAge,el('span','',item.year||''));
+    const peekDescription=el('p','card-peek-description',item.description||item.group||'Selecione para ver mais informações.');
+    const peekPlay=el('button','card-peek-play','▶ Assistir');peekPlay.type='button';peekPlay.addEventListener('click',event=>{event.stopPropagation();item.type==='series'?openSeries(item):playItem(item);});
+    preview.append(peekTitle,peekMeta,peekDescription,peekPlay);card.append(preview);
+    card.addEventListener('mouseenter',()=>{peekAge.textContent=item.ageLabel==='Não informada'?'Classificação pendente':ratingText(item);peekDescription.textContent=item.description||item.group||'Selecione para ver mais informações.';});
+  }
   const open=()=>item.type==='live'?playItem(item):openDetails(item);
   card.addEventListener('click',open);card.addEventListener('keydown',e=>{if(e.target===card&&(e.key==='Enter'||e.key===' ')){e.preventDefault();open();}});
   return card;
@@ -389,7 +400,7 @@ async function openDetails(item,refresh=false){
     $('detailsCredits').textContent=[metadata.director?`Direção: ${metadata.director}`:'',metadata.cast?`Elenco: ${metadata.cast}`:''].filter(Boolean).join(' · ');
     $('detailsFavorite').textContent=state.favorites.has(item.id)?'Remover da minha lista':'Adicionar à minha lista';
   };
-  $('detailsArt').replaceChildren();const src=safeHttp(item.logo);if(src){const image=el('img');image.src=src;image.alt='';image.referrerPolicy='no-referrer';$('detailsArt').append(image);}fill(item);$('detailsPlay').disabled=true;
+  $('detailsArt').replaceChildren();const src=safeHttp(item.logo);if(src){const image=el('img');const proxy=state.token?'/api/poster/'+encodeURIComponent(state.token)+'/'+item.type+'/'+encodeURIComponent(item.sourceId):src;image.src=proxy;image.alt='';image.referrerPolicy='no-referrer';image.onerror=()=>{if(image.src!==src){image.src=src;}else image.hidden=true;};$('detailsArt').append(image);}fill(item);$('detailsPlay').disabled=true;
   $('refreshRating').disabled=true;if(item.ageLabel==='Não informada'||refresh)$('detailsMeta').replaceChildren(el('span','age-badge','Buscando classificação…'));
   try{const data=(await api(`/api/catalog?section=${item.type}&kind=info&${item.type==='vod'?'vod_id':'series_id'}=${item.sourceId}${refresh?'&refresh=1':''}`)).data;if(ticket!==state.detailRequest||$('detailsModal').hidden)return;Object.assign(item,data.metadata);cachedItem.set(item.id,item);state.detailItem=item;render();fill(state.detailItem);$('detailsPlay').disabled=false;}
   catch(error){if(ticket===state.detailRequest){$('detailsDescription').textContent=error.message;if(error.status===403)loadSection(item.type,true);}}
