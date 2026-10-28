@@ -5,7 +5,7 @@ export function certification(item={}) {
   const release=item.release_dates?.results?.find(row=>row.iso_3166_1==='BR')?.release_dates?.find(row=>row.certification);
   if(release)candidates.unshift({certification:release.certification,ageCountry:'BR'});
   for(const candidate of candidates)for(const key of ['age_rating','content_rating','certification','mpaa','parental_rating','classification','contentAdvisoryRating','age']) {
-    const label=String(candidate[key]??'').trim().toUpperCase();
+    const label=String(candidate[key]??'').trim().toUpperCase().replace(/^CLASSIFICAÇÃO\s*:?\s*/,'').replace(/^RATED\s+/,'');
     const match=/^(?:BR[- ]?|A)?\+?(L|LIVRE|0|10|12|14|16|18)(?:\s*(?:ANOS|\+))?$/.exec(label);
     if(match){const age=['L','LIVRE'].includes(match[1])?0:Number(match[1]);return {age,ageLabel:age===0?'L':String(age),ageCountry:candidate.ageCountry||'',ageSource:candidate.ageSource||'Provedor'};}
     if(/^(TV-(?:Y|Y7|Y7-FV|G|PG|14|MA)|G|PG|PG-13|R|NC-17)$/.test(label)){

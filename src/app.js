@@ -60,7 +60,7 @@ function loadPrefs() { state.favorites = new Set(storage.get(`${scopeKey()}:favo
 function toast(message) { const node=el('div','toast',message); $('toastHost').append(node); setTimeout(()=>node.remove(),4200); }
 function number(n) { return new Intl.NumberFormat('pt-BR').format(n); }
 function normalize(text) { return String(text||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase(); }
-function safeHttp(url) { try { const out=new URL(url); return ['http:','https:'].includes(out.protocol) ? out.href : null; } catch { return null; } }
+function safeHttp(url) { try { const out=new URL(url,state.host||location.origin); return ['http:','https:'].includes(out.protocol) ? out.href : null; } catch { return null; } }
 function sessionHeaders() { return {...(state.token?{'x-session-token':state.token}:{}),...(state.fixedMode?{'Content-Type':'application/json','x-profile-id':state.profile?.id||''}:{})}; }
 async function api(path, options={}) {
   const response=await fetch(path,{cache:'no-store',...options,headers:{...sessionHeaders(),...(options.headers||{})}});

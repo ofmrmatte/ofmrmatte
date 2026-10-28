@@ -47,7 +47,7 @@ export function normalizeCatalog(items, categories, section) {
       id: `${section}:${id}`, sourceId: id, type: section,
       name: String(item.name || item.title || `Conteúdo ${id}`),
       group: groups.get(categoryId) || 'Sem categoria', categoryId,
-      logo: String(item.stream_icon || item.cover || ''),
+      logo: String(item.stream_icon || item.cover || item.cover_big || item.movie_image || item.poster || item.image || item.info?.movie_image || item.info?.cover || ''),
       extension: String(item.container_extension || (section === 'live' ? 'm3u8' : 'mp4')),
       rating: String(item.rating || ''), year: String(item.releaseDate || item.release_date || ''),
       ...contentMetadata(item,groups.get(categoryId)||''),
