@@ -521,6 +521,24 @@ async function route(req,res) {
         return send(res,200,{data});
       } catch (err) { return sendFailure(res,502,err); }
     }
+    // Image relay: derive URL from the authenticated catalog, never accept arbitrary user URLs.
+    const poster=/^\\/api\\/poster\\/([A-Za-z0-9_-]{20,60})\\/(live|vod|series)\\/(\\d{1,15})$/.exec(pathname);
+    if(req.method==='GET'&&poster){
+      const s=sessionFor(poster[1]);if(!s||access&&s.ownerId!==identity.user.id)return send(res,401,{error:'Sessão inválida.'});
+      try{
+        const section=poster[2],id=poster[3];if(!await allowedEntry(s,section,id,false))return send(res,403,{error:'Conteúdo indisponível.'});
+        const catalog=await catalogFor(s,section),item=catalog.items.find(row=>String(section==='series'?row.series_id:row.stream_id)===id);
+        const raw=item?.stream_icon||item?.cover||item?.cover_big||item?.movie_image||item?.poster||item?.image||item?.info?.movie_image||item?.info?.cover;
+        if(!raw)return send(res,404,{error:'Provedor não informou pôster.'});
+        const imageUrl=new URL(String(raw),s.base+'/');if(!['http:','https:'].includes(imageUrl.protocol)||imageUrl.username||imageUrl.password)return send(res,400,{error:'Imagem inválida.'});
+        const {response}=await getRemote(imageUrl.href);
+        const contentType=String(response.headers['content-type']||'').split(';')[0].trim().toLowerCase();
+        if(response.statusCode!==200||!['image/jpeg','image/png','image/webp','image/gif','image/avif'].includes(contentType)){response.resume();return send(res,502,{error:'Imagem indisponível no provedor.'});}
+        const size=Number(response.headers['content-length']||0);if(size>5_000_000){response.resume();return send(res,413,{error:'Imagem muito grande.'});}
+        res.writeHead(200,{'Content-Type':contentType,'Cache-Control':'private, max-age=1800','X-Content-Type-Options':'nosniff'});
+        let count=0;for await(const chunk of response){count+=chunk.length;if(count>5_000_000){res.destroy();return;}if(!res.write(chunk))await new Promise(resolve=>res.once('drain',resolve));}res.end();return;
+      }catch(error){return sendFailure(res,502,error);}
+    }
     const stream = /^\/api\/stream\/([A-Za-z0-9_-]{20,60})\/(live|vod|series)\/(\d{1,15})\.([a-z0-9]{2,5})$/.exec(pathname);
     const media = /^\/api\/media\/([A-Za-z0-9_-]{20,60})\/([A-Za-z0-9_-]{15,30})$/.exec(pathname);
     if (req.method === 'GET' && stream) {
