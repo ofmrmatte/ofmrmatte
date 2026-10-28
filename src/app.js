@@ -224,6 +224,7 @@ function emptyContent(title,description,buttonText,action) {
   const box=el('div','content-empty');const orb=el('span','empty-orb');orb.innerHTML=icon(state.token?'tv':'plug',27);box.append(orb,el('h3','',title),el('p','',description));
   if(buttonText){const btn=el('button','btn btn-primary',buttonText);btn.type='button';btn.addEventListener('click',action);box.append(btn);}return box;
 }
+const previewAbort=new AbortController();
 function mediaCard(item) {
   const card=el('article','media-card '+item.type);card.tabIndex=0;card.setAttribute('role','button');card.setAttribute('aria-label',`Abrir ${item.name}`);
   card.dataset.itemId=item.id;if(item.type!=='live'&&item.ageLabel==='Não informada')ratingObserver.observe(card);
@@ -250,7 +251,12 @@ function mediaCard(item) {
     const peekArt=el('div','card-peek-art');if(src){const img=el('img');img.alt='';img.loading='lazy';img.src=posterUrl;img.onerror=()=>{if(img.src!==src)img.src=src;else img.hidden=true};peekArt.append(img)}
     const peekActions=el('div','card-peek-actions');peekPlay.textContent='▶';peekPlay.title='Assistir';peekPlay.setAttribute('aria-label','Assistir');const peekMore=el('button','card-peek-more','⌄');peekMore.type='button';peekMore.title='Mais informações';peekMore.setAttribute('aria-label','Mais informações');peekMore.addEventListener('click',event=>{event.stopPropagation();openDetails(item)});const peekFav=el('button','card-peek-more',state.favorites.has(item.id)?'♥':'+');peekFav.type='button';peekFav.title='Adicionar ou remover favorito';peekFav.addEventListener('click',event=>{event.stopPropagation();favorite(item.id);peekFav.textContent=state.favorites.has(item.id)?'♥':'+'});peekActions.append(peekPlay,peekFav,peekMore);
     preview.append(peekArt,peekActions,peekTitle,peekMeta,peekDescription);card.append(preview);
-    card.addEventListener('mouseenter',()=>{peekAge.textContent=item.ageLabel==='Não informada'?'Classificação pendente':ratingText(item);peekDescription.textContent=item.description||item.group||'Selecione para ver mais informações.';});
+    let previewTimer;
+    const positionPreview=()=>{const rect=card.getBoundingClientRect();const width=Math.min(320,window.innerWidth-24);const height=Math.min(445,window.innerHeight-24);const left=Math.max(12,Math.min(rect.left+rect.width/2-width/2,window.innerWidth-width-12));const top=Math.max(12,Math.min(rect.top-28,window.innerHeight-height-12));preview.style.left=left+'px';preview.style.top=top+'px';preview.style.width=width+'px';};
+    const reveal=()=>{if(!window.matchMedia('(hover:hover) and (min-width:761px)').matches)return;clearTimeout(previewTimer);previewTimer=setTimeout(()=>{if(!card.isConnected)return;peekAge.textContent=item.ageLabel==='Não informada'?'Classificação pendente':ratingText(item);peekDescription.textContent=item.description||item.group||'Selecione para ver mais informações.';positionPreview();preview.classList.add('is-visible');preview.setAttribute('aria-hidden','false');},240);};
+    const dismiss=()=>{clearTimeout(previewTimer);preview.classList.remove('is-visible');preview.setAttribute('aria-hidden','true');};
+    card.addEventListener('mouseenter',reveal);card.addEventListener('mouseleave',dismiss);card.addEventListener('focusin',reveal);card.addEventListener('focusout',event=>{if(!card.contains(event.relatedTarget))dismiss()});
+    window.addEventListener('scroll',dismiss,{passive:true,signal:previewAbort.signal});window.addEventListener('resize',dismiss,{passive:true,signal:previewAbort.signal});
   }
   const open=()=>item.type==='live'?playItem(item):openDetails(item);
   card.addEventListener('click',open);card.addEventListener('keydown',e=>{if(e.target===card&&(e.key==='Enter'||e.key===' ')){e.preventDefault();open();}});
