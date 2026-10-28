@@ -5,7 +5,7 @@ const eslintConfig = [
   ...nextVitals,
   ...nextTypescript,
   {
-    ignores: [".next/**", "node_modules/**", "out/**", "dist/**", "next-env.d.ts", "integrations/office-background/**", "public/office/**"]
+    ignores: [".next/**", "node_modules/**", "out/**", "dist/**", "next-env.d.ts", "integrations/office-background/**", "public/office/**", "apps/mf-stream/**"]
   }
 ];
 

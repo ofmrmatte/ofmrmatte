@@ -1,4 +1,4 @@
-export type ProjectVisual = "archi" | "alc-site" | "mldds";
+export type ProjectVisual = "archi" | "alc-site" | "mldds" | "mf-stream";
 
 export type ProjectScreenshot = {
   src: string;
@@ -89,6 +89,14 @@ export const archiSubsystems: readonly ArchiSubsystem[] = [
 ];
 
 export const portfolioProjects: readonly PortfolioProject[] = [
+  {
+    name: "MF Stream",
+    eyebrow: "Streaming · Filmes, séries e TV ao vivo",
+    description: "Aplicativo de mídia com contas, perfis, reprodução HLS, controle parental e progresso salvo. Interface responsiva e infraestrutura preparada para publicação no Railway.",
+    visual: "mf-stream",
+    stack: ["Node.js", "JavaScript", "Better Auth", "SQLite / PostgreSQL", "HLS", "Docker"],
+    screenshot: { src: "/projects/mf-stream.png", alt: "Tela de acesso do MF Stream", privacy: "public" }
+  },
   {
     name: "ALC ARCHI",
     eyebrow: "Plataforma corporativa · Identidade e acessos",

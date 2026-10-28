@@ -28,6 +28,12 @@ No desenvolvimento, utilizo ferramentas de inteligência artificial como apoio �
 
 ## Projetos em destaque
 
+### MF Stream — Filmes, séries e TV ao vivo
+
+Aplicativo responsivo com autenticação por conta, até cinco perfis, progresso salvo em banco, controle parental e player com controles integrados. Código independente em [apps/mf-stream](apps/mf-stream), com instruções de publicação em [DEPLOY_RAILWAY.md](apps/mf-stream/DEPLOY_RAILWAY.md). A configuração privada da lista e os bancos locais não são versionados. A publicação do streaming usa o ramo `mf-stream-deploy`, separado da aplicação Next.js do portfólio em `main`.
+
+![Acesso ao MF Stream](public/projects/mf-stream.png)
+
 ### ALC ARCHI
 
 **Plataforma corporativa · Identidade · Setores · SSO**

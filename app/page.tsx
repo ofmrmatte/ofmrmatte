@@ -39,6 +39,7 @@ const projectByName = (name: string) => {
 const archi = projectByName("ALC ARCHI");
 const mldds = projectByName("MLDDS");
 const alcSite = projectByName("Site ALC & Pereira Filho");
+const mfStream = projectByName("MF Stream");
 
 const capabilities = [
   {
@@ -402,6 +403,22 @@ export default function Page() {
                   <p>{alcSite.description}</p>
                   <StackTags items={alcSite.stack} />
                 </CardContent>
+              </Card>
+            </div>
+            <div className="showcase-feature">
+              <Card className="showcase-card" data-spotlight-card>
+                <div className="showcase-feature-upper">
+                  <CardContent className="showcase-copy">
+                    <div className="showcase-number"><span>PROJETO 04</span><span>STREAMING / EXPERIÊNCIA DIGITAL</span></div>
+                    <h3>MF Stream</h3>
+                    <p>{mfStream.description}</p>
+                    <StackTags items={mfStream.stack} />
+                    <a className="text-link" href="https://github.com/ofmrmatte/ofmrmatte/tree/main/apps/mf-stream" target="_blank" rel="noreferrer">Ver projeto no GitHub ↗</a>
+                  </CardContent>
+                  <div className="alc-preview" style={{ height: "100%", minHeight: 260, aspectRatio: "auto" }}>
+                    <Image src="/projects/mf-stream.png" alt="Tela de login do MF Stream com acesso por conta e perfis" fill sizes="(max-width: 850px) 100vw, 50vw" />
+                  </div>
+                </div>
               </Card>
             </div>
           </SpotlightGrid>
