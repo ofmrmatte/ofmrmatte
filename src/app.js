@@ -247,7 +247,9 @@ function mediaCard(item) {
     peekMeta.append(peekAge,el('span','',item.year||''));
     const peekDescription=el('p','card-peek-description',item.description||item.group||'Selecione para ver mais informações.');
     const peekPlay=el('button','card-peek-play','▶ Assistir');peekPlay.type='button';peekPlay.addEventListener('click',event=>{event.stopPropagation();item.type==='series'?openSeries(item):playItem(item);});
-    preview.append(peekTitle,peekMeta,peekDescription,peekPlay);card.append(preview);
+    const peekArt=el('div','card-peek-art');if(src){const img=el('img');img.alt='';img.loading='lazy';img.src=posterUrl;img.onerror=()=>{if(img.src!==src)img.src=src;else img.hidden=true};peekArt.append(img)}
+    const peekActions=el('div','card-peek-actions');peekPlay.textContent='▶';peekPlay.title='Assistir';peekPlay.setAttribute('aria-label','Assistir');const peekMore=el('button','card-peek-more','⌄');peekMore.type='button';peekMore.title='Mais informações';peekMore.setAttribute('aria-label','Mais informações');peekMore.addEventListener('click',event=>{event.stopPropagation();openDetails(item)});const peekFav=el('button','card-peek-more',state.favorites.has(item.id)?'♥':'+');peekFav.type='button';peekFav.title='Adicionar ou remover favorito';peekFav.addEventListener('click',event=>{event.stopPropagation();favorite(item.id);peekFav.textContent=state.favorites.has(item.id)?'♥':'+'});peekActions.append(peekPlay,peekFav,peekMore);
+    preview.append(peekArt,peekActions,peekTitle,peekMeta,peekDescription);card.append(preview);
     card.addEventListener('mouseenter',()=>{peekAge.textContent=item.ageLabel==='Não informada'?'Classificação pendente':ratingText(item);peekDescription.textContent=item.description||item.group||'Selecione para ver mais informações.';});
   }
   const open=()=>item.type==='live'?playItem(item):openDetails(item);
