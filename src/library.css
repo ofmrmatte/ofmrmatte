@@ -67,3 +67,21 @@ body{font-family:'DM Sans',sans-serif;background:#08090b}
 .hero.has-feature-art:after{content:'';position:absolute;inset:0;z-index:2;pointer-events:none;background:linear-gradient(90deg,#1c1b28 0%,#1c1b28e8 34%,transparent 76%)}
 .hero-actions{position:relative;z-index:4}
 @media(max-width:760px){.hero{min-height:300px!important;padding:32px 24px!important}.hero-copy{max-width:100%!important}.hero h1{font-size:clamp(27px,7vw,37px)!important;max-width:80%!important}.hero-copy p{max-width:75%!important}.hero .feature-art{width:58%;opacity:.55}.hero.has-feature-art:after{background:linear-gradient(90deg,#1c1b28 0%,#1c1b28c9 55%,transparent 100%)}.hero-actions{flex-wrap:wrap}}
+
+/* Dedicated title routes: no nested episode/details popups. */
+.title-page[hidden],.title-episodes[hidden]{display:none!important}
+body.title-page-open .hero,body.title-page-open #contentArea,body.title-page-open #loadMoreWrap,body.title-page-open .catalog-heading,body.title-page-open .catalog-filters{display:none!important}
+.title-page{max-width:1240px;margin:0 auto;padding:26px 24px 80px;min-height:calc(100dvh - 110px)}
+.title-back{margin-bottom:22px}
+.title-page .details-modal{display:grid;grid-template-columns:minmax(220px,32%) minmax(0,1fr);width:100%;max-height:none;min-height:450px;overflow:hidden;border:1px solid #343240;border-radius:20px;background:#17171f;box-shadow:none}
+.title-page .details-art{min-height:440px;position:relative;background:#24232d}
+.title-page .details-art img{width:100%;height:100%;position:absolute;inset:0;object-fit:contain}
+.title-page .details-copy{padding:48px 44px;overflow:visible}
+.title-page .details-copy h2{font-size:clamp(30px,3.8vw,52px)}
+.title-episodes{margin-top:32px;scroll-margin-top:115px}
+.title-episodes .series-modal{width:100%;max-height:none;display:block;padding:32px;border:1px solid #343240;border-radius:20px;background:#17171f;overflow:visible}
+.title-episodes .episodes-list{max-height:none;overflow:visible;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.title-episodes .series-heading{margin-bottom:24px}
+.title-episodes .series-heading>p{display:none}
+.title-episodes .series-heading h2{font-size:24px}
+@media(max-width:760px){.title-page{padding:16px 14px 45px}.title-page .details-modal{display:block}.title-page .details-art{height:310px;min-height:310px}.title-page .details-copy{padding:25px 20px}.title-episodes .series-modal{padding:18px}.title-episodes .episodes-list{grid-template-columns:1fr}}
