@@ -562,8 +562,9 @@ async function route(req,res) {
     return send(res,404,{error:'Rota não encontrada.'});
   }
   if (req.method !== 'GET' && req.method !== 'HEAD') return send(res,405,{error:'Método não permitido.'});
-  if (!staticPaths.has(pathname)) return send(res,404,{error:'Arquivo não encontrado.'});
-  const path = pathname==='/admin'||pathname==='/admin/'?resolve(root,'admin.html'):vendorPaths.get(pathname)||resolve(root, '.' + pathname);
+  const isTitleRoute=/^\/title\/(?:movie|series)\/\d{1,15}\/?$/.test(pathname);
+  if (!staticPaths.has(pathname)&&!isTitleRoute) return send(res,404,{error:'Arquivo não encontrado.'});
+  const path = isTitleRoute?resolve(root,'index.html'):pathname==='/admin'||pathname==='/admin/'?resolve(root,'admin.html'):vendorPaths.get(pathname)||resolve(root, '.' + pathname);
   if (path !== root && !path.startsWith(root + sep)) return send(res,403,{error:'Acesso negado.'});
   try {
     const filePath = (await stat(path)).isDirectory() ? resolve(path,'index.html') : path;

@@ -205,3 +205,19 @@ test('proteção parental filtra API e bloqueia URLs diretas, detalhes e sessõe
  response=await update({hideAdult:false,maxAge:null,blockUnknown:false,pin:'7429'});assert.equal(response.status,200);
  response=await fetch(origin+'/api/catalog?section=live&kind=items',{headers});assert.equal((await response.json()).data.length,2);
 });
+
+test('rotas individuais de filmes e séries servem o aplicativo',async t=>{
+ const origin=await startApp(t);
+ for(const path of ['/title/movie/22','/title/series/33','/title/movie/22/']){
+  const response=await fetch(origin+path);
+  assert.equal(response.status,200,path);
+  assert.match(response.headers.get('content-type')||'',/text\/html/);
+  assert.match(await response.text(),/id="detailsModal"/);
+ }
+ for(const path of ['/title/movie/invalid','/title/series/33/extra','/title/other/22'])
+  assert.equal((await fetch(origin+path)).status,404,path);
+});
+test('o JavaScript da interface é sintaticamente válido',async()=>{
+ const {execFileSync}=await import('node:child_process');
+ assert.doesNotThrow(()=>execFileSync(process.execPath,['--check','src/app.js'],{cwd:resolve(import.meta.dirname,'..'),encoding:'utf8'}));
+});
