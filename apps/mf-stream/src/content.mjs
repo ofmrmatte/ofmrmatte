@@ -5,12 +5,12 @@ export function certification(item={}) {
   const release=item.release_dates?.results?.find(row=>row.iso_3166_1==='BR')?.release_dates?.find(row=>row.certification);
   if(release)candidates.unshift({certification:release.certification,ageCountry:'BR'});
   for(const candidate of candidates)for(const key of ['age_rating','content_rating','certification','mpaa','parental_rating','classification','contentAdvisoryRating','rated','tv_rating','us_rating','age']) {
-    const label=String(candidate[key]??'').trim().toUpperCase().replace(/^CLASSIFICAÇÃO\s*:?\s*/,'').replace(/^RATED\s+/,'').replace(/^USA?\s*:?\s*/,'');
+    const raw=candidate[key];const label=String(raw&&typeof raw==='object'?(raw.rating||raw.certification||raw.value||''):raw??'').trim().toUpperCase().replace(/^CLASSIFICAÇÃO\s*:?\s*/,'').replace(/^RATED\s+/,'').replace(/^USA?\s*:?\s*/,'').replace(/^N[ÃA]O RECOMENDADO (?:PARA )?(?:MENORES DE )?/,'').replace(/^TODOS OS P[ÚU]BLICOS$/,'LIVRE');
     const match=/^(?:BR[- ]?|A)?\+?(L|LIVRE|0|6|10|12|14|16|18)(?:\s*(?:ANOS|\+))?$/.exec(label);
     if(match){const age=['L','LIVRE'].includes(match[1])?0:Number(match[1]);return {age,ageLabel:age===0?'L':String(age),ageCountry:candidate.ageCountry||'',ageSource:candidate.ageSource||'Provedor',...(candidate.ageSourceUrl?{ageSourceUrl:candidate.ageSourceUrl}:{})};}
     if(/^(TV-(?:Y|Y7|Y7-FV|G|PG|14|MA)|G|PG|PG-13|R|NC-17)$/.test(label)){
       const reference={'TV-Y':0,'TV-Y7':7,'TV-Y7-FV':7,'TV-G':0,'TV-PG':10,'TV-14':14,'TV-MA':18,G:0,PG:10,'PG-13':14,R:18,'NC-17':18};
-      return {age:reference[label]??null,ageLabel:label,ageCountry:candidate.ageCountry||'US',ageSource:candidate.ageSource||'Provedor',ageReference:true};
+      return {age:reference[label]??null,ageLabel:label,ageCountry:'US',ageSource:candidate.ageSource||'Provedor',ageReference:true};
     }
   }
   return {age:null,ageLabel:'Não informada',ageCountry:'',ageSource:''};
@@ -27,4 +27,12 @@ export function contentAllowed(metadata, policy) {
   if (policy.hideAdult && metadata.adult) return false;
   if (metadata.age === null) return !policy.blockUnknown;
   return policy.maxAge === null || metadata.age <= policy.maxAge;
+}
+
+// Catalog refreshes must not discard verified age data or replace it with audience scores.
+export function mergeCatalogMetadata(base,previous,cached){
+  const known=m=>m&&m.ageLabel&&m.ageLabel!=='Não informada';
+  const candidates=[cached,previous,base].filter(known);const best=candidates.find(m=>m.ageCountry==='BR')||candidates.find(m=>m.ageSource==='Provedor')||candidates[0];
+  const age=best?Object.fromEntries(Object.entries(best).filter(([k])=>k.startsWith('age'))):{};
+  return {...base,...age,description:base.description||previous?.description||'',adult:base.adult||best?.age===18};
 }
