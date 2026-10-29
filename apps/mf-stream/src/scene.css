@@ -311,3 +311,58 @@
  .episode-download-row .title-episode{flex:1 1 100%}
  .episode-download-action{margin-left:auto}
 }
+
+
+/* Cinematic highlights v5.2.1 — sharp portrait key art and native-provider previews. */
+.hero.hero-presentation .highlight-scene:not(.is-landscape) .highlight-cover{
+ filter:none!important;opacity:1!important;
+ right:6%!important;left:auto!important;top:0!important;
+ width:min(46vw,var(--hero-poster-width,460px))!important;
+ height:100%!important;max-height:100%!important;
+ object-fit:contain!important;object-position:center!important;
+ mask-image:linear-gradient(0deg,transparent 0%,black 10%,black 95%,transparent 100%)!important;
+ -webkit-mask-image:linear-gradient(0deg,transparent 0%,black 10%,black 95%,transparent 100%)!important;
+ image-rendering:auto;
+}
+.hero.hero-presentation .highlight-scene:not(.is-landscape) .highlight-atmosphere{
+ filter:blur(18px) saturate(.7)!important;opacity:.13!important;
+}
+.hero.hero-presentation .highlight-scene.is-landscape .highlight-cover{
+ filter:none!important;opacity:1!important;object-fit:cover!important;image-rendering:auto;
+}
+.hero.hero-presentation .highlight-scene .highlight-video{
+ position:absolute;inset:0;z-index:2;
+ width:100%;height:100%;object-fit:cover;object-position:center;
+ filter:none!important;opacity:0!important;
+ border:0;background:#050507;
+ pointer-events:none;transition:opacity .35s ease;
+}
+.hero.hero-presentation.has-background-preview .highlight-scene .highlight-video{opacity:1!important}
+.hero.hero-presentation.has-background-preview .highlight-scene .highlight-cover,
+.hero.hero-presentation.has-background-preview .highlight-scene .highlight-atmosphere{opacity:0!important}
+.hero.hero-presentation .hero-actions #heroTrailer[hidden]{display:none!important}
+.hero.hero-presentation .hero-actions #heroTrailer[aria-pressed=true]{
+ border-color:rgba(188,150,255,.6);background:rgba(102,69,145,.32);
+}
+@media(max-width:1100px){
+ .hero.hero-presentation .highlight-scene:not(.is-landscape) .highlight-cover{
+  width:min(53vw,var(--hero-poster-width,460px))!important;
+  right:2%!important;object-position:right top!important;
+ }
+}
+@media(max-width:760px){
+ .hero.hero-presentation .highlight-scene:not(.is-landscape) .highlight-cover{
+  width:min(92vw,var(--hero-poster-width,460px))!important;
+  height:390px!important;right:0!important;
+  top:0!important;object-position:right top!important;
+  mask-image:linear-gradient(0deg,transparent,black 30%)!important;
+  -webkit-mask-image:linear-gradient(0deg,transparent,black 30%)!important;
+ }
+ .hero.hero-presentation .highlight-scene.is-landscape .highlight-cover{
+  width:100%!important;height:410px!important;object-fit:cover!important;
+  object-position:center top!important;
+ }
+ .hero.hero-presentation .highlight-scene .highlight-video{
+  object-position:center top!important;
+ }
+}

@@ -1,7 +1,7 @@
 import {createHash} from 'node:crypto';
 import {readFile,mkdir,writeFile} from 'node:fs/promises';
 import {resolve} from 'node:path';
-import {publicJson,readCache,writeCache,DAY,createTrailerLookup,limitedBytes} from './public-metadata.mjs';
+import {publicJson,readCache,writeCache,DAY,limitedBytes} from './public-metadata.mjs';
 import {cleanTitle,searchTitle} from './ratings.mjs';
 export const discoveryName=value=>cleanTitle(value).replace(/\s+(?:completa|completo)\s*$/,'');
 export function remoteIndex(rows){
@@ -22,7 +22,7 @@ export function dailySelection(items,day,limit=8){
 const validArt=value=>typeof value==='string'&&/^[\w/-]{5,100}$/.test(value);
 export function simklArtwork(row){return validArt(row?.fanart)?'https://wsrv.nl/?url='+encodeURIComponent('https://simkl.in/fanart/'+row.fanart+'_medium.jpg')+'&w=1920&output=webp':'';}
 export function createDiscovery({cacheDir,fetcher=fetch,enabled=true,tmdb}={}){
-  const file=resolve(cacheDir,'discovery.json'),trailer=createTrailerLookup(fetcher,{cachePath:resolve(cacheDir,'trailers.json')});
+  const file=resolve(cacheDir,'discovery.json');
   const artPending=new Map();
   let state={updatedAt:0,groups:{vod:[],series:[]}},pending=null,retryAt=0;const ready=readCache(file,state).then(s=>{if(s.groups&&Array.isArray(s.groups.vod)&&Array.isArray(s.groups.series))state=s;});
   async function refresh(){await ready;if(!enabled||Date.now()-state.updatedAt<DAY||Date.now()<retryAt)return;retryAt=Date.now()+300000;
@@ -42,7 +42,7 @@ export function createDiscovery({cacheDir,fetcher=fetch,enabled=true,tmdb}={}){
       const pool=[...rankings.vod,...rankings.series];const highlights=dailySelection(pool.length?pool:[...items.vod,...items.series].filter(allowed),day);
       return {updatedAt:s.updatedAt?new Date(s.updatedAt).toISOString():null,nextRefreshAt:new Date(s.updatedAt?s.updatedAt+DAY:Date.now()+300000).toISOString(),status:!s.updatedAt?'unavailable':Date.now()-s.updatedAt>DAY?'stale':s.partial?'partial':'ready',day,highlights,rankings,source:{name:'Simkl',url:'https://simkl.com/',moviesUrl:'https://simkl.com/movies/best-movies/most-watched/',seriesUrl:'https://simkl.com/tv/best-shows/most-watched/'}};
     },
-    async extra(item,section){const row=await match(item,section),remote=row?metadata(row):{};const tm=await tmdb?.lookup(searchTitle(item.name),section,String(item.releaseDate||item.release_date||item.year||'').slice(0,4),row?.ids?.tmdb||item.tmdb_id||'');return {...remote,...(tm?{backdrop:tm.backdrop||remote.backdrop,description:tm.description,metadataSource:'TMDB',metadataUrl:tm.sourceUrl,rating:tm.rating}:{}),trailer:tm?.trailer||await trailer(row?.trailer)};},
+    async extra(item,section){const row=await match(item,section),remote=row?metadata(row):{};const tm=await tmdb?.lookup(searchTitle(item.name),section,String(item.releaseDate||item.release_date||item.year||'').slice(0,4),row?.ids?.tmdb||item.tmdb_id||'');return {...remote,...(tm?{backdrop:tm.backdrop||remote.backdrop,description:tm.description,metadataSource:'TMDB',metadataUrl:tm.sourceUrl,rating:tm.rating}:{}),trailer:null};},
     async artwork(url){
       if(artPending.has(url))return artPending.get(url);const job=(async()=>{
       if(!url||!(/^https:\/\/wsrv\.nl\/\?url=https%3A%2F%2Fsimkl\.in%2Ffanart%2F/i.test(url)||/^https:\/\/image\.tmdb\.org\/t\/p\/w1280\/[\w.-]+$/.test(url)))return null;
