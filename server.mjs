@@ -13,7 +13,7 @@ import {createParentalStore,parentalKey} from './lib/parental.mjs';
 import {contentMetadata,contentAllowed} from './src/content.mjs';
 import {createRatingLookup} from './lib/ratings.mjs';
 import {createAccess} from './lib/access.mjs';
-const lookupRating=process.env.RATING_LOOKUP_ENABLED==='0'?async()=>null:createRatingLookup();
+const lookupRating=process.env.RATING_LOOKUP_ENABLED==='0'?async()=>null:createRatingLookup(fetch,{cachePath:resolve(process.env.APP_DATA_DIR||resolve(root,'.data'),'ratings-cache.json')});
 import { CATALOG_ACTIONS, SECTIONS, normalizeServerUrl, apiUrl, buildStreamUrl, rewriteHlsManifest } from './src/xtream.mjs';
 
 const root = resolve(fileURLToPath(new URL('.', import.meta.url)));
@@ -36,8 +36,8 @@ const MAX_API_JSON = 30_000_000;
 const MAX_MANIFEST = 2_000_000;
 const DNS_WAIT_MS = 5500;
 const CONNECT_WAIT_MS = 12000;
-const staticPaths = new Set(['/', '/index.html', '/manifest.webmanifest', '/service-worker.js', '/src/favicon.svg', '/src/styles.css', '/src/app.js', '/src/access-ui.mjs', '/src/xtream.mjs', '/src/content.mjs', '/src/playback.mjs', '/src/library.css', '/admin', '/admin/', '/admin.html', '/src/admin.mjs', '/src/admin.css', '/assets/icon-192.png', '/assets/icon-512.png']);
-const vendorPaths=new Map(['/vendor/plyr.js','/vendor/plyr.css','/vendor/plyr.svg'].map(path=>[path,resolve(root,'node_modules/plyr/dist',path.endsWith('.js')?'plyr.min.js':path.endsWith('.css')?'plyr.css':'plyr.svg')]));for(const path of vendorPaths.keys())staticPaths.add(path);
+const staticPaths = new Set(['/', '/index.html', '/manifest.webmanifest', '/service-worker.js', '/src/favicon.svg', '/src/styles.css', '/src/app.js', '/src/access-ui.mjs', '/src/xtream.mjs', '/src/content.mjs', '/src/playback.mjs', '/src/library.css', '/src/title-sheet.css', '/src/episode-tray.css', '/src/mobile.css', '/src/mobile.mjs', '/admin', '/admin/', '/admin.html', '/src/admin.mjs', '/src/admin.css', '/assets/icon-192.png', '/assets/icon-512.png']);
+const vendorPaths=new Map(['/vendor/plyr.js','/vendor/plyr.css','/vendor/plyr.svg'].map(path=>[path,resolve(root,'node_modules/plyr/dist',path.endsWith('.js')?'plyr.min.js':path.endsWith('.css')?'plyr.css':'plyr.svg')]));vendorPaths.set('/vendor/gsap.js',resolve(root,'node_modules/gsap/dist/gsap.min.js'));for(const path of vendorPaths.keys())staticPaths.add(path);
 const types = { '.html':'text/html; charset=utf-8', '.css':'text/css; charset=utf-8', '.js':'text/javascript; charset=utf-8', '.mjs':'text/javascript; charset=utf-8', '.svg':'image/svg+xml', '.png':'image/png', '.webmanifest':'application/manifest+json' };
 const securityHeaders = { 'Cache-Control':'no-store', 'X-Content-Type-Options':'nosniff', 'Referrer-Policy':'no-referrer', 'X-Frame-Options':'DENY' };
 
@@ -251,7 +251,7 @@ async function catalogFor(session,section) {
   session.catalogs.set(section,{time:Date.now(),promise});
   try{return await promise;}catch(error){session.catalogs.delete(section);throw error;}
 }
-async function allowedEntry(session,section,id,details=false,refresh=false) {
+async function allowedEntry(session,section,id,details=false,refresh=false,enrich=true) {
   const catalog=await catalogFor(session,section);
   const key=`${section}:${id}`;let metadata=session.entries.get(key);
   if(refresh)session.details.delete(key);
@@ -260,12 +260,14 @@ async function allowedEntry(session,section,id,details=false,refresh=false) {
   if(details && section!=='live' && !session.details.has(key)){
     const data=await providerJson(apiUrl(session.base,session.username,session.password,section==='vod'?'get_vod_info':'get_series_info',{[section==='vod'?'vod_id':'series_id']:id}));
     const info=contentMetadata({...data?.movie_data,...data?.info,...data});
-    const classification=info.ageLabel==='Não informada'?(refresh&&metadata.ageSource==='Apple TV'?{age:null,ageLabel:'Não informada',ageCountry:'',ageSource:'',ageSourceUrl:'',ageReference:false}:Object.fromEntries(Object.entries(metadata).filter(([key])=>key.startsWith('age')))):Object.fromEntries(Object.entries(info).filter(([key])=>key.startsWith('age')));
+    const classification=info.ageLabel==='Não informada'?(refresh&&['Apple TV','Wikidata'].includes(metadata.ageSource)?{age:null,ageLabel:'Não informada',ageCountry:'',ageSource:'',ageSourceUrl:'',ageReference:false}:Object.fromEntries(Object.entries(metadata).filter(([key])=>key.startsWith('age')))):Object.fromEntries(Object.entries(info).filter(([key])=>key.startsWith('age')));
     metadata={...metadata,...info,...classification,adult:metadata.adult||info.adult};
-    if(metadata.ageLabel==='Não informada'){
+    session.entries.set(key,metadata);session.details.set(key,{...data,metadata});
+  }
+  if(details&&enrich&&section!=='live'&&metadata.ageLabel==='Não informada'){
+      const data=session.details.get(key);
       const item=catalog.items.find(item=>String(section==='series'?item.series_id:item.stream_id)===String(id));
-      if(item){const rating=await lookupRating(item.name||data?.info?.name,section,item.releaseDate||item.release_date||'',{refresh});if(rating)metadata={...metadata,...rating,adult:metadata.adult||rating.age===18};}
-    }
+      if(item){const rating=await lookupRating(item.name||data?.info?.name,section,item.releaseDate||item.release_date||item.year||/\b(?:19|20)\d{2}\b/.exec(item.name||'')?.[0]||'',{refresh});if(rating)metadata={...metadata,...rating,adult:metadata.adult||rating.age===18};}
     session.entries.set(key,metadata);session.details.set(key,{...data,metadata});
   }
   return contentAllowed(metadata,parental.get(session.policyKey))?metadata:null;
@@ -313,7 +315,7 @@ async function route(req,res) {
   let url;
   try { url = new URL(req.url, 'http://localhost'); } catch { return send(res,400,{error:'URL inválida.'}); }
   const pathname = url.pathname;
-  if(pathname==='/healthz')return send(res,200,{ok:true,version:'4.0.0'});
+  if(pathname==='/healthz')return send(res,200,{ok:true,version:'4.1.0'});
   if(access&&pathname.startsWith('/api/auth/')){
     // Nenhum endpoint de administração do plugin fica acessível publicamente.
     if(!new Set(['/api/auth/sign-in/email','/api/auth/sign-out','/api/auth/get-session']).has(pathname))return send(res,404,{error:'Rota indisponível.'});
@@ -500,7 +502,7 @@ async function route(req,res) {
         let data;
         if(kind==='info'||kind==='rating'){
           const id=params.series_id||params.vod_id;
-          if(!await allowedEntry(session,section,id,true,url.searchParams.get('refresh')==='1'))return send(res,403,{error:'Conteúdo bloqueado pelo controle parental.'});
+          if(!await allowedEntry(session,section,id,true,url.searchParams.get('refresh')==='1',kind==='rating'))return send(res,403,{error:'Conteúdo bloqueado pelo controle parental.'});
           if(kind==='rating')return send(res,200,{data:session.entries.get(`${section}:${id}`)});
           data=session.details.get(`${section}:${id}`);
           if(section==='series'){

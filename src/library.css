@@ -44,18 +44,7 @@ body{font-family:'DM Sans',sans-serif;background:#08090b}
 .card-peek-meta{display:flex;flex-wrap:wrap;gap:10px;color:#c8b4ff;font-size:11px;margin:8px 14px}
 .card-peek-description{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;font-size:12px;line-height:1.5;color:#c7c5d0;margin:0 14px 14px}
 .media-rail{padding-bottom:14px;margin-bottom:0}
-#detailsModal .details-modal{width:min(900px,calc(100vw - 48px));max-height:min(82dvh,720px);display:grid;grid-template-columns:minmax(220px,34%) minmax(0,1fr);position:relative;overflow:hidden;padding:0;border-radius:18px;background:#17171f;box-shadow:0 28px 85px #000b}
-#detailsModal .details-art{position:relative;min-height:0;height:auto;overflow:hidden;background:#252431}
-#detailsModal .details-art img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center;filter:none;mask-image:none}
-#detailsModal .details-copy{min-width:0;min-height:0;overflow-y:auto;display:flex;flex-direction:column;align-items:flex-start;padding:48px 32px 28px;margin:0}
-#detailsModal .details-copy h2{font:600 clamp(24px,2.7vw,36px)/1.14 'Outfit',sans-serif;letter-spacing:-.6px;margin:10px 0 18px}
-#detailsModal .title-metadata{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-#detailsModal .synopsis{font-size:13px;line-height:1.65;margin:18px 0;max-width:100%}
-#detailsModal .credits{font-size:11px;line-height:1.65}
-#detailsModal .details-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:auto;padding-top:22px;flex-shrink:0}
-#detailsModal .modal-close{position:absolute;top:12px;right:12px;margin:0;z-index:4;background:#17171ddc}
 @media(hover:none), (max-width:760px){.card-peek{display:none!important}}
-@media(max-width:760px){#detailsModal .details-modal{width:min(100%,480px);max-height:92dvh;display:flex;flex-direction:column;overflow-y:auto}#detailsModal .details-art{height:230px;min-height:230px;flex:none}#detailsModal .details-art img{position:relative;object-fit:contain}#detailsModal .details-copy{overflow:visible;display:block;padding:22px 22px 28px}#detailsModal .details-copy h2{font-size:27px}#detailsModal .details-actions{margin-top:20px;padding-top:0}}
 
 /* Home feature: use reliable proxied Xtream artwork, never a giant blank placeholder. */
 .hero{position:relative;isolation:isolate;min-height:365px!important;padding:52px 5%!important;overflow:hidden;background:linear-gradient(115deg,#1c1b28 0%,#191922 62%,#29233d 100%)!important;border:1px solid #383440!important}
@@ -67,21 +56,3 @@ body{font-family:'DM Sans',sans-serif;background:#08090b}
 .hero.has-feature-art:after{content:'';position:absolute;inset:0;z-index:2;pointer-events:none;background:linear-gradient(90deg,#1c1b28 0%,#1c1b28e8 34%,transparent 76%)}
 .hero-actions{position:relative;z-index:4}
 @media(max-width:760px){.hero{min-height:300px!important;padding:32px 24px!important}.hero-copy{max-width:100%!important}.hero h1{font-size:clamp(27px,7vw,37px)!important;max-width:80%!important}.hero-copy p{max-width:75%!important}.hero .feature-art{width:58%;opacity:.55}.hero.has-feature-art:after{background:linear-gradient(90deg,#1c1b28 0%,#1c1b28c9 55%,transparent 100%)}.hero-actions{flex-wrap:wrap}}
-
-/* Dedicated title routes: no nested episode/details popups. */
-.title-page[hidden],.title-episodes[hidden]{display:none!important}
-body.title-page-open .hero,body.title-page-open #contentArea,body.title-page-open #loadMoreWrap,body.title-page-open .catalog-heading,body.title-page-open .catalog-filters{display:none!important}
-.title-page{max-width:1240px;margin:0 auto;padding:26px 24px 80px;min-height:calc(100dvh - 110px)}
-.title-back{margin-bottom:22px}
-.title-page .details-modal{display:grid;grid-template-columns:minmax(220px,32%) minmax(0,1fr);width:100%;max-height:none;min-height:450px;overflow:hidden;border:1px solid #343240;border-radius:20px;background:#17171f;box-shadow:none}
-.title-page .details-art{min-height:440px;position:relative;background:#24232d}
-.title-page .details-art img{width:100%;height:100%;position:absolute;inset:0;object-fit:contain}
-.title-page .details-copy{padding:48px 44px;overflow:visible}
-.title-page .details-copy h2{font-size:clamp(30px,3.8vw,52px)}
-.title-episodes{margin-top:32px;scroll-margin-top:115px}
-.title-episodes .series-modal{width:100%;max-height:none;display:block;padding:32px;border:1px solid #343240;border-radius:20px;background:#17171f;overflow:visible}
-.title-episodes .episodes-list{max-height:none;overflow:visible;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-.title-episodes .series-heading{margin-bottom:24px}
-.title-episodes .series-heading>p{display:none}
-.title-episodes .series-heading h2{font-size:24px}
-@media(max-width:760px){.title-page{padding:16px 14px 45px}.title-page .details-modal{display:block}.title-page .details-art{height:310px;min-height:310px}.title-page .details-copy{padding:25px 20px}.title-episodes .series-modal{padding:18px}.title-episodes .episodes-list{grid-template-columns:1fr}}

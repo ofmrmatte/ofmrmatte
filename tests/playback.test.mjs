@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {seekTarget,formatTime,progressRecord,flattenEpisodes} from '../src/playback.mjs';
 import {contentMetadata} from '../src/content.mjs';
-import {selectRating,createRatingLookup} from '../lib/ratings.mjs';
+import {selectRating,selectWikidataRating,createRatingLookup} from '../lib/ratings.mjs';
 test('avanço de 10s respeita início, fim e intervalos disponíveis de DVR',()=>{
  assert.equal(seekTarget(4,-10,100),0);assert.equal(seekTarget(50,10,100),60);assert.equal(seekTarget(95,10,100),99.9);
  const ranges={length:2,start:i=>[20,60][i],end:i=>[40,90][i]};assert.equal(seekTarget(25,-10,Infinity,ranges),20);assert.equal(seekTarget(35,10,Infinity,ranges),39.9);
@@ -32,6 +32,25 @@ test('fonte complementar exige título exato e ano, e identifica região interna
 });
 test('consulta complementar prefere Brasil, usa cache e falha sem interromper o player',async()=>{
  let calls=0;const lookup=createRatingLookup(async url=>{calls++;return {ok:true,text:async()=>JSON.stringify({results:url.searchParams.get('country')==='br'?[]:[{collectionName:'Série',contentAdvisoryRating:'TV-14'}]})};});
- const result=await lookup('Série','series');assert.equal(result.ageLabel,'TV-14');await lookup('Série','series');assert.equal(calls,2);await lookup('Série','series','',{refresh:true});assert.equal(calls,4);
+ const result=await lookup('Série','series');assert.equal(result.ageLabel,'TV-14');await lookup('Série','series');assert.equal(calls,3);await lookup('Série','series','',{refresh:true});assert.equal(calls,6);
  const unavailable=createRatingLookup(async()=>{throw new Error('offline');});assert.equal(await unavailable('Série','series'),null);
+});
+
+test('ClassInd complementar exige obra única e ano correto, preservando país e fonte',()=>{
+ const row=(id,label,country='BR',year='2023')=>({item:{value:'http://www.wikidata.org/entity/'+id},ratingLabel:{value:label},country:{value:country},year:{value:year}});
+ const certificate=selectWikidataRating([row('Q1','14'),row('Q1','R','US')],'2023');
+ assert.equal(certificate.ageLabel,'14');assert.equal(certificate.ageCountry,'BR');assert.equal(certificate.ageSource,'Wikidata');
+ assert.equal(certificate.ageSourceUrl,'https://www.wikidata.org/entity/Q1');
+ assert.equal(selectWikidataRating([row('Q1','14')],'2020'),null);
+ assert.equal(selectWikidataRating([row('Q1','14'),row('Q2','14')],'2023'),null);
+ assert.equal(selectWikidataRating([row('Q1','14'),row('Q1','16')],'2023'),null);
+ assert.equal(selectRating([{trackName:'Remake',releaseDate:'1990',contentAdvisoryRating:'R'},{trackName:'Remake',releaseDate:'2020',contentAdvisoryRating:'R'}],'Remake','vod','','us'),null);
+});
+
+test('classificações confirmadas sobrevivem à recriação do lookup sem nova consulta',async t=>{
+ const {mkdtemp,rm}=await import('node:fs/promises');const {tmpdir}=await import('node:os');const {join}=await import('node:path');
+ const dir=await mkdtemp(join(tmpdir(),'mf-ratings-'));t.after(()=>rm(dir,{recursive:true,force:true}));const cachePath=join(dir,'ratings.json');
+ const lookup=createRatingLookup(async url=>({ok:true,text:async()=>url.hostname==='itunes.apple.com'?JSON.stringify({results:[]}):JSON.stringify({results:{bindings:[{item:{value:'http://www.wikidata.org/entity/Q1'},ratingLabel:{value:'16'},country:{value:'BR'},year:{value:'2023'}}]}})}),{cachePath});
+ const result=await lookup('Filme 2023','vod','2023');assert.equal(result.age,16);
+ const restored=createRatingLookup(async()=>{throw new Error('Não deve consultar a rede');},{cachePath});assert.deepEqual(await restored('Filme 2023','vod','2023'),result);
 });

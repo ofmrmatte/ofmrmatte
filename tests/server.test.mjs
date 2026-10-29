@@ -67,7 +67,7 @@ test('fluxo completo: app, login Xtream, catálogo, séries, manifesto e logout'
  t.after(()=>new Promise(resolve=>provider.close(resolve)));
  const origin=await startApp(t);
  const shell=await (await fetch(origin)).text();assert.match(shell,/MF Stream IPTV/);assert.match(shell,/id="listName"/);
- for(const asset of ['/manifest.webmanifest','/service-worker.js','/assets/icon-192.png','/src/styles.css'])assert.equal((await fetch(origin+asset)).status,200,asset);
+ for(const asset of ['/manifest.webmanifest','/service-worker.js','/assets/icon-192.png','/src/styles.css','/src/title-sheet.css','/src/episode-tray.css','/src/mobile.css','/src/mobile.mjs','/vendor/gsap.js'])assert.equal((await fetch(origin+asset)).status,200,asset);
  let res=await fetch(origin+'/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:`http://localhost:${providerPort}`,username:'testuser',password:'invalid'})});assert.equal(res.status,401);
  res=await fetch(origin+'/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({listName:'iptv',url:`http://localhost:${providerPort}`,username:'testuser',password:'testpass'})});assert.equal(res.status,200);
  const {token,host,account}=await res.json();assert.ok(token);assert.equal(account.listName,'iptv');assert.equal(host,`http://localhost:${providerPort}`);

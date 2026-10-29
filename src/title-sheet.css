@@ -1,0 +1,50 @@
+/* One scrollable title sheet, with the full season browser in its own flow. */
+.title-layer{padding:28px 20px;align-items:flex-start;overflow-y:auto;overscroll-behavior:contain}
+.title-layer .modal-scrim{position:fixed;background:rgba(0,0,0,.76);backdrop-filter:blur(10px)}
+.title-close-dock{position:sticky;top:0;height:0;z-index:6}
+#detailsModal .details-modal{position:relative;display:block;width:min(960px,100%);max-height:calc(100dvh - 56px);padding:0;overflow:auto;overscroll-behavior:contain;border:1px solid #ffffff1c;border-radius:22px;background:#151519;box-shadow:0 32px 100px #000b;scrollbar-width:thin;scrollbar-color:#4b465c transparent}
+#detailsModal .modal-close{position:absolute;top:18px;right:18px;z-index:5;width:38px;height:38px;border-radius:50%;background:#131318c9;backdrop-filter:blur(16px);border:1px solid #ffffff2b;margin:0}
+.title-feature{position:relative;isolation:isolate;min-height:390px;display:flex;align-items:flex-end;background:radial-gradient(ellipse at 85% 20%,#51416a,#25232f 45%,#151519 85%);overflow:hidden}
+#detailsModal .details-art{position:absolute;inset:0;min-height:0;height:100%;z-index:-2;background:transparent}
+#detailsModal .details-art img{position:absolute;inset:0 0 0 auto;width:65%;height:100%;object-fit:cover;object-position:center 27%;filter:none;mask-image:none}
+.title-feature:after{content:'';position:absolute;inset:0;z-index:-1;background:linear-gradient(0deg,#151519 1%,#15151930 75%),linear-gradient(90deg,#151519f5 2%,#151519c0 32%,#15151924 80%);pointer-events:none}
+#detailsModal .details-copy{position:relative;display:block;min-width:0;width:100%;padding:100px 44px 30px;margin:0;overflow:visible}
+#detailsModal .details-copy .eyebrow{color:#d4c1ff;font-size:10px;letter-spacing:2.6px;margin-bottom:16px}
+#detailsModal .details-copy h2{max-width:76%;font:700 clamp(30px,4.5vw,54px)/1.04 'Outfit',sans-serif;letter-spacing:-1.5px;text-wrap:balance;margin:0 0 19px;text-shadow:0 2px 22px #0008}
+#detailsModal .title-metadata{display:flex;flex-wrap:wrap;align-items:center;gap:11px;font-size:12px;color:#dddae5;line-height:1.5}
+#detailsModal .details-actions{display:flex;flex-wrap:wrap;gap:10px;padding:0;margin:24px 0 0}
+#detailsModal .details-actions .btn{font-size:13px;min-height:46px;padding:0 22px;font-weight:700;border-radius:8px}
+#detailsModal .btn-primary{background:#f4f1ff;color:#15121c}
+#detailsModal .title-save{background:#ffffff16;border:1px solid #ffffff2b;color:#ece8f6;backdrop-filter:blur(12px)}
+.title-body{padding:0 44px 38px}
+.title-about{display:grid;grid-template-columns:minmax(0,1fr) minmax(150px,28%);gap:34px;align-items:start}
+#detailsModal .synopsis{font-size:14px;line-height:1.8;color:#d5d1dd;margin:0;max-width:100%;white-space:pre-line}
+#detailsModal .credits{font-size:11px;line-height:1.8;color:#96919f;margin:0}
+.rating-note{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:18px 0 0;padding-bottom:24px;color:#9b96a7;font-size:11px;line-height:1.5}
+.rating-note .text-action{font-size:11px;text-decoration:underline;text-underline-offset:3px;padding:5px 0;color:#bfb1dc;margin-left:auto}
+.title-episode-section{border-top:1px solid #ffffff13;padding-top:28px;scroll-margin-top:25px}
+.title-episode-section[hidden]{display:none!important}
+.episodes-heading{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:24px}
+.episodes-heading .eyebrow{font-size:8px;letter-spacing:2px;color:#9c93af}
+.episodes-heading h3{font:600 25px 'Outfit';letter-spacing:-.5px;margin:7px 0 0;color:#f6f2fc}
+.episodes-heading h3 span{font:400 14px 'DM Sans';color:#8d879a}
+.season-picker{display:flex;flex-direction:column;gap:6px;font-size:10px;color:#b7afc3}
+.season-picker select{min-height:42px;border:1px solid #ffffff27;border-radius:8px;padding:0 36px 0 13px;background:#24222c;color:#f8f5ff;font:600 12px 'DM Sans';max-width:220px}
+#detailsModal .episodes-list{display:grid;gap:0;overflow:visible;max-height:none;padding:0}
+#detailsModal .title-episode{position:relative;display:grid;grid-template-columns:126px minmax(0,1fr);gap:19px;width:100%;align-items:center;padding:18px 10px;margin:0;border:0;border-bottom:1px solid #ffffff10;border-radius:8px;background:transparent;text-align:left;transition:background .2s}
+#detailsModal .title-episode:hover,#detailsModal .title-episode:focus-visible{background:#ffffff08}
+#detailsModal .title-episode.is-resume{background:#b69af50b;box-shadow:inset 3px 0 #bea2f3}
+.episode-thumb{position:relative;display:grid;place-items:center;width:126px;aspect-ratio:16/9;overflow:hidden;border-radius:7px;background:linear-gradient(125deg,#302c3b,#202027);font:500 30px 'Outfit';color:#80728e}
+.episode-thumb img{width:100%;height:100%;object-fit:cover}
+.episode-play{position:absolute;display:grid;place-items:center;inset:0;background:#0002;font-size:17px;color:white;opacity:0;transition:opacity .2s}
+.title-episode:hover .episode-play,.title-episode:focus-visible .episode-play{opacity:1}
+#detailsModal .queue-episode-copy{display:grid;gap:7px}
+#detailsModal .queue-episode-copy strong{font-size:11px;color:#b9a5df}
+#detailsModal .queue-episode-copy>span{font-size:14px;color:#e4dfed;font-weight:500}
+#detailsModal .queue-episode-copy small{color:#8f899c;font-size:11px}
+#detailsModal .episode-progress{grid-column:2;height:3px;margin-top:-8px}
+#detailsModal .resume-series{font-size:12px;margin:0 0 18px}
+.card-peek{position:fixed;z-index:1500;box-sizing:border-box;width:300px;max-height:min(450px,calc(100dvh - 24px));overflow:hidden;background:#1c1b25;border:1px solid #494052;border-radius:14px;box-shadow:0 20px 65px #000d;opacity:0;visibility:hidden;pointer-events:none;transform:translateY(8px) scale(.98);transition:opacity .18s ease,transform .18s ease,visibility .18s}
+.card-peek.is-visible{opacity:1;visibility:visible;pointer-events:auto;transform:none}
+@media(max-width:760px){.title-layer{padding:10px 8px}.title-layer .modal-scrim{backdrop-filter:blur(5px)}#detailsModal .details-modal{max-height:calc(100dvh - 20px);width:100%;border-radius:15px}.title-feature{min-height:330px}#detailsModal .details-art{height:100%;min-height:0}#detailsModal .details-art img{width:100%;object-position:center 25%}#detailsModal .details-copy{padding:100px 22px 22px}#detailsModal .details-copy h2{font-size:clamp(29px,8vw,42px);letter-spacing:-.9px;max-width:94%}#detailsModal .details-copy .eyebrow{font-size:8px;letter-spacing:2px}#detailsModal .title-metadata{font-size:11px;gap:8px}.title-body{padding:0 22px 25px}.title-about{display:block}#detailsModal .synopsis{font-size:12px;line-height:1.8}#detailsModal .credits{margin-top:14px}.rating-note{font-size:10px;gap:8px;padding-bottom:19px}.rating-note .text-action{font-size:10px;margin-left:0}.episodes-heading{gap:10px;margin-bottom:12px}.episodes-heading h3{font-size:22px}.season-picker select{font-size:11px;padding-right:15px;max-width:150px}.title-episode-section{padding-top:21px}#detailsModal .title-episode{grid-template-columns:86px minmax(0,1fr);gap:13px;padding:14px 7px}.episode-thumb{width:86px;font-size:24px}#detailsModal .queue-episode-copy>span{font-size:12px}#detailsModal .queue-episode-copy strong,#detailsModal .queue-episode-copy small{font-size:10px}#detailsModal .details-actions{gap:8px;margin-top:19px}#detailsModal .details-actions .btn{min-height:42px;padding:0 13px;font-size:11px}#detailsModal .modal-close{top:12px;right:12px;width:34px;height:34px}}
+@media(prefers-reduced-motion:reduce){.card-peek,.title-episode,.episode-play{transition:none!important}}

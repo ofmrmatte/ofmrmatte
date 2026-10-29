@@ -6,8 +6,8 @@ export function certification(item={}) {
   if(release)candidates.unshift({certification:release.certification,ageCountry:'BR'});
   for(const candidate of candidates)for(const key of ['age_rating','content_rating','certification','mpaa','parental_rating','classification','contentAdvisoryRating','rated','tv_rating','us_rating','age']) {
     const label=String(candidate[key]??'').trim().toUpperCase().replace(/^CLASSIFICAÇÃO\s*:?\s*/,'').replace(/^RATED\s+/,'').replace(/^USA?\s*:?\s*/,'');
-    const match=/^(?:BR[- ]?|A)?\+?(L|LIVRE|0|10|12|14|16|18)(?:\s*(?:ANOS|\+))?$/.exec(label);
-    if(match){const age=['L','LIVRE'].includes(match[1])?0:Number(match[1]);return {age,ageLabel:age===0?'L':String(age),ageCountry:candidate.ageCountry||'',ageSource:candidate.ageSource||'Provedor'};}
+    const match=/^(?:BR[- ]?|A)?\+?(L|LIVRE|0|6|10|12|14|16|18)(?:\s*(?:ANOS|\+))?$/.exec(label);
+    if(match){const age=['L','LIVRE'].includes(match[1])?0:Number(match[1]);return {age,ageLabel:age===0?'L':String(age),ageCountry:candidate.ageCountry||'',ageSource:candidate.ageSource||'Provedor',...(candidate.ageSourceUrl?{ageSourceUrl:candidate.ageSourceUrl}:{})};}
     if(/^(TV-(?:Y|Y7|Y7-FV|G|PG|14|MA)|G|PG|PG-13|R|NC-17)$/.test(label)){
       const reference={'TV-Y':0,'TV-Y7':7,'TV-Y7-FV':7,'TV-G':0,'TV-PG':10,'TV-14':14,'TV-MA':18,G:0,PG:10,'PG-13':14,R:18,'NC-17':18};
       return {age:reference[label]??null,ageLabel:label,ageCountry:candidate.ageCountry||'US',ageSource:candidate.ageSource||'Provedor',ageReference:true};
