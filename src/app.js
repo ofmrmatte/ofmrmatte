@@ -363,7 +363,7 @@ async function openSeries(item) {
   showTitleEpisodes();
   try{
     const data=(await api(`/api/catalog?section=series&kind=info&series_id=${encodeURIComponent(item.sourceId)}`)).data;
-    if(request!==state.seriesRequest||token!==state.token||!document.body.classList.contains('title-page-open'))return;
+    if(request!==state.seriesRequest||token!==state.token||$('seriesModal').hidden)return;
     Object.assign(item,data.metadata);cachedItem.set(item.id,item);
     const queue=flattenEpisodes(item,data.episodes),seasons=[...new Set(queue.map(ep=>ep.season))];
     $('seriesDescription').textContent=[ratingText(item),data?.info?.plot||item.description||item.group].filter(Boolean).join(' · ');
@@ -404,54 +404,11 @@ function renderHero(){
 }
 
 let titleReturnUrl=null;
-function titlePath(item){return '/title/'+(item.type==='series'?'series':'movie')+'/'+encodeURIComponent(item.sourceId);}
-function showTitlePage(item){
-  const page=$('titlePage');if(!page)return;
-  if(!document.body.classList.contains('title-page-open'))titleReturnUrl=location.pathname+location.search+location.hash;
-  document.body.classList.add('title-page-open');page.hidden=false;
-  $('titleEpisodes').hidden=true;
-  document.querySelector('.catalog-heading')?.setAttribute('aria-hidden','true');
-  window.scrollTo({top:0,behavior:'instant'});
-  const path=titlePath(item);if(location.pathname!==path)history.pushState({mfTitle:true},'',path);
-}
-function closeTitlePage(fromNavigation=false){
-  const page=$('titlePage');if(!page||page.hidden)return;
-  page.hidden=true;document.body.classList.remove('title-page-open');state.detailRequest++;state.seriesRequest++;
-  document.querySelector('.catalog-heading')?.removeAttribute('aria-hidden');
-  if(!fromNavigation&&location.pathname.startsWith('/title/'))history.pushState({},'',titleReturnUrl&& !titleReturnUrl.startsWith('/title/')?titleReturnUrl:'/');
-  titleReturnUrl=null;
-}
-function showTitleEpisodes(){
-  const node=$('titleEpisodes');if(!node)return;
-  node.hidden=false;
-  node.scrollIntoView({behavior:'smooth',block:'start'});
-}
-function restoreTitleFromLocation(){
-  const match=location.pathname.match(/^\/title\/(movie|series)\/(\d{1,15})\/?$/);
-  if(!match||!state.token)return;
-  const type=match[1]==='movie'?'vod':'series',catalog=state.catalog[type];
-  if(!catalog.loaded)return;
-  const item=catalog.items.find(entry=>String(entry.sourceId)===match[2]);
-  if(item&&(!document.body.classList.contains('title-page-open')||state.detailItem?.id!==item.id))openDetails(item);
-}
-function initTitlePage(){
-  const layer=$('detailsModal'),card=layer?.querySelector('.details-modal');
-  const series=$('seriesModal')?.querySelector('.series-modal');
-  if(!layer||!card||!series)return;
-  const page=document.createElement('section');page.id='titlePage';page.className='title-page';page.hidden=true;page.tabIndex=-1;page.setAttribute('aria-label','Detalhes do conteúdo');
-  const back=document.createElement('button');back.type='button';back.className='btn btn-outline title-back';back.textContent='← Voltar à biblioteca';back.onclick=()=>{if(history.state?.mfTitle&&titleReturnUrl&&!titleReturnUrl.startsWith('/title/'))history.back();else closeTitlePage();};
-  card.querySelector('[data-dismiss="detailsModal"]')?.remove();card.setAttribute('role','region');card.removeAttribute('aria-modal');
-  const episodes=document.createElement('section');episodes.id='titleEpisodes';episodes.className='title-episodes';episodes.hidden=true;
-  series.querySelector('[data-dismiss="seriesModal"]')?.remove();series.setAttribute('role','region');series.removeAttribute('aria-modal');
-  episodes.append(series);
-  page.append(back,card,episodes);
-  document.querySelector('.page-content')?.append(page);
-  window.addEventListener('popstate',()=>{
-    if(!location.pathname.startsWith('/title/'))closeTitlePage(true);
-    else {const match=location.pathname.match(/^\/title\/(movie|series)\/(\d{1,15})\/?$/);if(match){const item=state.catalog[match[1]==='movie'?'vod':'series'].items.find(x=>String(x.sourceId)===match[2]);if(item)openDetails(item);else if(state.token)loadSection(match[1]==='movie'?'vod':'series');}}
-  });
-}
-
+function showTitlePage(item){showModal('detailsModal');}
+function closeTitlePage(){hideModal('seriesModal');hideModal('detailsModal');}
+function showTitleEpisodes(){showModal('seriesModal');}
+function restoreTitleFromLocation(){}
+function initTitlePage(){}
 async function openDetails(item,refresh=false){
   state.detailItem=item;const ticket=++state.detailRequest;if(!refresh)showTitlePage(item);
   const fill=metadata=>{
