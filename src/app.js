@@ -103,7 +103,7 @@ function currentOfflineProfile(){
   const scope=offlineScope(state.appUser?.id||state.account.username,state.profile?.id||'default');
   return {scope,name:state.profile?.name||state.listName||'Minha conta'};
  }
- return navigator.onLine===false?lastOfflineProfile():null;
+ return navigator.onLine===false||state.offlineMode?lastOfflineProfile():null;
 }
 function stopOfflineVideo(){
  const video=$('offlineVideo');if(!video)return;
@@ -162,7 +162,7 @@ async function playOfflineFile(scope,item){
  }catch(error){status.textContent=error.message;}
 }
 function showDownloads(){
- if(!state.account&&navigator.onLine!==false){toast('Entre em um perfil para ver seus downloads.');return;}
+ if(!state.account&&navigator.onLine!==false&&!state.offlineMode){toast('Entre em um perfil para ver seus downloads.');return;}
  stopOfflineVideo();$('offlineStatus').textContent=downloadingOffline?'Download em andamento…':'';
  showModal('downloadsModal',$('downloadsButton'));refreshOfflineList();
 }
@@ -175,7 +175,7 @@ async function downloadTitle(item,button){
  const identity=currentOfflineProfile();
  if(!identity?.scope){toast('Perfil não identificado. Reconecte-se.');return;}
  const controller=new AbortController(),key=offlineKey(item),previous=button?.textContent;
- downloadingOffline={controller,key,scope:identity.scope};
+ downloadingOffline={controller,key,scope:identity.scope};$('offlineCancelDownload').hidden=false;
  const status=$('downloadStatus'),panelStatus=$('offlineStatus');
  if(status){status.hidden=false;status.textContent='Preparando o download de '+item.name+'…';}
  if(button){button.disabled=true;button.textContent='Preparando…';}
@@ -200,7 +200,7 @@ async function downloadTitle(item,button){
   if(panelStatus)panelStatus.textContent=message;
   toast(message);
  }finally{
-  downloadingOffline=null;
+  downloadingOffline=null;$('offlineCancelDownload').hidden=true;
   if(button){button.disabled=false;button.textContent=previous||'Baixar offline';}
  }
 }
@@ -717,6 +717,7 @@ function bind() {
   $('detailsPlay').onclick=()=>{const item=state.detailItem;if(!item)return;item.type==='series'?openSeries(item):playItem(item);};
   $('detailsDownload').onclick=()=>{if(state.detailItem)downloadTitle(state.detailItem,$('detailsDownload'));};
   $('downloadsButton').onclick=showDownloads;
+  $('offlineCancelDownload').onclick=()=>downloadingOffline?.controller.abort();
   $('offlineBack').onclick=stopOfflineVideo;
   $('detailsFavorite').onclick=()=>{if(state.detailItem){favorite(state.detailItem.id);$('detailsFavorite').textContent=state.favorites.has(state.detailItem.id)?'Remover da minha lista':'Adicionar à minha lista';}};
   $('openParental').onclick=async()=>{if(!state.token){showModal('accountModal');return;}try{await loadParental();$('hideAdult').checked=state.policy.hideAdult;$('maxAge').value=state.policy.maxAge??'';$('blockUnknown').checked=state.policy.blockUnknown;$('currentPinField').hidden=!state.policy.pinSet;$('parentalPin').required=state.policy.pinSet;$('newParentalPin').required=!state.policy.pinSet;$('newPinLabel').textContent=state.policy.pinSet?'Novo PIN (opcional)':'Criar PIN';for(const id of ['parentalPin','newParentalPin','confirmParentalPin'])$(id).value='';$('parentalError').hidden=true;showModal('parentalModal');}catch(error){toast(error.message);}};
@@ -742,5 +743,5 @@ function bind() {
   window.addEventListener('appinstalled',()=>{$('installButton').hidden=true;toast('Scene Play instalado.');});
   if('serviceWorker'in navigator&&['https:','http:'].includes(location.protocol)){navigator.serviceWorker.register('/service-worker.js').catch(()=>{});}
 }
-async function main(){bind();document.body.dataset.page='home';updateSessionUI();render();try{const fixed=await setupAccess({state,onReset:()=>{flushCloud();setDisconnected();},onConnected:async(result,profile,user)=>{state.token=result.token;state.account=result.account;state.host=result.host;state.listName=profile.name;state.profile=profile;state.appUser=user;updateProfileButton(profile);rememberOfflineProfile(offlineScope(user.id,profile.id),profile.name);$('openAccount').setAttribute('aria-label','Trocar perfil');$('openAccountSidebar').querySelector('span:not([data-icon])').textContent='Perfis';loadPrefs();const prefs=await api('/api/preferences');if(Array.isArray(prefs.favorites))state.favorites=new Set(prefs.favorites);if(Array.isArray(prefs.recents))state.recents=prefs.recents;if(prefs.progress&&typeof prefs.progress==='object')state.progress=prefs.progress;if(prefs.seriesProgress&&typeof prefs.seriesProgress==='object')state.seriesProgress=prefs.seriesProgress;if(typeof prefs.autoNext==='boolean')state.autoNext=prefs.autoNext;await loadParental();updateSessionUI();setSection('home');}});if(!fixed)await restoreSession();}catch(error){document.body.classList.remove('auth-pending');if(navigator.onLine===false&&lastOfflineProfile()?.scope){showDownloads();}else toast('Não foi possível carregar o acesso. Atualize a página.');}}
+async function main(){bind();document.body.dataset.page='home';updateSessionUI();render();try{const fixed=await setupAccess({state,onReset:()=>{flushCloud();setDisconnected();},onConnected:async(result,profile,user)=>{state.token=result.token;state.account=result.account;state.host=result.host;state.listName=profile.name;state.profile=profile;state.appUser=user;state.offlineMode=false;updateProfileButton(profile);rememberOfflineProfile(offlineScope(user.id,profile.id),profile.name);$('openAccount').setAttribute('aria-label','Trocar perfil');$('openAccountSidebar').querySelector('span:not([data-icon])').textContent='Perfis';loadPrefs();const prefs=await api('/api/preferences');if(Array.isArray(prefs.favorites))state.favorites=new Set(prefs.favorites);if(Array.isArray(prefs.recents))state.recents=prefs.recents;if(prefs.progress&&typeof prefs.progress==='object')state.progress=prefs.progress;if(prefs.seriesProgress&&typeof prefs.seriesProgress==='object')state.seriesProgress=prefs.seriesProgress;if(typeof prefs.autoNext==='boolean')state.autoNext=prefs.autoNext;await loadParental();updateSessionUI();setSection('home');}});if(!fixed)await restoreSession();}catch(error){document.body.classList.remove('auth-pending');if(lastOfflineProfile()?.scope){state.offlineMode=true;showDownloads();}else toast('Não foi possível carregar o acesso. Atualize a página.');}}
 main();
