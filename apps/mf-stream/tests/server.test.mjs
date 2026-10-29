@@ -43,10 +43,10 @@ function fakeXtream(req,res){
  }
  res.writeHead(404);res.end('not found');
 }
-async function startApp(t, {allowPrivate=true} = {}) {
+async function startApp(t, {allowPrivate=true,ratings=false} = {}) {
  const dataDir=await mkdtemp(join(tmpdir(),'mfstream-integration-'));
  t.after(async()=>{assert.ok(resolve(dataDir).startsWith(resolve(tmpdir())+sep+'mfstream-integration-'));await rm(dataDir,{recursive:true,force:true});});
- const app=spawn(process.execPath,['server.mjs'],{cwd:resolve(import.meta.dirname,'..'),env:{...process.env,PORT:'0',APP_AUTH_ENABLED:'0',RATING_LOOKUP_ENABLED:'0',PARENTAL_DATA_DIR:dataDir,ALLOW_PRIVATE_XTREAM_HOSTS:allowPrivate?'1':'0'},stdio:['ignore','pipe','pipe']});
+ const app=spawn(process.execPath,['server.mjs'],{cwd:resolve(import.meta.dirname,'..'),env:{...process.env,PORT:'0',APP_AUTH_ENABLED:'0',RATING_LOOKUP_ENABLED:ratings?'1':'0',APP_DATA_DIR:'',PARENTAL_DATA_DIR:dataDir,ALLOW_PRIVATE_XTREAM_HOSTS:allowPrivate?'1':'0'},stdio:['ignore','pipe','pipe']});
  t.after(async()=>{if(app.exitCode===null){app.kill();await once(app,'exit');}});
  let stderr='';app.stderr.on('data',chunk=>{stderr+=chunk;});
  const lines=createInterface({input:app.stdout});
@@ -221,3 +221,5 @@ test('o JavaScript da interface é sintaticamente válido',async()=>{
  const {execFileSync}=await import('node:child_process');
  assert.doesNotThrow(()=>execFileSync(process.execPath,['--check','src/app.js'],{cwd:resolve(import.meta.dirname,'..'),encoding:'utf8'}));
 });
+
+test('inicia com classificações habilitadas sem APP_DATA_DIR configurado',async t=>{const origin=await startApp(t,{ratings:true});const response=await fetch(origin+'/healthz');assert.equal(response.status,200);assert.equal((await response.json()).ok,true);});

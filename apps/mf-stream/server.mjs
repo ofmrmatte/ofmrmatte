@@ -13,11 +13,11 @@ import {createParentalStore,parentalKey} from './lib/parental.mjs';
 import {contentMetadata,contentAllowed} from './src/content.mjs';
 import {createRatingLookup} from './lib/ratings.mjs';
 import {createAccess} from './lib/access.mjs';
-const lookupRating=process.env.RATING_LOOKUP_ENABLED==='0'?async()=>null:createRatingLookup(fetch,{cachePath:resolve(process.env.APP_DATA_DIR||resolve(root,'.data'),'ratings-cache.json')});
 import { CATALOG_ACTIONS, SECTIONS, normalizeServerUrl, apiUrl, buildStreamUrl, rewriteHlsManifest } from './src/xtream.mjs';
 
 const root = resolve(fileURLToPath(new URL('.', import.meta.url)));
 if(process.env.APP_AUTH_ENABLED!=='0'){try{process.loadEnvFile(resolve(root,'.env'));}catch(error){if(error.code!=='ENOENT')throw error;}}
+const lookupRating=process.env.RATING_LOOKUP_ENABLED==='0'?async()=>null:createRatingLookup(fetch,{cachePath:resolve(process.env.APP_DATA_DIR||resolve(root,'.data'),'ratings-cache.json')});
 const port = Number.parseInt(process.env.PORT || '3000', 10);
 const fixedMode=process.env.APP_AUTH_ENABLED!=='0'&&!!(process.env.XTREAM_URL&&process.env.XTREAM_USERNAME&&process.env.XTREAM_PASSWORD);
 if(process.env.APP_AUTH_ENABLED==='1'&&!fixedMode)throw new Error('Configure as variáveis XTREAM_URL, XTREAM_USERNAME e XTREAM_PASSWORD.');

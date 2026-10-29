@@ -8,7 +8,7 @@
 - Aviso no canto inferior nos últimos 15 segundos, com Assistir agora e Cancelar. A reprodução automática segue inclusive para outra temporada; pode ser desligada na lateral do player. A preferência fica separada por perfil e sincroniza com as demais preferências.
 - Metadados recebidos agora atualizam a ficha. Links `/title/movie/ID` e `/title/series/ID` restauram o título após conectar. A consulta externa de classificação não atrasa a lista de episódios.
 - Classificação complementar usa correspondência de título/ano, rejeita obras ambíguas, identifica país/fonte e mantém cache de resultados confirmados por 24 horas em `APP_DATA_DIR/ratings-cache.json`. Wikidata consulta [ClassInd/P3216](https://www.wikidata.org/wiki/Property:P3216) e MPA/P1657. Onde não há certificado confirmado, o app continua mostrando classificação não confirmada; certificados estrangeiros não são apresentados como brasileiros.
-- Verificação: 35 testes automatizados, inclusive persistência do cache e rejeição de classificações ambíguas; fluxo em navegador com fonte fictícia e vídeo CC0, troca de temporada, retomada, passagem automática de T1 E2 para T2 E1 e faixa em tela cheia. Layout conferido em 320×568, 390×844 e 844×390, além do desktop.
+- Verificação: 36 testes automatizados, inclusive persistência do cache e rejeição de classificações ambíguas; fluxo em navegador com fonte fictícia e vídeo CC0, troca de temporada, retomada, passagem automática de T1 E2 para T2 E1 e faixa em tela cheia. Layout conferido em 320×568, 390×844 e 844×390, além do desktop.
 
 ## Mobile
 
