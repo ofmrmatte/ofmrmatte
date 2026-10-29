@@ -32,7 +32,7 @@ test('fonte complementar exige título exato e ano, e identifica região interna
 });
 test('consulta complementar prefere Brasil, usa cache e falha sem interromper o player',async()=>{
  let calls=0;const lookup=createRatingLookup(async url=>{calls++;return {ok:true,text:async()=>JSON.stringify({results:url.searchParams.get('country')==='br'?[]:[{collectionName:'Série',contentAdvisoryRating:'TV-14'}]})};});
- const result=await lookup('Série','series');assert.equal(result.ageLabel,'TV-14');await lookup('Série','series');assert.equal(calls,3);await lookup('Série','series','',{refresh:true});assert.equal(calls,6);
+ const result=await lookup('Série','series');assert.equal(result.ageLabel,'TV-14');await lookup('Série','series');assert.equal(calls,4);await lookup('Série','series','',{refresh:true});assert.equal(calls,8);
  const unavailable=createRatingLookup(async()=>{throw new Error('offline');});assert.equal(await unavailable('Série','series'),null);
 });
 
@@ -54,3 +54,5 @@ test('classificações confirmadas sobrevivem à recriação do lookup sem nova 
  const result=await lookup('Filme 2023','vod','2023');assert.equal(result.age,16);
  const restored=createRatingLookup(async()=>{throw new Error('Não deve consultar a rede');},{cachePath});assert.deepEqual(await restored('Filme 2023','vod','2023'),result);
 });
+
+test('lookup informa indisponibilidade sem inventar classificação',async()=>{const lookup=createRatingLookup(async()=>{throw Error('offline')});const result=await lookup('Filme','vod','',{withStatus:true});assert.equal(result.age,null);assert.equal(result.ageLookupStatus,'unavailable');});

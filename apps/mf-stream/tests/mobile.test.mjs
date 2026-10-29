@@ -1,21 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {mobilePlaybackViewport,enterMobilePlayback,unlockMobilePlayback} from '../src/mobile.mjs';
-const layout=()=>{const classes=new Set();return {classList:{add:x=>classes.add(x),remove:x=>classes.delete(x),contains:x=>classes.has(x)}};};
-test('mobile requests fullscreen during the click and locks landscape after entry',async()=>{
- const target=layout(),events=[];target.requestFullscreen=()=>{events.push('fullscreen');return Promise.resolve();};
- const orientation={lock:async mode=>events.push(mode),unlock:()=>events.push('unlock')};
- const pending=enterMobilePlayback(target,{doc:{},orientation});assert.deepEqual(events,['fullscreen']);await pending;assert.deepEqual(events,['fullscreen','landscape']);
- assert.equal(target.classList.contains('mobile-landscape'),true);unlockMobilePlayback(target,orientation);assert.equal(target.classList.contains('mobile-landscape'),false);assert.equal(events.at(-1),'unlock');
- assert.equal(mobilePlaybackViewport({matchMedia:query=>({matches:query.includes('pointer:coarse')})}),true);
+import {mobilePlaybackViewport,enterNativePlayback} from '../src/mobile.mjs';
+const video=()=>({controls:false,playsInline:true,removeAttribute(){}});
+test('iPhone uses the native video fullscreen API instead of the page container',async()=>{
+ const v=video(),events=[];v.webkitEnterFullscreen=()=>events.push('system-video');v.requestFullscreen=()=>{throw Error('Must prefer iPhone native API');};
+ assert.equal(await enterNativePlayback(v,{doc:{},orientation:{}}),true);assert.deepEqual(events,['system-video']);assert.equal(v.controls,true);assert.equal(v.playsInline,false);
+ assert.equal(mobilePlaybackViewport({matchMedia:q=>({matches:q.includes('pointer:coarse')})}),true);
 });
-test('a browser without fullscreen or orientation lock retains the custom landscape player',async()=>{
- const target=layout();await enterMobilePlayback(target,{doc:{},orientation:{lock:async()=>{throw new Error('not supported');}}});
- assert.equal(target.classList.contains('is-full-window'),true);assert.equal(target.classList.contains('mobile-landscape'),true);
+test('Android requests fullscreen on the video element and retains native controls',async()=>{
+ const v=video(),events=[];v.requestFullscreen=async()=>events.push('video');assert.equal(await enterNativePlayback(v,{doc:{},orientation:{lock:async mode=>events.push(mode)}}),true);assert.deepEqual(events,['video','landscape']);assert.equal(v.controls,true);
 });
-test('closing while fullscreen is pending prevents a later landscape lock',async()=>{
- const target=layout();let enter,locks=0,exits=0;target.requestFullscreen=()=>new Promise(resolve=>{enter=resolve;});const doc={fullscreenElement:target,exitFullscreen:async()=>{exits++;}};
- // Simulate a pending entry rather than an already active fullscreen element.
- doc.fullscreenElement=null;const pending=enterMobilePlayback(target,{doc,orientation:{lock:async()=>{locks++;}}});unlockMobilePlayback(target,{});doc.fullscreenElement=target;enter();await pending;
- assert.equal(locks,0);assert.equal(exits,1);
+test('when native fullscreen is denied, no simulated browser fullscreen or CSS rotation is used',async()=>{
+ const v=video();v.requestFullscreen=async()=>{throw Error('Gesture required');};assert.equal(await enterNativePlayback(v,{doc:{},orientation:{}}),false);assert.equal(v.controls,true);assert.equal(v.playsInline,false);
 });
