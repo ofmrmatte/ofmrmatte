@@ -1,11 +1,11 @@
 // Cache network-first: installing a new ZIP must not leave the previous app stuck.
-const CACHE = 'scene-play-shell-v5-1-0';
+const CACHE = 'scene-play-shell-v5-1-1';
 const SHELL = ['/', '/index.html', '/src/styles.css', '/src/app.js', '/src/access-ui.mjs', '/vendor/gsap.js', '/vendor/plyr.js', '/vendor/plyr.css', '/vendor/plyr.svg', '/src/favicon.svg', '/src/xtream.mjs', '/src/content.mjs', '/src/playback.mjs', '/src/library.css', '/src/title-sheet.css', '/src/episode-tray.css', '/src/mobile.css', '/src/mobile.mjs', '/src/highlights.mjs', '/src/highlights.css', '/src/scene.css', '/src/scene-ui.mjs', '/assets/scene-play.svg', '/src/discovery.css', '/src/hero-preview.mjs', '/manifest.webmanifest', '/assets/icon-192.png', '/assets/icon-512.png'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(SHELL)).then(()=>self.skipWaiting()));
 });
 self.addEventListener('activate', event => {
-  event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k=>k.startsWith('mf-stream-shell-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));
+  event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k=>(k.startsWith('mf-stream-shell-')||k.startsWith('scene-play-shell-'))&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));
 });
 self.addEventListener('fetch', event => {
   if (event.request.method!=='GET' || new URL(event.request.url).origin!==self.location.origin) return;

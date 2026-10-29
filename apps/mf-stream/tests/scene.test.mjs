@@ -3,3 +3,14 @@ test('preview never starts without hover or an authorized direct media source',(
 test('horizontal navigation respects beginning/end and viewport width',()=>{assert.deepEqual(railState(0,100,300),{previous:false,next:true,step:85});assert.deepEqual(railState(200,100,300),{previous:true,next:false,step:85});assert.equal(railState(0,400,100).next,false);});
 test('search preserves query when focus moves to results',()=>{assert.equal(searchShouldCollapse('filme',false),false);assert.equal(searchShouldCollapse('',true),false);assert.equal(searchShouldCollapse(' ',false),true);});
 test('public identity and PWA assets use Scene Play without changing persistent keys',async()=>{const html=await readFile(new URL('../index.html',import.meta.url),'utf8');assert.match(html,/SCENE PLAY/);assert.doesNotMatch(html,/id="heroPreview"/);const manifest=JSON.parse(await readFile(new URL('../manifest.webmanifest',import.meta.url)));assert.equal(manifest.name,'Scene Play');for(const size of [192,512]){const bytes=await readFile(new URL('../assets/icon-'+size+'.png',import.meta.url));assert.equal(bytes.readUInt32BE(16),size);}const access=await readFile(new URL('../lib/access.mjs',import.meta.url),'utf8');assert.match(access,/mf-stream/);});
+
+test('Scene Play header uses accessible search and a named profile button',async()=>{
+ const html=await readFile(new URL('../index.html',import.meta.url),'utf8');
+ const css=await readFile(new URL('../src/scene.css',import.meta.url),'utf8');
+ const ui=await readFile(new URL('../src/scene-ui.mjs',import.meta.url),'utf8');
+ assert.match(html,/<div class="global-search" role="search"/);
+ assert.match(html,/id="openAccountProfile"[^>]*aria-label="Gerenciar perfis"/);
+ assert.match(css,/\.global-search\.is-expanded input\{opacity:1;pointer-events:auto\}/);
+ assert.match(ui,/Limpar e fechar busca/);
+ assert.match(ui,/aria-controls/);
+});

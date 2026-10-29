@@ -12,6 +12,27 @@ export function mountRail(section,rail){
 }
 export function searchShouldCollapse(value,inside){return !inside&&!value.trim();}
 export function bindSearch(root,input){
- const toggle=document.createElement('button'),close=document.createElement('button');toggle.type=close.type='button';toggle.className='search-toggle';close.className='search-close';toggle.setAttribute('aria-label','Abrir busca');toggle.setAttribute('aria-expanded','false');toggle.innerHTML='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="10" cy="10" r="7"/><path d="m15 15 6 6"/></svg>';close.textContent='×';close.setAttribute('aria-label','Fechar busca');root.prepend(toggle);root.append(close);
- const set=value=>{root.classList.toggle('is-expanded',value);toggle.setAttribute('aria-expanded',String(value));input.tabIndex=value?0:-1;if(value)input.focus();};toggle.onclick=e=>{e.preventDefault();set(true);};close.onclick=e=>{e.preventDefault();input.value='';input.dispatchEvent(new Event('input',{bubbles:true}));set(false);toggle.focus();};input.addEventListener('keydown',e=>{if(e.key==='Escape'){e.stopPropagation();set(false);toggle.focus();}});root.addEventListener('focusout',e=>{if(searchShouldCollapse(input.value,root.contains(e.relatedTarget)))set(false);});set(false);
+ const toggle=document.createElement('button'),close=document.createElement('button');
+ toggle.type=close.type='button';toggle.className='search-toggle';close.className='search-close';
+ toggle.setAttribute('aria-label','Abrir busca');toggle.setAttribute('title','Buscar no catálogo (/ )');
+ toggle.setAttribute('aria-controls',input.id);toggle.setAttribute('aria-expanded','false');
+ close.setAttribute('aria-label','Limpar e fechar busca');close.setAttribute('title','Limpar e fechar busca');
+ toggle.innerHTML='<svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10.75" cy="10.75" r="7.25"/><path d="m16.2 16.2 5 5"/></svg>';
+ close.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+ root.prepend(toggle);root.append(close);
+ function expand(value){
+   root.classList.toggle('is-expanded',value);
+   toggle.setAttribute('aria-expanded',String(value));
+   input.tabIndex=value?0:-1;close.tabIndex=value?0:-1;
+   if(value)input.focus({preventScroll:true});
+ }
+ function dismiss(){
+   if(input.value){input.value='';input.dispatchEvent(new Event('input',{bubbles:true}));}
+   expand(false);toggle.focus({preventScroll:true});
+ }
+ toggle.addEventListener('click',event=>{event.preventDefault();expand(true);});
+ close.addEventListener('click',event=>{event.preventDefault();dismiss();});
+ input.addEventListener('keydown',event=>{if(event.key==='Escape'){event.preventDefault();event.stopPropagation();dismiss();}});
+ root.addEventListener('focusout',event=>{if(searchShouldCollapse(input.value,root.contains(event.relatedTarget)))expand(false);});
+ expand(false);
 }
