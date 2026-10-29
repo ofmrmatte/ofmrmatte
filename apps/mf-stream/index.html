@@ -17,7 +17,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/src/styles.css">
-  <link rel="stylesheet" href="/vendor/plyr.css"><link rel="stylesheet" href="/src/library.css"><link rel="stylesheet" href="/src/title-sheet.css"><link rel="stylesheet" href="/src/episode-tray.css"><link rel="stylesheet" href="/src/mobile.css"><script defer src="/vendor/plyr.js"></script>
+  <link rel="stylesheet" href="/vendor/plyr.css"><link rel="stylesheet" href="/src/library.css"><link rel="stylesheet" href="/src/title-sheet.css"><link rel="stylesheet" href="/src/episode-tray.css"><link rel="stylesheet" href="/src/mobile.css"><link rel="stylesheet" href="/src/highlights.css"><script defer src="/vendor/plyr.js"></script>
   <script defer src="/vendor/gsap.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/hls.js@1.6.15/dist/hls.min.js"></script>
   <script type="module" src="/src/app.js"></script>
@@ -65,16 +65,17 @@
       </header>
 
       <main class="page-content">
-        <section class="hero" aria-label="Destaque MF Stream">
+        <section class="hero hero-presentation" aria-label="Destaques MF Stream" aria-roledescription="carrossel">
+          <button type="button" class="highlight-pause" id="highlightPause" aria-label="Pausar apresentação" hidden>Ⅱ</button>
           <div class="hero-grid"></div>
           <div class="hero-visual" aria-hidden="true"><div class="hero-orbit orbit-outer"></div><div class="hero-orbit orbit-middle"></div><div class="hero-orbit orbit-inner"></div><div class="hero-glass"><span>MF</span></div><div class="hero-glow"></div></div>
-          <div class="hero-copy">
+          <div class="hero-copy" role="group" aria-roledescription="slide" aria-label="Destaque" aria-live="off" aria-atomic="true">
             <div class="hero-kicker"><span class="kicker-dash"></span> BEM-VINDO AO SEU STREAMING</div>
             <h1>Seu universo de<br><em>entretenimento.</em></h1>
             <p>TV ao vivo, filmes e séries. Uma experiência feita para você assistir o que gosta, quando quiser.</p>
             <div class="hero-actions"><button type="button" class="btn btn-primary" id="heroPrimary"><span data-icon="plug" data-size="18"></span><span id="heroPrimaryLabel">Conectar minha lista</span><span data-icon="arrow-right" data-size="17"></span></button><button type="button" class="btn btn-secondary" id="heroSecondary"><span data-icon="tv" data-size="18"></span> Explorar canais</button></div>
           </div>
-          <div class="hero-bottom"><span><span class="online-dot"></span> PLATAFORMA XTREAM CODES</span><span>UMA NOVA FORMA DE ASSISTIR <span data-icon="arrow-up-right" data-size="14"></span></span></div>
+          <div class="highlight-controls" id="highlightControls" aria-label="Navegar pelos destaques" hidden><button type="button" id="highlightPrevious" aria-label="Destaque anterior">‹</button><span class="highlight-counter" id="highlightCounter">01 / 01</span><button type="button" id="highlightNext" aria-label="Próximo destaque">›</button></div><div class="hero-bottom"><span><span class="online-dot"></span> PLATAFORMA XTREAM CODES</span><span>UMA NOVA FORMA DE ASSISTIR <span data-icon="arrow-up-right" data-size="14"></span></span></div>
         </section>
 
         <section class="quick-stats" aria-label="Sua biblioteca">

@@ -1,4 +1,13 @@
-# MF Stream 4.2.1
+# MF Stream 4.3.0
+
+## Apresentação de destaques no fundo
+
+- Início com cenário de largura total, dissolvência entre imagens e degradê para a biblioteca. Até oito filmes e séries da própria lista se alternam a cada nove segundos, sem duplicar versões HD/FHD e respeitando o controle parental.
+- Imagens horizontais ocupam o cenário. Capas verticais são contidas por inteiro, com uma versão desfocada compondo a atmosfera ao fundo. Falhas de imagem mantêm o título e o fundo neutro, sem imagem quebrada.
+- Anterior, próximo, contador e pausar/iniciar. Ao focar os controles ou ações pelo teclado, a rotação para até ser retomada; hover, outra aba, ficha aberta e destaque fora da tela suspendem o temporizador. Movimento reduzido começa pausado e remove a transição.
+- A ação principal acompanha o título visível, abrindo a ficha correta do filme ou série. A apresentação usa o proxy autenticado de imagens e não faz consultas extras de metadados.
+- Controles baseados nas [orientações de carrosséis da WAI](https://www.w3.org/WAI/ARIA/apg/patterns/carousel/). Validação: 43 testes automatizados, incluindo seleção, bloqueios, rotação e pausa; revisão no navegador com catálogo fictício e layout mobile.
+
 
 ## Mini player persistente
 
