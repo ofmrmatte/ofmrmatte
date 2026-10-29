@@ -166,6 +166,7 @@ async function loadSection(type, force=false) {
       cat.items=normalizeCatalog(items.data,cat.categories,type);
       cat.loaded=true;
       for(const item of cat.items)cachedItem.set(item.id,item);
+      restoreTitleFromLocation();
     }catch(err){cat.error=err.message;if(state.token)toast(`Não foi possível carregar ${kindMap[type]}: ${err.message}`);}
     finally{cat.loading=false;cat.promise=null;render();}
   })();
@@ -173,7 +174,7 @@ async function loadSection(type, force=false) {
 }
 function targetType() {return types.includes(state.section)?state.section:'live';}
 function setSection(section, keepSearch=false) {
-  closeTitlePage(true);
+  closeTitlePage();
   if(!['home','favorites','recents',...types].includes(section))return;
   state.section=section;document.body.dataset.page=section;state.category='';state.limit=30;
   if(!keepSearch){state.search='';$('globalSearch').value='';}
@@ -418,27 +419,36 @@ function closeTitlePage(fromNavigation=false){
   page.hidden=true;document.body.classList.remove('title-page-open');state.detailRequest++;state.seriesRequest++;
   document.querySelector('.catalog-heading')?.removeAttribute('aria-hidden');
   if(!fromNavigation&&location.pathname.startsWith('/title/'))history.pushState({},'',titleReturnUrl&& !titleReturnUrl.startsWith('/title/')?titleReturnUrl:'/');
+  titleReturnUrl=null;
 }
 function showTitleEpisodes(){
   const node=$('titleEpisodes');if(!node)return;
   node.hidden=false;
   node.scrollIntoView({behavior:'smooth',block:'start'});
 }
+function restoreTitleFromLocation(){
+  const match=location.pathname.match(/^\/title\/(movie|series)\/(\d{1,15})\/?$/);
+  if(!match||!state.token)return;
+  const type=match[1]==='movie'?'vod':'series',catalog=state.catalog[type];
+  if(!catalog.loaded)return;
+  const item=catalog.items.find(entry=>String(entry.sourceId)===match[2]);
+  if(item&&(!document.body.classList.contains('title-page-open')||state.detailItem?.id!==item.id))openDetails(item);
+}
 function initTitlePage(){
   const layer=$('detailsModal'),card=layer?.querySelector('.details-modal');
   const series=$('seriesModal')?.querySelector('.series-modal');
   if(!layer||!card||!series)return;
-  const page=document.createElement('main');page.id='titlePage';page.className='title-page';page.hidden=true;
-  const back=document.createElement('button');back.type='button';back.className='btn btn-outline title-back';back.textContent='← Voltar à biblioteca';back.onclick=()=>closeTitlePage();
-  card.querySelector('[data-dismiss="detailsModal"]')?.remove();
+  const page=document.createElement('section');page.id='titlePage';page.className='title-page';page.hidden=true;page.tabIndex=-1;page.setAttribute('aria-label','Detalhes do conteúdo');
+  const back=document.createElement('button');back.type='button';back.className='btn btn-outline title-back';back.textContent='← Voltar à biblioteca';back.onclick=()=>{if(history.state?.mfTitle&&titleReturnUrl&&!titleReturnUrl.startsWith('/title/'))history.back();else closeTitlePage();};
+  card.querySelector('[data-dismiss="detailsModal"]')?.remove();card.setAttribute('role','region');card.removeAttribute('aria-modal');
   const episodes=document.createElement('section');episodes.id='titleEpisodes';episodes.className='title-episodes';episodes.hidden=true;
-  series.querySelector('[data-dismiss="seriesModal"]')?.remove();
+  series.querySelector('[data-dismiss="seriesModal"]')?.remove();series.setAttribute('role','region');series.removeAttribute('aria-modal');
   episodes.append(series);
   page.append(back,card,episodes);
-  document.querySelector('.hero')?.parentElement?.append(page);
+  document.querySelector('.page-content')?.append(page);
   window.addEventListener('popstate',()=>{
     if(!location.pathname.startsWith('/title/'))closeTitlePage(true);
-    else {const match=location.pathname.match(/^\/title\/(movie|series)\/(\d{1,15})\/?$/);if(match){const item=state.catalog[match[1]==='movie'?'vod':'series'].items.find(x=>String(x.sourceId)===match[2]);if(item)openDetails(item);}}
+    else {const match=location.pathname.match(/^\/title\/(movie|series)\/(\d{1,15})\/?$/);if(match){const item=state.catalog[match[1]==='movie'?'vod':'series'].items.find(x=>String(x.sourceId)===match[2]);if(item)openDetails(item);else if(state.token)loadSection(match[1]==='movie'?'vod':'series');}}
   });
 }
 
@@ -451,10 +461,10 @@ async function openDetails(item,refresh=false){
     $('detailsCredits').textContent=[metadata.director?`Direção: ${metadata.director}`:'',metadata.cast?`Elenco: ${metadata.cast}`:''].filter(Boolean).join(' · ');
     $('detailsFavorite').textContent=state.favorites.has(item.id)?'Remover da minha lista':'Adicionar à minha lista';
   };
-  $('detailsArt').replaceChildren();const src=safeHttp(item.logo);if(src){const image=el('img');const proxy=state.token?'/api/poster/'+encodeURIComponent(state.token)+'/'+item.type+'/'+encodeURIComponent(item.sourceId):src;image.src=proxy;image.alt='';image.referrerPolicy='no-referrer';image.onerror=()=>{if(image.src!==src){image.src=src;}else image.hidden=true;};$('detailsArt').append(image);}fill(item);$('detailsPlay').disabled=true;
+  $('detailsArt').replaceChildren();const src=safeHttp(item.logo);if(src){const image=el('img');const proxy=state.token?'/api/poster/'+encodeURIComponent(state.token)+'/'+item.type+'/'+encodeURIComponent(item.sourceId):src;image.src=proxy;image.alt='';image.referrerPolicy='no-referrer';image.onerror=()=>{if(image.src!==src){image.src=src;}else image.hidden=true;};$('detailsArt').append(image);}fill(item);$('detailsPlay').disabled=false;
   $('refreshRating').disabled=true;if(item.ageLabel==='Não informada'||refresh)$('detailsMeta').replaceChildren(el('span','age-badge','Buscando classificação…'));
   try{const data=(await api(`/api/catalog?section=${item.type}&kind=info&${item.type==='vod'?'vod_id':'series_id'}=${item.sourceId}${refresh?'&refresh=1':''}`)).data;if(ticket!==state.detailRequest||!document.body.classList.contains('title-page-open'))return;Object.assign(item,data.metadata);cachedItem.set(item.id,item);state.detailItem=item;render();fill(state.detailItem);$('detailsPlay').disabled=false;}
-  catch(error){if(ticket===state.detailRequest){$('detailsDescription').textContent=error.message;if(error.status===403)loadSection(item.type,true);}}
+  catch(error){if(ticket===state.detailRequest){$('detailsDescription').textContent=item.description||'Informações adicionais indisponíveis no momento.';$('detailsPlay').disabled=false;if(error.status===403)loadSection(item.type,true);}}
   finally{if(ticket===state.detailRequest)$('refreshRating').disabled=false;}
 }
 function bind() {
