@@ -438,7 +438,7 @@ function initTitlePage(){
   document.querySelector('.hero')?.parentElement?.append(page);
   window.addEventListener('popstate',()=>{
     if(!location.pathname.startsWith('/title/'))closeTitlePage(true);
-    else {const match=location.pathname.match(/^\\/title\\/(movie|series)\\/(\\d+)$/);if(match){const item=state.catalog[match[1]==='movie'?'vod':'series'].items.find(x=>String(x.sourceId)===match[2]);if(item)openDetails(item);}}
+    else {const match=location.pathname.match(/^\/title\/(movie|series)\/(\d{1,15})\/?$/);if(match){const item=state.catalog[match[1]==='movie'?'vod':'series'].items.find(x=>String(x.sourceId)===match[2]);if(item)openDetails(item);}}
   });
 }
 
