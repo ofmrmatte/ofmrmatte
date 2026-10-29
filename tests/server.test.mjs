@@ -29,8 +29,8 @@ function fakeXtream(req,res){
   else if(action.endsWith('_categories'))data=[{category_id:'1',category_name:'Ação'}];
   else if(action==='get_live_streams')data=[{stream_id:11,name:'Canal Teste',category_id:'1'}];
   else if(action==='get_vod_streams')data=[{stream_id:22,name:'Filme Teste',category_id:'1'}];
-  else if(action==='get_series')data=[{series_id:33,name:'Série Teste',category_id:'1'}];
-  else if(action==='get_series_info')data={info:{plot:'Descrição teste'},episodes:{'1':[{id:44,episode_num:1,title:'Piloto',container_extension:'mp4'}]}};
+  else if(action==='get_series')data=[{series_id:33,name:'Série Teste',category_id:'1',cover:'/poster.png'}];
+  else if(action==='get_series_info')data={info:{plot:'Descrição teste'},episodes:{'1':[{id:44,episode_num:1,title:'Piloto',container_extension:'mp4',info:{movie_image:'/broken-poster.png'}}]}};
   else data=[];
   res.writeHead(200,{'Content-Type':'application/json'});return res.end(JSON.stringify(data));
  }
@@ -38,6 +38,7 @@ function fakeXtream(req,res){
   res.writeHead(200,{'Content-Type':'application/vnd.apple.mpegurl'});
   return res.end('#EXTM3U\n#EXTINF:5,\n/segment.ts\n');
  }
+ if(u.pathname==='/poster.png'){res.writeHead(200,{'Content-Type':'image/png'});return res.end(Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aZJ0AAAAASUVORK5CYII=','base64'));}
  if(u.pathname==='/segment.ts'){
   res.writeHead(200,{'Content-Type':'video/mp2t'});return res.end('TS_EXAMPLE');
  }
@@ -99,6 +100,7 @@ test('fluxo completo: app, login Xtream, catálogo, séries, manifesto e logout'
   const items=await (await fetch(`${origin}/api/catalog?section=${kind}&kind=items`,{headers})).json();assert.equal(items.data.length,1);
  }
  const info=await (await fetch(origin+'/api/catalog?section=series&kind=info&series_id=33',{headers})).json();assert.equal(info.data.episodes['1'][0].title,'Piloto');
+ const poster=await fetch(origin+`/api/episode-poster/${token}/44`);assert.equal(poster.status,200);assert.match(poster.headers.get('content-type'),/image\/png/);assert.equal((await poster.arrayBuffer()).byteLength>20,true);assert.equal((await fetch(origin+'/api/episode-poster/'+token+'/999')).status,403);
  const playlist=await (await fetch(origin+`/api/stream/${token}/live/11.m3u8`)).text();assert.match(playlist,/\/api\/media\//);assert.doesNotMatch(playlist,/testpass/);
  const media=playlist.split('\n').find(x=>x.startsWith('/api/media/'));const segment=await (await fetch(origin+media)).text();assert.equal(segment,'TS_EXAMPLE');
  res=await fetch(origin+'/api/logout',{method:'POST',headers});assert.equal(res.status,200);
@@ -220,6 +222,12 @@ test('rotas individuais de filmes e séries servem o aplicativo',async t=>{
 test('o JavaScript da interface é sintaticamente válido',async()=>{
  const {execFileSync}=await import('node:child_process');
  assert.doesNotThrow(()=>execFileSync(process.execPath,['--check','src/app.js'],{cwd:resolve(import.meta.dirname,'..'),encoding:'utf8'}));
+});
+
+test('consulta de classificação não depende do endpoint de detalhes do provedor',async t=>{
+ let details=0;const provider=createServer((req,res)=>{const u=new URL(req.url,'http://localhost');if(u.searchParams.get('action')==='get_vod_info'){details++;res.writeHead(403);res.end();return;}fakeXtream(req,res);});provider.listen(0,'127.0.0.1');await once(provider,'listening');t.after(()=>new Promise(resolve=>provider.close(resolve)));
+ const origin=await startApp(t);const login=await fetch(origin+'/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:'http://127.0.0.1:'+provider.address().port,username:'testuser',password:'testpass'})});const {token}=await login.json();
+ const response=await fetch(origin+'/api/catalog?section=vod&kind=rating&vod_id=22',{headers:{'x-session-token':token}});assert.equal(response.status,200);assert.equal((await response.json()).data.age,null);assert.equal(details,0);
 });
 
 test('inicia com classificações habilitadas sem APP_DATA_DIR configurado',async t=>{const origin=await startApp(t,{ratings:true});const response=await fetch(origin+'/healthz');assert.equal(response.status,200);assert.equal((await response.json()).ok,true);});

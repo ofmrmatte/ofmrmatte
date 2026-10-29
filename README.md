@@ -1,22 +1,28 @@
-# MF Stream 4.1
+# MF Stream 4.1.1
 
 ## Ficha unificada e reprodução contínua
 
 - Filmes e séries abrem uma ficha com capa, sinopse, classificação e ações. Em séries, **Assistir · Ver episódios** revela temporadas e episódios dentro da mesma ficha, com uma única rolagem e sem outro popup.
 - Abertura a partir do cartão e fechamento com GSAP servido pelo próprio app. Movimento reduzido respeitado. Referências de interação: [Morphing Dialog do 21st](https://21st.dev/@ibelick/components/morphing-dialog), [organização de títulos do Apple TV](https://itunespartner.apple.com/tv-movies/support/5408-apple-tv-app-overview) e navegação de temporadas dos streamers.
-- Em tela cheia, **Episódios** abre uma faixa compacta no rodapé, acima dos controles. Ela fica fechada por padrão e se fecha ao escolher um episódio. O centro da imagem permanece livre. O botão **Próximo episódio** continua dentro do player.
+- No player personalizado do desktop, **Episódios** abre uma faixa compacta no rodapé, acima dos controles. No celular, a reprodução usa os controles nativos do vídeo e o player de sistema; a seleção de episódios permanece na ficha do aplicativo.
 - Aviso no canto inferior nos últimos 15 segundos, com Assistir agora e Cancelar. A reprodução automática segue inclusive para outra temporada; pode ser desligada na lateral do player. A preferência fica separada por perfil e sincroniza com as demais preferências.
 - Metadados recebidos agora atualizam a ficha. Links `/title/movie/ID` e `/title/series/ID` restauram o título após conectar. A consulta externa de classificação não atrasa a lista de episódios.
 - Classificação complementar usa correspondência de título/ano, rejeita obras ambíguas, identifica país/fonte e mantém cache de resultados confirmados por 24 horas em `APP_DATA_DIR/ratings-cache.json`. Wikidata consulta [ClassInd/P3216](https://www.wikidata.org/wiki/Property:P3216) e MPA/P1657. Onde não há certificado confirmado, o app continua mostrando classificação não confirmada; certificados estrangeiros não são apresentados como brasileiros.
-- Verificação: 36 testes automatizados, inclusive persistência do cache e rejeição de classificações ambíguas; fluxo em navegador com fonte fictícia e vídeo CC0, troca de temporada, retomada, passagem automática de T1 E2 para T2 E1 e faixa em tela cheia. Layout conferido em 320×568, 390×844 e 844×390, além do desktop.
+- Verificação: 38 testes automatizados, inclusive persistência do cache e rejeição de classificações ambíguas; fluxo em navegador com fonte fictícia e vídeo CC0, troca de temporada, retomada, passagem automática de T1 E2 para T2 E1 e faixa em tela cheia. Layout conferido em 320×568, 390×844 e 844×390, além do desktop.
 
 ## Mobile
 
 - Formulários com fonte de 16 px, áreas de toque maiores, rolagem de teclado baseada na altura visual disponível e respeito aos recortes de tela. O zoom manual continua permitido.
 - Biblioteca com cabeçalho alinhado, cartões proporcionais e navegação inferior. Capas da ficha são contidas por inteiro, com fundo desfocado; os episódios usam uma única rolagem.
-- Ao tocar em um episódio ou filme no celular, o player solicita tela cheia diretamente no gesto e tenta travar a orientação em paisagem. Em navegadores sem esse suporte, usa tela cheia dentro do app e um player horizontal que acompanha a rotação física. O vídeo usa object-fit: contain para não recortar a imagem. A disponibilidade da trava nativa depende do navegador; consulte a [API de orientação](https://developer.mozilla.org/en-US/docs/Web/API/ScreenOrientation/lock).
-- Botão de retorno aos detalhes dentro da tela cheia, controles por toque e faixa discreta de próximos episódios, inclusive da próxima temporada. A preferência de reprodução automática permanece por perfil.
+- No celular, o vídeo usa controles nativos. No iPhone, a API webkitEnterFullscreen entrega o vídeo ao player do sistema; nos demais navegadores compatíveis, requestFullscreen é chamado no elemento de vídeo. O app não força tela cheia do site nem rotação por CSS. Se o sistema exigir novo gesto após carregar a mídia, aparece Abrir no player do aparelho. Veja as [orientações da Apple para vídeo](https://developer.apple.com/documentation/webkit/delivering-video-content-for-safari).
+- A navegação de temporadas e episódios e a retomada ficam na ficha. Os controles exibidos no player nativo dependem do sistema operacional. A preferência de reprodução automática permanece por perfil.
 - A verificação usou dimensões responsivas no navegador e testes das falhas das APIs de tela cheia/orientação. Não substitui validação em aparelhos físicos Android/iOS.
+
+## Correções 4.1.1
+
+- Removido o preview ao passar o mouse: clicar no cartão abre a ficha.
+- Imagens de episódios passam pelo backend autenticado; falhas usam a capa da série e, por último, uma indicação limpa do número do episódio.
+- A consulta complementar de classificação não depende do endpoint de detalhes do provedor. O ano decorativo no nome da lista não substitui a data de lançamento. As consultas identificam fila, indisponibilidade ou obra não encontrada; resultados confirmados mostram país e fonte. Não há garantia de certificado disponível para todo título nas fontes gratuitas.
 
 ## Contas, perfis e acesso permanente
 

@@ -32,19 +32,19 @@ body{font-family:'DM Sans',sans-serif;background:#08090b}
 
 /* MF Stream unified catalog preview and details — replaces experimental overrides. */
 .media-card{position:relative}
-.media-card .card-peek{position:fixed;z-index:1500;box-sizing:border-box;width:300px;max-height:min(450px,calc(100dvh - 24px));overflow:hidden;background:#1c1b25;border:1px solid #494052;border-radius:14px;box-shadow:0 20px 65px #000d;opacity:0;visibility:hidden;pointer-events:none;transform:translateY(8px) scale(.98);transition:opacity .18s ease,transform .18s ease,visibility .18s}
-.media-card .card-peek.is-visible,.card-peek.is-visible{opacity:1;visibility:visible;pointer-events:auto;transform:none}
-.card-peek-art{height:155px;overflow:hidden;background:#292735}
-.card-peek-art img{display:block;width:100%;height:100%;object-fit:cover;object-position:center 35%}
-.card-peek-actions{display:flex;gap:9px;align-items:center;padding:12px 14px 6px}
-.card-peek-play,.card-peek-more{width:36px;height:36px;flex:none;border-radius:50%;display:grid;place-items:center;padding:0;background:#282632;border:1px solid #777384;color:#fff;font-size:19px;cursor:pointer}
-.card-peek-play{background:#e8ddff;border-color:#e8ddff;color:#171021}
-.card-peek-more:nth-child(3){margin-left:auto}
-.card-peek-title{display:block;font-size:15px;line-height:1.3;color:#fff;margin:4px 14px 0}
-.card-peek-meta{display:flex;flex-wrap:wrap;gap:10px;color:#c8b4ff;font-size:11px;margin:8px 14px}
-.card-peek-description{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;font-size:12px;line-height:1.5;color:#c7c5d0;margin:0 14px 14px}
+
+
+
+
+
+
+
+
+
+
+
 .media-rail{padding-bottom:14px;margin-bottom:0}
-@media(hover:none), (max-width:760px){.card-peek{display:none!important}}
+@media(hover:none), (max-width:760px){}
 
 /* Home feature: use reliable proxied Xtream artwork, never a giant blank placeholder. */
 .hero{position:relative;isolation:isolate;min-height:365px!important;padding:52px 5%!important;overflow:hidden;background:linear-gradient(115deg,#1c1b28 0%,#191922 62%,#29233d 100%)!important;border:1px solid #383440!important}

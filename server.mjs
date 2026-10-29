@@ -251,14 +251,16 @@ async function catalogFor(session,section) {
   session.catalogs.set(section,{time:Date.now(),promise});
   try{return await promise;}catch(error){session.catalogs.delete(section);throw error;}
 }
-async function allowedEntry(session,section,id,details=false,refresh=false,enrich=true) {
+async function allowedEntry(session,section,id,details=false,refresh=false,enrich=true,skipProvider=false) {
   const catalog=await catalogFor(session,section);
   const key=`${section}:${id}`;let metadata=session.entries.get(key);
   if(refresh)session.details.delete(key);
   if(!metadata)return null;
+  if(refresh&&['Apple TV','Wikidata'].includes(metadata.ageSource))metadata={...metadata,age:null,ageLabel:'Não informada',ageSource:'',ageCountry:'',ageSourceUrl:'',ageReference:false};
   if(!contentAllowed(metadata,parental.get(session.policyKey)) && !(details && metadata.age===null && !metadata.adult))return null;
-  if(details && section!=='live' && !session.details.has(key)){
+  if(details && !skipProvider && section!=='live' && !session.details.has(key)){
     const data=await providerJson(apiUrl(session.base,session.username,session.password,section==='vod'?'get_vod_info':'get_series_info',{[section==='vod'?'vod_id':'series_id']:id}));
+    metadata=session.entries.get(key)||metadata;
     const info=contentMetadata({...data?.movie_data,...data?.info,...data});
     const classification=info.ageLabel==='Não informada'?(refresh&&['Apple TV','Wikidata'].includes(metadata.ageSource)?{age:null,ageLabel:'Não informada',ageCountry:'',ageSource:'',ageSourceUrl:'',ageReference:false}:Object.fromEntries(Object.entries(metadata).filter(([key])=>key.startsWith('age')))):Object.fromEntries(Object.entries(info).filter(([key])=>key.startsWith('age')));
     metadata={...metadata,...info,...classification,adult:metadata.adult||info.adult};
@@ -267,8 +269,8 @@ async function allowedEntry(session,section,id,details=false,refresh=false,enric
   if(details&&enrich&&section!=='live'&&metadata.ageLabel==='Não informada'){
       const data=session.details.get(key);
       const item=catalog.items.find(item=>String(section==='series'?item.series_id:item.stream_id)===String(id));
-      if(item){const rating=await lookupRating(item.name||data?.info?.name,section,item.releaseDate||item.release_date||item.year||/\b(?:19|20)\d{2}\b/.exec(item.name||'')?.[0]||'',{refresh});if(rating)metadata={...metadata,...rating,adult:metadata.adult||rating.age===18};}
-    session.entries.set(key,metadata);session.details.set(key,{...data,metadata});
+      if(item){const rating=await lookupRating(item.name||data?.info?.name,section,data?.info?.releasedate||data?.info?.release_date||item.releaseDate||item.release_date||item.year||'',{refresh,withStatus:true});if(rating)metadata={...metadata,...rating,adult:metadata.adult||rating.age===18};}
+    session.entries.set(key,metadata);if(data)session.details.set(key,{...data,metadata});
   }
   return contentAllowed(metadata,parental.get(session.policyKey))?metadata:null;
 }
@@ -315,7 +317,7 @@ async function route(req,res) {
   let url;
   try { url = new URL(req.url, 'http://localhost'); } catch { return send(res,400,{error:'URL inválida.'}); }
   const pathname = url.pathname;
-  if(pathname==='/healthz')return send(res,200,{ok:true,version:'4.1.0'});
+  if(pathname==='/healthz')return send(res,200,{ok:true,version:'4.1.1'});
   if(access&&pathname.startsWith('/api/auth/')){
     // Nenhum endpoint de administração do plugin fica acessível publicamente.
     if(!new Set(['/api/auth/sign-in/email','/api/auth/sign-out','/api/auth/get-session']).has(pathname))return send(res,404,{error:'Rota indisponível.'});
@@ -502,7 +504,7 @@ async function route(req,res) {
         let data;
         if(kind==='info'||kind==='rating'){
           const id=params.series_id||params.vod_id;
-          if(!await allowedEntry(session,section,id,true,url.searchParams.get('refresh')==='1',kind==='rating'))return send(res,403,{error:'Conteúdo bloqueado pelo controle parental.'});
+          if(!await allowedEntry(session,section,id,true,url.searchParams.get('refresh')==='1',kind==='rating',kind==='rating'))return send(res,403,{error:'Conteúdo bloqueado pelo controle parental.'});
           if(kind==='rating')return send(res,200,{data:session.entries.get(`${section}:${id}`)});
           data=session.details.get(`${section}:${id}`);
           if(section==='series'){
@@ -510,7 +512,7 @@ async function route(req,res) {
             for(const [season,rows] of Object.entries(data?.episodes||{}))if(Array.isArray(rows))episodes[season]=rows.filter(ep=>{
               const child=contentMetadata({...ep,...ep.info});const metadata={...parent,adult:parent.adult||child.adult,age:child.age===null?parent.age:Math.max(parent.age??0,child.age)};
               if(!contentAllowed(metadata,policy))return false;
-              session.episodes.set(String(ep.id),{parentId:String(id),metadata});return true;
+              session.episodes.set(String(ep.id),{parentId:String(id),metadata,poster:ep.info?.movie_image||ep.info?.cover_big||ep.info?.cover||ep.movie_image||ep.cover||ep.thumbnail||ep.still||''});return true;
             });
             data={...data,episodes};
           }
@@ -540,6 +542,21 @@ async function route(req,res) {
         res.writeHead(200,{'Content-Type':contentType,'Cache-Control':'private, max-age=1800','X-Content-Type-Options':'nosniff'});
         let count=0;for await(const chunk of response){count+=chunk.length;if(count>5_000_000){res.destroy();return;}if(!res.write(chunk))await new Promise(resolve=>res.once('drain',resolve));}res.end();return;
       }catch(error){return sendFailure(res,502,error);}
+    }
+    const episodePoster=/^\/api\/episode-poster\/([A-Za-z0-9_-]{20,60})\/(\d{1,15})$/.exec(pathname);
+    if(req.method==='GET'&&episodePoster){
+      const s=sessionFor(episodePoster[1]);if(!s||access&&s.ownerId!==identity.user.id)return send(res,401,{error:'Sessão inválida.'});
+      const ep=s.episodes.get(episodePoster[2]);if(!ep||!contentAllowed(ep.metadata,parental.get(s.policyKey))||!await allowedEntry(s,'series',ep.parentId,false))return send(res,403,{error:'Episódio indisponível.'});
+      const catalog=await catalogFor(s,'series'),parent=catalog.items.find(row=>String(row.series_id)===ep.parentId);
+      for(const raw of [...new Set([ep.poster,parent?.cover,parent?.cover_big,parent?.stream_icon,parent?.movie_image].filter(value=>typeof value==='string'&&value.trim()))]){
+        try{
+          const imageUrl=new URL(raw,s.base+'/');if(!['http:','https:'].includes(imageUrl.protocol)||imageUrl.username||imageUrl.password)continue;
+          const {response}=await getRemote(imageUrl.href),contentType=String(response.headers['content-type']||'').split(';')[0].trim().toLowerCase();
+          if(response.statusCode!==200||!['image/jpeg','image/png','image/webp','image/gif','image/avif'].includes(contentType)||Number(response.headers['content-length']||0)>5000000){response.resume();continue;}
+          res.writeHead(200,{'Content-Type':contentType,'Cache-Control':'private, max-age=1800','X-Content-Type-Options':'nosniff'});let count=0;for await(const chunk of response){count+=chunk.length;if(count>5000000){res.destroy();return;}if(!res.write(chunk))await new Promise(resolve=>res.once('drain',resolve));}res.end();return;
+        }catch{if(res.headersSent){res.destroy();return;}}
+      }
+      return send(res,404,{error:'Imagem do episódio indisponível.'});
     }
     const stream = /^\/api\/stream\/([A-Za-z0-9_-]{20,60})\/(live|vod|series)\/(\d{1,15})\.([a-z0-9]{2,5})$/.exec(pathname);
     const media = /^\/api\/media\/([A-Za-z0-9_-]{20,60})\/([A-Za-z0-9_-]{15,30})$/.exec(pathname);
@@ -579,6 +596,3 @@ async function route(req,res) {
 const server = createServer((req,res) => { route(req,res).catch(() => { if (!res.headersSent) send(res,500,{error:'Erro interno.'}); else res.destroy(); }); });
 server.listen(port,'0.0.0.0',() => console.log(`MF Stream IPTV disponível na porta ${server.address().port}`));
 setInterval(() => { for (const [key, s] of sessions) if (Date.now()-s.lastUsed>SESSION_IDLE_MS) sessions.delete(key); },300_000).unref();
-
-
-
