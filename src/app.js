@@ -41,6 +41,21 @@ const $ = id => document.getElementById(id);
 const icon = (key, size = 20) => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[key] || ICONS.play}</svg>`;
 const el = (tag, className='', text) => { const node = document.createElement(tag); if (className) node.className = className; if (text !== undefined) node.textContent = text; return node; };
 const uiIcon = () => document.querySelectorAll('[data-icon]').forEach(node => { node.innerHTML = icon(node.dataset.icon, Number(node.dataset.size)||20); });
+const PROFILE_HEADER_COLORS=['#aa95f5','#70b8cb','#d38c9d','#dea659','#7bb298','#8b9bd6','#bf9470','#9a9eac'];
+function updateProfileButton(profile){
+ const button=$('openAccountProfile');if(!button)return;
+ if(!profile){
+   button.innerHTML=icon('user',20);button.removeAttribute('data-profile');
+   button.style.removeProperty('--profile-color');button.title='Gerenciar perfis';
+   button.setAttribute('aria-label','Gerenciar perfis');return;
+ }
+ const name=String(profile.name||'Perfil').trim();
+ button.textContent=name.slice(0,1).toLocaleUpperCase('pt-BR');
+ button.dataset.profile='true';
+ button.style.setProperty('--profile-color',PROFILE_HEADER_COLORS[Number(profile.avatar)]||PROFILE_HEADER_COLORS[0]);
+ button.title='Trocar perfil: '+name;button.setAttribute('aria-label',button.title);
+}
+
 const kindMap = { live:'TV ao vivo', vod:'Filmes', series:'Séries' };
 const types = ['live','vod','series'];
 const storage = { get(k, fallback) { try { return JSON.parse(localStorage.getItem(k)) ?? fallback; } catch { return fallback; } }, set(k, value) { try { localStorage.setItem(k, JSON.stringify(value)); } catch {} } };
@@ -94,7 +109,7 @@ function setDisconnected(msg) {
   state.discovery=null;state.discoveryLoading=false;state.discoveryExpires=0;state.blockedTitles.clear();titleExtras.clear();heroPreview?.stop();
   ratingJobs.length=0;ratingSeen.clear();ratingPending.clear();ratingObserver.disconnect();
   saveProgress();playerReset();state.progress={};state.seriesProgress={};state.episodeQueue=[];state.seriesRequest++;
-  state.token=null;state.account=null;state.host='';state.listName='';state.current=null;cachedItem.clear();state.favorites=new Set();state.recents=[];
+  state.token=null;state.account=null;state.host='';state.listName='';state.current=null;state.profile=null;state.appUser=null;updateProfileButton(null);cachedItem.clear();state.favorites=new Set();state.recents=[];
   for(const t of types) state.catalog[t]={loaded:false,loading:false,items:[],categories:[],promise:null,error:null};
   sessionStorage.removeItem('mfstream:session');
   updateSessionUI();render();if(msg)toast(msg);
@@ -608,5 +623,5 @@ function bind() {
   window.addEventListener('appinstalled',()=>{$('installButton').hidden=true;toast('Scene Play instalado.');});
   if('serviceWorker'in navigator&&['https:','http:'].includes(location.protocol)){navigator.serviceWorker.register('/service-worker.js').catch(()=>{});}
 }
-async function main(){bind();document.body.dataset.page='home';updateSessionUI();render();try{const fixed=await setupAccess({state,onReset:()=>{flushCloud();setDisconnected();},onConnected:async(result,profile,user)=>{state.token=result.token;state.account=result.account;state.host=result.host;state.listName=profile.name;state.profile=profile;state.appUser=user;$('openAccount').setAttribute('aria-label','Trocar perfil');$('openAccountSidebar').querySelector('span:not([data-icon])').textContent='Perfis';loadPrefs();const prefs=await api('/api/preferences');if(Array.isArray(prefs.favorites))state.favorites=new Set(prefs.favorites);if(Array.isArray(prefs.recents))state.recents=prefs.recents;if(prefs.progress&&typeof prefs.progress==='object')state.progress=prefs.progress;if(prefs.seriesProgress&&typeof prefs.seriesProgress==='object')state.seriesProgress=prefs.seriesProgress;if(typeof prefs.autoNext==='boolean')state.autoNext=prefs.autoNext;await loadParental();updateSessionUI();setSection('home');}});if(!fixed)await restoreSession();}catch(error){document.body.classList.remove('auth-pending');toast('Não foi possível carregar o acesso. Atualize a página.');}}
+async function main(){bind();document.body.dataset.page='home';updateSessionUI();render();try{const fixed=await setupAccess({state,onReset:()=>{flushCloud();setDisconnected();},onConnected:async(result,profile,user)=>{state.token=result.token;state.account=result.account;state.host=result.host;state.listName=profile.name;state.profile=profile;state.appUser=user;updateProfileButton(profile);$('openAccount').setAttribute('aria-label','Trocar perfil');$('openAccountSidebar').querySelector('span:not([data-icon])').textContent='Perfis';loadPrefs();const prefs=await api('/api/preferences');if(Array.isArray(prefs.favorites))state.favorites=new Set(prefs.favorites);if(Array.isArray(prefs.recents))state.recents=prefs.recents;if(prefs.progress&&typeof prefs.progress==='object')state.progress=prefs.progress;if(prefs.seriesProgress&&typeof prefs.seriesProgress==='object')state.seriesProgress=prefs.seriesProgress;if(typeof prefs.autoNext==='boolean')state.autoNext=prefs.autoNext;await loadParental();updateSessionUI();setSection('home');}});if(!fixed)await restoreSession();}catch(error){document.body.classList.remove('auth-pending');toast('Não foi possível carregar o acesso. Atualize a página.');}}
 main();
