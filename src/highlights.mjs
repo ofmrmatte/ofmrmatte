@@ -26,3 +26,5 @@ export function createHighlightRotation({onChange,onState=()=>{},delay=9000,paus
     destroy(){if(timer!==null)clearTimer(timer);timer=null;items=[];}
   };
 }
+
+export function displayTitle(value){return String(value||'').replace(/\s*[-–]\s*(?:19|20)\d{2}\s*(?:\([^)]*\))?\s*$/,'').replace(/\s*[\[(](?:L|D|HD|FHD|UHD|4K|DUBLADO|LEGENDADO)[\])]\s*$/i,'').trim();}

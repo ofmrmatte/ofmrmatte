@@ -21,8 +21,13 @@ O aplicativo é um serviço independente do site do portfólio. No repositório 
 | PARENTAL_DATA_DIR | `/data` |
 | NODE_ENV | `production` |
 | BETTER_AUTH_URL | Domínio HTTPS do serviço; pode ser omitido se `RAILWAY_PUBLIC_DOMAIN` estiver disponível |
+| DISCOVERY_ENABLED | `1` por padrão; `0` desliga a descoberta externa |
+| TMDB_API_READ_ACCESS_TOKEN | Opcional, token privado de leitura do TMDB |
+| CLASSIND_CSV_FILE | Opcional, caminho de um CSV oficial ClassInd no servidor |
 
 O código e `.env.example` são públicos. `.env`, os bancos, segredos e relatórios locais não são publicados no Git.
+
+A versão 5 guarda tendências, classificações, imagens e agregados de audiência em `APP_DATA_DIR`. Preserve `/data` mesmo com PostgreSQL: esses arquivos não são transferidos para o banco. Use uma réplica para manter as contagens e caches consistentes. O ranking externo funciona sem chave de API e só apresenta títulos encontrados na lista. A primeira consulta pode levar alguns segundos; indisponibilidade externa não impede abrir a biblioteca.
 
 ## PostgreSQL opcional
 

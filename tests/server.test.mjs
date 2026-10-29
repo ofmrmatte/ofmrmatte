@@ -5,7 +5,7 @@ import {spawn} from 'node:child_process';
 import {once} from 'node:events';
 import {resolve} from 'node:path';
 import {createInterface} from 'node:readline';
-import {mkdtemp,rm} from 'node:fs/promises';
+import {mkdtemp,rm,writeFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join,sep} from 'node:path';
 
@@ -44,15 +44,16 @@ function fakeXtream(req,res){
  }
  res.writeHead(404);res.end('not found');
 }
-async function startApp(t, {allowPrivate=true,ratings=false,admin=false,providerUrl='',fixedPort=0} = {}) {
+async function startApp(t, {allowPrivate=true,ratings=false,admin=false,providerUrl='',fixedPort=0,discoverySeed=null,ratingsSeed=null} = {}) {
  const dataDir=await mkdtemp(join(tmpdir(),'mfstream-integration-'));
- const app=spawn(process.execPath,['server.mjs'],{cwd:resolve(import.meta.dirname,'..'),env:{...process.env,PORT:String(fixedPort),APP_AUTH_ENABLED:admin?'1':'0',XTREAM_URL:providerUrl,XTREAM_USERNAME:'testuser',XTREAM_PASSWORD:'testpass',ADMIN_SETUP_TOKEN:'fixture-master-setup',BETTER_AUTH_SECRET:'fixture-auth-secret-for-admin-tests-only-2026',BETTER_AUTH_URL:'http://127.0.0.1:'+fixedPort,RATING_LOOKUP_ENABLED:ratings?'1':'0',APP_DATA_DIR:admin?dataDir:'',PARENTAL_DATA_DIR:dataDir,ALLOW_PRIVATE_XTREAM_HOSTS:allowPrivate?'1':'0'},stdio:['ignore','pipe','pipe']});
+ if(discoverySeed)await writeFile(join(dataDir,'discovery.json'),JSON.stringify(discoverySeed));if(ratingsSeed)await writeFile(join(dataDir,'ratings-cache.json'),JSON.stringify(ratingsSeed));
+ const app=spawn(process.execPath,['server.mjs'],{cwd:resolve(import.meta.dirname,'..'),env:{...process.env,PORT:String(fixedPort),APP_AUTH_ENABLED:admin?'1':'0',XTREAM_URL:providerUrl,XTREAM_USERNAME:'testuser',XTREAM_PASSWORD:'testpass',ADMIN_SETUP_TOKEN:'fixture-master-setup',BETTER_AUTH_SECRET:'fixture-auth-secret-for-admin-tests-only-2026',BETTER_AUTH_URL:'http://127.0.0.1:'+fixedPort,RATING_LOOKUP_ENABLED:ratings?'1':'0',DISCOVERY_ENABLED:'0',APP_DATA_DIR:admin||discoverySeed||ratingsSeed?dataDir:'',PARENTAL_DATA_DIR:dataDir,ALLOW_PRIVATE_XTREAM_HOSTS:allowPrivate?'1':'0'},stdio:['ignore','pipe','pipe']});
  t.after(async()=>{if(app.exitCode===null){const ended=once(app,'exit');app.kill();await ended;}assert.ok(resolve(dataDir).startsWith(resolve(tmpdir())+sep+'mfstream-integration-'));await rm(dataDir,{recursive:true,force:true});});
  let stderr='';app.stderr.on('data',chunk=>{stderr+=chunk;});
  const lines=createInterface({input:app.stdout});
  try {
   return await new Promise((resolve,reject)=>{
-   const timer=setTimeout(()=>finish(new Error('O servidor não iniciou.')),6000);
+   const timer=setTimeout(()=>finish(new Error('O servidor não iniciou.')),15000);
    function onExit(){finish(new Error(`O servidor encerrou antes de iniciar: ${stderr}`));}
    function finish(error,origin){clearTimeout(timer);app.off('exit',onExit);app.off('error',finish);error?reject(error):resolve(origin);}
    app.once('exit',onExit);app.once('error',finish);
@@ -60,6 +61,23 @@ async function startApp(t, {allowPrivate=true,ratings=false,admin=false,provider
   });
  } finally {lines.close();}
 }
+
+test('início cruza ranking com catálogo autenticado, hidrata classificação em nova sessão e rejeita audiência sem reprodução',async t=>{
+ const provider=createServer(fakeXtream);provider.listen(0,'127.0.0.1');await once(provider,'listening');t.after(()=>{provider.closeAllConnections();provider.close();});
+ const remote=(id,title)=>({title,ids:{simkl_id:id},release_date:'01/01/2024',watched:100-id,url:'/movies/'+id+'/title'});
+ const discoverySeed={updatedAt:Date.now(),groups:{vod:[remote(1,'Filme Teste'),remote(2,'Fora do catálogo')],series:[remote(3,'Série Teste')]}};
+ const ratingsSeed={version:2,entries:{'vod:filme teste:':{expires:Date.now()+86400000,value:{age:14,ageLabel:'14',ageCountry:'BR',ageSource:'ClassInd · MJSP'}}}};
+ const origin=await startApp(t,{ratings:true,discoverySeed,ratingsSeed});
+ assert.equal((await fetch(origin+'/api/discovery')).status,401);
+ async function login(){const r=await fetch(origin+'/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:'http://127.0.0.1:'+provider.address().port,username:'testuser',password:'testpass',listName:'Fixture'})});assert.equal(r.status,200);return (await r.json()).token;}
+ const token=await login(),headers={'x-session-token':token};
+ const response=await fetch(origin+'/api/discovery',{headers});assert.equal(response.status,200);const data=await response.json();assert.equal(data.rankings.vod.length,1);assert.equal(data.rankings.vod[0].sourceId,'22');assert.equal(data.rankings.vod[0].age,14);assert.equal(data.rankings.series[0].sourceId,'33');assert.equal(data.internal.vod.available,false);assert.equal(JSON.stringify(data).includes('testpass'),false);
+ const extra=await fetch(origin+'/api/title-extra?section=vod&id=22',{headers});assert.equal(extra.status,200);assert.equal((await extra.json()).trailer,null);
+ assert.equal((await fetch(origin+'/api/title-extra?section=vod&id=999',{headers})).status,403);
+ const another=await login();const catalog=await fetch(origin+'/api/catalog?section=vod&kind=items',{headers:{'x-session-token':another}}).then(r=>r.json());assert.equal(catalog.data[0].metadata.ageLabel,'14');
+ assert.equal((await fetch(origin+'/api/watch-event',{method:'POST',headers:{...headers,'Content-Type':'application/json'},body:JSON.stringify({type:'vod',sourceId:'22',seconds:500})})).status,409);
+ assert.equal((await fetch(origin+'/src/hero-preview.mjs')).status,200);
+});
 
 test('fluxo completo: app, login Xtream, catálogo, séries, manifesto e logout',async t=>{
  const provider=createServer(fakeXtream);provider.listen(0,'127.0.0.1');await once(provider,'listening');

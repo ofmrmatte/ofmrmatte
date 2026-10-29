@@ -1,4 +1,16 @@
-# MF Stream 4.3.0
+# MF Stream 5.0.0
+
+## Início cinematográfico e descoberta diária
+
+- Cenário horizontal de largura total, degradês, oito destaques com seleção diária e navegação manual. Quando disponível, um trailer de canal oficial verificado abre ao lado do título, sem cobrir os controles do YouTube. No desktop, pode iniciar sem áudio; no mobile, exige toque. Movimento reduzido, economia de dados, aba oculta, destaque fora da tela e reprodução principal suspendem o preview.
+- Top 10 de filmes e Top 10 de séries independentes, cruzando as tendências públicas globais do [Simkl](https://simkl.com/) com títulos realmente presentes na lista e permitidos pelo controle parental. A posição é entre os títulos disponíveis, não um ranking brasileiro. Cada seção identifica fonte e atualização; não há números fictícios de audiência.
+- O modo MF Stream usa reproduções internas agregadas dos últimos 30 dias. Uma visualização exige 30 segundos de reprodução, com deduplicação por perfil, título e dia. O modo só libera com pelo menos dez visualizações, três títulos e cinco perfis distintos na seção. Perfis são representados por hashes no arquivo privado; identificadores não são enviados aos espectadores.
+- Tendências e classificações confirmadas têm cache persistente de 24 horas; imagens externas ficam no cache pelo endereço de origem. Falhas mantêm a biblioteca e os últimos dados válidos, identificados como desatualizados. As consultas externas recebem apenas informações públicas do título, nunca credenciais da lista.
+- Classificações confirmadas permanecem após atualizar o catálogo. A correspondência preserva números que fazem parte do nome, verifica título/ano e usa nomes alternativos confirmados. O fluxo prioriza ClassInd/MJSP, TMDB quando configurado, catálogo da Apple e Wikidata. Certificados estrangeiros exibem o país; notas de avaliação não viram idade. Onde não há correspondência confiável, continua aparecendo uma indicação de ausência.
+- O feed oficial legado do ClassInd ficou indisponível durante a validação, e a API atual exigiu autenticação. Não há contorno desse acesso. É possível importar um CSV oficial por `CLASSIND_CSV_FILE`; o conector de dados abertos tenta novamente automaticamente. TMDB é opcional por `TMDB_API_READ_ACCESS_TOKEN`, privado no servidor. Sem essa chave, tendências, imagens e trailers continuam pelo Simkl e as demais fontes de classificação. JustWatch não foi integrado: sua API exige parceria.
+- O player, mini player persistente, perfis, TV ao vivo e Master Admin permanecem integrados. Verificação: 54 testes automatizados; tendências reais e trailers oficiais em catálogo de demonstração; revisão em 320×568, 390×844 e desktop. O teste de reprodução usa vídeo CC0, sem depender de mídia comercial.
+
+As fontes têm condições próprias: [feed público do Simkl](https://simkl.docs.apiary.io/reference/redirect), [YouTube IFrame API](https://developers.google.com/youtube/iframe_api_reference), [TMDB](https://developer.themoviedb.org/docs/faq) e [dados ClassInd](https://dados.mj.gov.br/dataset/classind-sistema-gerencial-da-classificacao-indicativa). Ao habilitar TMDB, observe também as exigências de atribuição e licença do serviço.
 
 ## Apresentação de destaques no fundo
 
@@ -61,7 +73,7 @@
 
 Veja [DEPLOY_RAILWAY.md](DEPLOY_RAILWAY.md) para publicação do serviço separado do portfólio, armazenamento persistente e configuração das variáveis.
 
-### Executar a versão 4
+### Executar a versão 5
 
 Node.js 22.13+ (recomendado 24), `npm ci` e `npm start`. Configure `.env` a partir de `.env.example` em uma instalação nova. Abra `http://localhost:3000`, clique em Criar sua conta e escolha o acesso da aplicação. As seções abaixo documentam também os recursos e o modo Xtream de desenvolvimento das versões anteriores.
 

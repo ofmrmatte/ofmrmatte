@@ -1,3 +1,7 @@
+import {createDiscovery} from './lib/discovery.mjs';
+import {createTmdb} from './lib/tmdb.mjs';
+import {createClassind} from './lib/classind.mjs';
+import {createAudience,audienceKey} from './lib/audience.mjs';
 import { createServer } from 'node:http';
 import http from 'node:http';
 import https from 'node:https';
@@ -10,14 +14,19 @@ import { randomBytes } from 'node:crypto';
 import { pipeline } from 'node:stream/promises';
 import { isAllowedApiRedirect, pinnedLookup, tryAddresses } from './lib/connect.mjs';
 import {createParentalStore,parentalKey} from './lib/parental.mjs';
-import {contentMetadata,contentAllowed} from './src/content.mjs';
+import {contentMetadata,contentAllowed,mergeCatalogMetadata} from './src/content.mjs';
 import {createRatingLookup} from './lib/ratings.mjs';
 import {createAccess} from './lib/access.mjs';
-import { CATALOG_ACTIONS, SECTIONS, normalizeServerUrl, apiUrl, buildStreamUrl, rewriteHlsManifest } from './src/xtream.mjs';
+import { CATALOG_ACTIONS, SECTIONS, normalizeCatalog, normalizeServerUrl, apiUrl, buildStreamUrl, rewriteHlsManifest } from './src/xtream.mjs';
 
 const root = resolve(fileURLToPath(new URL('.', import.meta.url)));
 if(process.env.APP_AUTH_ENABLED!=='0'){try{process.loadEnvFile(resolve(root,'.env'));}catch(error){if(error.code!=='ENOENT')throw error;}}
-const lookupRating=process.env.RATING_LOOKUP_ENABLED==='0'?async()=>null:createRatingLookup(fetch,{cachePath:resolve(process.env.APP_DATA_DIR||resolve(root,'.data'),'ratings-cache.json')});
+const metadataDir=resolve(process.env.APP_DATA_DIR||resolve(root,'.data'));
+const tmdb=createTmdb({token:process.env.TMDB_API_READ_ACCESS_TOKEN||'',cachePath:resolve(metadataDir,'tmdb-cache.json')});
+const classind=createClassind({cachePath:resolve(metadataDir,'classind-cache.json'),file:process.env.CLASSIND_CSV_FILE||''});
+const lookupRating=process.env.RATING_LOOKUP_ENABLED==='0'?async()=>null:createRatingLookup(fetch,{cachePath:resolve(metadataDir,'ratings-cache.json'),official:classind,supplemental:tmdb.lookup});
+const discovery=createDiscovery({cacheDir:metadataDir,enabled:process.env.DISCOVERY_ENABLED!=='0',tmdb});
+const audience=createAudience({file:resolve(metadataDir,'audience.json')});
 const port = Number.parseInt(process.env.PORT || '3000', 10);
 const fixedMode=process.env.APP_AUTH_ENABLED!=='0'&&!!(process.env.XTREAM_URL&&process.env.XTREAM_USERNAME&&process.env.XTREAM_PASSWORD);
 if(process.env.APP_AUTH_ENABLED==='1'&&!fixedMode)throw new Error('Configure as variáveis XTREAM_URL, XTREAM_USERNAME e XTREAM_PASSWORD.');
@@ -36,7 +45,7 @@ const MAX_API_JSON = 30_000_000;
 const MAX_MANIFEST = 2_000_000;
 const DNS_WAIT_MS = 5500;
 const CONNECT_WAIT_MS = 12000;
-const staticPaths = new Set(['/', '/index.html', '/manifest.webmanifest', '/service-worker.js', '/src/favicon.svg', '/src/styles.css', '/src/app.js', '/src/access-ui.mjs', '/src/xtream.mjs', '/src/content.mjs', '/src/playback.mjs', '/src/library.css', '/src/title-sheet.css', '/src/episode-tray.css', '/src/mobile.css', '/src/mobile.mjs', '/src/highlights.mjs', '/src/highlights.css', '/admin', '/admin/', '/admin.html', '/src/admin.mjs', '/src/admin.css', '/assets/icon-192.png', '/assets/icon-512.png']);
+const staticPaths = new Set(['/', '/index.html', '/manifest.webmanifest', '/service-worker.js', '/src/favicon.svg', '/src/styles.css', '/src/app.js', '/src/access-ui.mjs', '/src/xtream.mjs', '/src/content.mjs', '/src/playback.mjs', '/src/library.css', '/src/title-sheet.css', '/src/episode-tray.css', '/src/mobile.css', '/src/mobile.mjs', '/src/highlights.mjs', '/src/highlights.css', '/src/discovery.css', '/src/hero-preview.mjs', '/admin', '/admin/', '/admin.html', '/src/admin.mjs', '/src/admin.css', '/assets/icon-192.png', '/assets/icon-512.png']);
 const vendorPaths=new Map(['/vendor/plyr.js','/vendor/plyr.css','/vendor/plyr.svg'].map(path=>[path,resolve(root,'node_modules/plyr/dist',path.endsWith('.js')?'plyr.min.js':path.endsWith('.css')?'plyr.css':'plyr.svg')]));vendorPaths.set('/vendor/gsap.js',resolve(root,'node_modules/gsap/dist/gsap.min.js'));for(const path of vendorPaths.keys())staticPaths.add(path);
 const types = { '.html':'text/html; charset=utf-8', '.css':'text/css; charset=utf-8', '.js':'text/javascript; charset=utf-8', '.mjs':'text/javascript; charset=utf-8', '.svg':'image/svg+xml', '.png':'image/png', '.webmanifest':'application/manifest+json' };
 const securityHeaders = { 'Cache-Control':'no-store', 'X-Content-Type-Options':'nosniff', 'Referrer-Policy':'no-referrer', 'X-Frame-Options':'DENY' };
@@ -245,7 +254,7 @@ async function catalogFor(session,section) {
     const [categories,items]=await Promise.all(['categories','items'].map(kind=>providerJson(apiUrl(session.base,session.username,session.password,CATALOG_ACTIONS[section][kind]))));
     const cats=Array.isArray(categories)?categories:[], rows=Array.isArray(items)?items:[];
     const groups=new Map(cats.map(c=>[String(c.category_id),String(c.category_name||'')]));
-    for(const item of rows){const id=String(section==='series'?item.series_id:item.stream_id);session.entries.set(`${section}:${id}`,session.details.get(`${section}:${id}`)?.metadata||contentMetadata(item,groups.get(String(item.category_id))||''));}
+    for(const item of rows){const id=String(section==='series'?item.series_id:item.stream_id),key=section+':'+id;const base=contentMetadata(item,groups.get(String(item.category_id))||'');const known=section!=='live'?await lookupRating.peek?.(item.name,section,item.releaseDate||item.release_date||item.year||''):null;session.entries.set(key,mergeCatalogMetadata(base,session.details.get(key)?.metadata||session.entries.get(key),known));}
     return {categories:cats,items:rows};
   })();
   session.catalogs.set(section,{time:Date.now(),promise});
@@ -256,23 +265,29 @@ async function allowedEntry(session,section,id,details=false,refresh=false,enric
   const key=`${section}:${id}`;let metadata=session.entries.get(key);
   if(refresh)session.details.delete(key);
   if(!metadata)return null;
-  if(refresh&&['Apple TV','Wikidata'].includes(metadata.ageSource))metadata={...metadata,age:null,ageLabel:'Não informada',ageSource:'',ageCountry:'',ageSourceUrl:'',ageReference:false};
+  if(refresh&&['Apple TV','Wikidata','TMDB','ClassInd · MJSP'].includes(metadata.ageSource))metadata={...metadata,age:null,ageLabel:'Não informada',ageSource:'',ageCountry:'',ageSourceUrl:'',ageReference:false};
   if(!contentAllowed(metadata,parental.get(session.policyKey)) && !(details && metadata.age===null && !metadata.adult))return null;
   if(details && !skipProvider && section!=='live' && !session.details.has(key)){
     const data=await providerJson(apiUrl(session.base,session.username,session.password,section==='vod'?'get_vod_info':'get_series_info',{[section==='vod'?'vod_id':'series_id']:id}));
     metadata=session.entries.get(key)||metadata;
     const info=contentMetadata({...data?.movie_data,...data?.info,...data});
-    const classification=info.ageLabel==='Não informada'?(refresh&&['Apple TV','Wikidata'].includes(metadata.ageSource)?{age:null,ageLabel:'Não informada',ageCountry:'',ageSource:'',ageSourceUrl:'',ageReference:false}:Object.fromEntries(Object.entries(metadata).filter(([key])=>key.startsWith('age')))):Object.fromEntries(Object.entries(info).filter(([key])=>key.startsWith('age')));
+    const classification=info.ageLabel==='Não informada'?(refresh&&['Apple TV','Wikidata','TMDB','ClassInd · MJSP'].includes(metadata.ageSource)?{age:null,ageLabel:'Não informada',ageCountry:'',ageSource:'',ageSourceUrl:'',ageReference:false}:Object.fromEntries(Object.entries(metadata).filter(([key])=>key.startsWith('age')))):Object.fromEntries(Object.entries(info).filter(([key])=>key.startsWith('age')));
     metadata={...metadata,...info,...classification,adult:metadata.adult||info.adult};
     session.entries.set(key,metadata);session.details.set(key,{...data,metadata});
   }
-  if(details&&enrich&&section!=='live'&&metadata.ageLabel==='Não informada'){
+  if(details&&enrich&&section!=='live'&&(metadata.ageLabel==='Não informada'||metadata.ageExpiresAt&&Date.parse(metadata.ageExpiresAt)<=Date.now())){
       const data=session.details.get(key);
       const item=catalog.items.find(item=>String(section==='series'?item.series_id:item.stream_id)===String(id));
-      if(item){const rating=await lookupRating(item.name||data?.info?.name,section,data?.info?.releasedate||data?.info?.release_date||item.releaseDate||item.release_date||item.year||'',{refresh,withStatus:true});if(rating)metadata={...metadata,...rating,adult:metadata.adult||rating.age===18};}
+      if(item){const remote=await discovery.match(item,section);const rating=await lookupRating(item.name||data?.info?.name,section,data?.info?.releasedate||data?.info?.release_date||item.releaseDate||item.release_date||item.year||'',{refresh,withStatus:true,aliases:remote?[remote.title,...(remote.alt_titles||[]).filter(a=>[26,214].includes(a.lang)).map(a=>a.name)]:[],externalId:remote?.ids?.tmdb||item.tmdb_id||''});if(rating)metadata={...metadata,...rating,adult:metadata.adult||rating.age===18};}
     session.entries.set(key,metadata);if(data)session.details.set(key,{...data,metadata});
   }
   return contentAllowed(metadata,parental.get(session.policyKey))?metadata:null;
+}
+async function titleExtra(session,section,id){
+  if(!await allowedEntry(session,section,id,false))return null;
+  const cache=session.extraCache||=new Map(),key=section+':'+id,old=cache.get(key);if(old&&old.expires>Date.now())return old.promise;
+  const requests=session.metadataRequests||=[];while(requests.length&&requests[0]<Date.now()-60000)requests.shift();if(requests.length>=30)return null;requests.push(Date.now());
+  const promise=(async()=>{const catalog=await catalogFor(session,section),item=catalog.items.find(row=>String(section==='series'?row.series_id:row.stream_id)===id);if(!item)return null;const [extra]=await Promise.all([discovery.extra(item,section),allowedEntry(session,section,id,true,false,false).catch(()=>null)]);if(extra.backdrop)(session.artworkSources||=new Map()).set(key,extra.backdrop);if(extra.rating){const meta=mergeCatalogMetadata(session.entries.get(key),null,extra.rating);session.entries.set(key,meta);}return extra;})();cache.set(key,{promise,expires:Date.now()+3600000});if(cache.size>100)cache.delete(cache.keys().next().value);return promise;
 }
 function sessionFor(token) {
   const session = sessions.get(token);
@@ -317,7 +332,7 @@ async function route(req,res) {
   let url;
   try { url = new URL(req.url, 'http://localhost'); } catch { return send(res,400,{error:'URL inválida.'}); }
   const pathname = url.pathname;
-  if(pathname==='/healthz')return send(res,200,{ok:true,version:'4.3.0'});
+  if(pathname==='/healthz')return send(res,200,{ok:true,version:'5.0.0'});
   if(access&&pathname.startsWith('/api/auth/')){
     // Nenhum endpoint de administração do plugin fica acessível publicamente.
     if(!new Set(['/api/auth/sign-in/email','/api/auth/sign-out','/api/auth/get-session']).has(pathname))return send(res,404,{error:'Rota indisponível.'});
@@ -340,7 +355,7 @@ async function route(req,res) {
     }
     const identity=await access.identity(req);
     if(!identity||!await access.isOwner(identity.user.id))return send(res,403,{error:'Acesso exclusivo do proprietário.'});
-    if(pathname==='/api/admin/overview'&&req.method==='GET'){const snapshot=await access.adminSnapshot(identity.user.id),c=activeXtream();return send(res,200,{...snapshot,system:{version:'4.3.0',uptimeSeconds:Math.floor(process.uptime())},connection:{configured:!!(c.url&&c.username&&c.password),name:c.name},updatedAt:new Date().toISOString()});}
+    if(pathname==='/api/admin/overview'&&req.method==='GET'){const snapshot=await access.adminSnapshot(identity.user.id),c=activeXtream();return send(res,200,{...snapshot,system:{version:'5.0.0',uptimeSeconds:Math.floor(process.uptime())},connection:{configured:!!(c.url&&c.username&&c.password),name:c.name},updatedAt:new Date().toISOString()});}
     const userDetail=/^\/api\/admin\/users\/([A-Za-z0-9_-]{1,128})$/.exec(pathname);
     if(userDetail&&req.method==='GET'){try{return send(res,200,await access.userDetails(identity.user.id,userDetail[1]));}catch(error){return send(res,error.status||500,{error:error.status?error.message:'Não foi possível carregar a conta.'});}}
     if(pathname==='/api/admin/xtream/check'&&req.method==='POST'){
@@ -477,6 +492,23 @@ async function route(req,res) {
     }
     const session = sessionFor(token);
     if(access&&session&&session.ownerId!==identity.user.id)return send(res,401,{error:'Sessão inválida.'});
+    if(pathname==='/api/discovery'&&req.method==='GET'){
+      if(!session)return send(res,401,{error:'Conecte sua conta.'});
+      const items={};for(const section of ['vod','series']){const cat=await catalogFor(session,section);items[section]=normalizeCatalog(cat.items.map(row=>({...row,metadata:session.entries.get(section+':'+(section==='series'?row.series_id:row.stream_id))})),cat.categories,section);}
+      const allowed=item=>contentAllowed(item,parental.get(session.policyKey));const data=await discovery.build(items,allowed);const artworkSources=session.artworkSources||=new Map();for(const item of [...data.highlights,...data.rankings.vod,...data.rankings.series])if(item.backdrop){if(item.backdrop.startsWith('https:'))artworkSources.set(item.id,item.backdrop);item.backdrop='/api/artwork/'+session.token+'/'+item.type+'/'+item.sourceId;}const internal={};for(const section of ['vod','series'])internal[section]=await audience.rankings(items[section].filter(allowed),item=>audienceKey(session.base,section,item.sourceId));
+      return send(res,200,{...data,internal});
+    }
+    if(pathname==='/api/title-extra'&&req.method==='GET'){
+      if(!session)return send(res,401,{error:'Conecte sua conta.'});const section=url.searchParams.get('section'),id=url.searchParams.get('id');if(!['vod','series'].includes(section)||!/^\d{1,15}$/.test(id||''))return send(res,400,{error:'Título inválido.'});
+      const extra=await titleExtra(session,section,id);if(!extra||!await allowedEntry(session,section,id,false))return send(res,403,{error:'Título indisponível.'});return send(res,200,{...extra,backdrop:extra.backdrop?'/api/artwork/'+session.token+'/'+section+'/'+id:'',metadata:session.entries.get(section+':'+id)});
+    }
+    const artwork=/^\/api\/artwork\/([A-Za-z0-9_-]{20,60})\/(vod|series)\/(\d{1,15})$/.exec(pathname);
+    if(artwork&&req.method==='GET'){
+      const s=sessionFor(artwork[1]);if(!s||access&&s.ownerId!==identity.user.id)return send(res,401,{error:'Sessão inválida.'});const section=artwork[2],id=artwork[3];if(!await allowedEntry(s,section,id,false))return send(res,403,{error:'Título indisponível.'});let source=s.artworkSources?.get(section+':'+id);if(!source){const cat=await catalogFor(s,section),item=cat.items.find(row=>String(section==='series'?row.series_id:row.stream_id)===id),remote=item&&await discovery.match(item,section);source=remote?discovery.metadata(remote).backdrop:'';}const image=await discovery.artwork(source);if(!image)return send(res,404,{error:'Imagem indisponível.'});res.writeHead(200,{...securityHeaders,'Content-Type':image.type,'Cache-Control':'private, max-age=86400'});return res.end(image.bytes);
+    }
+    if(pathname==='/api/watch-event'&&req.method==='POST'){
+      if(!session)return send(res,401,{error:'Conecte sua conta.'});const body=await getJsonBody(req),section=body.type,id=String(body.sourceId||'');if(!['vod','series'].includes(section)||!/^\d{1,15}$/.test(id)||!await allowedEntry(session,section,id,false))return send(res,400,{error:'Título inválido.'});const started=session.watchStarts?.get(section+':'+id);if(!started||Date.now()-started<30000||Number(body.seconds)<30)return send(res,409,{error:'Reprodução insuficiente.'});const recorded=await audience.record(audienceKey(session.base,section,id),(session.ownerId||session.policyKey)+':'+(session.profileId||''));return send(res,200,{ok:true,recorded});
+    }
     if(pathname==='/api/parental' && ['GET','POST'].includes(req.method)) {
       if(!session)return send(res,401,{error:'Conecte sua conta para configurar a proteção.'});
       if(req.method==='GET')return send(res,200,parental.get(session.policyKey));
@@ -574,6 +606,7 @@ async function route(req,res) {
         const section=stream[2],episode=section==='series'?s.episodes.get(stream[3]):null,id=section==='series'?episode?.parentId:stream[3];
         if(episode&&!contentAllowed(episode.metadata,parental.get(s.policyKey)))return send(res,403,{error:'Episódio bloqueado pelo controle parental.'});
         if(!id||!await allowedEntry(s,section,id,true))return send(res,403,{error:'Conteúdo bloqueado ou indisponível. Abra a ficha do título.'});
+        if(section!=='live'){const starts=s.watchStarts||=new Map();if(!starts.has(section+':'+id))starts.set(section+':'+id,Date.now());}
         return await relayMedia(req,res,s,buildStreamUrl(s.base,s.username,s.password,section,stream[3],stream[4]));
       }
       catch (err) { return sendFailure(res,400,err); }
@@ -602,3 +635,6 @@ async function route(req,res) {
 const server = createServer((req,res) => { route(req,res).catch(() => { if (!res.headersSent) send(res,500,{error:'Erro interno.'}); else res.destroy(); }); });
 server.listen(port,'0.0.0.0',() => console.log(`MF Stream IPTV disponível na porta ${server.address().port}`));
 setInterval(() => { for (const [key, s] of sessions) if (Date.now()-s.lastUsed>SESSION_IDLE_MS) sessions.delete(key); },300_000).unref();
+
+// Daily refresh is independent from user sessions; no provider credentials leave this server.
+if(process.env.DISCOVERY_ENABLED!=='0'){discovery.snapshot().catch(()=>{});setInterval(()=>discovery.snapshot().catch(()=>{}),86400000).unref();}
