@@ -19,6 +19,8 @@ const ICONS = {
  'chevron-right':'<path d="m9 18 6-6-6-6"/>','chevron-down':'<path d="m6 9 6 6 6-6"/>',
  search:'<circle cx="10.8" cy="10.8" r="7.7"/><path d="m17 17 5 5"/>',
  download:'<path d="M12 3v12m-5-5 5 5 5-5M4 17v3h16v-3"/>',
+ 'volume-x':'<path d="M11 5 6 9H3v6h3l5 4V5ZM17 9l5 6m0-6-5 6"/>',
+ 'volume-2':'<path d="M11 5 6 9H3v6h3l5 4V5ZM15.5 8.5a5 5 0 0 1 0 7m3-10a9 9 0 0 1 0 13"/>',
  menu:'<path d="M4 7h16M4 12h16M4 17h16"/>',
  'arrow-right':'<path d="M4 12h16m-6-6 6 6-6 6"/>','arrow-up-right':'<path d="M7 17 17 7M7 7h10v10"/>','arrow-down':'<path d="M12 4v16m-6-6 6 6 6-6"/>',
  plug:'<path d="M8 3v5m8-5v5M6 8h12v3a6 6 0 0 1-12 0V8Zm6 9v5"/>',
@@ -662,7 +664,7 @@ function paintHeroMeta(item){
 }
 function bindHighlights(){
   const hero=document.querySelector('.hero');
-  heroPreview=createHeroPreview({hero,getScene:()=>hero.querySelector('.highlight-scene.is-visible')||hero.querySelector('.highlight-scene'),launch:$('heroTrailer'),onPlaying:value=>{hero.classList.toggle('has-preview',value);highlightRotation.block('preview',value);},canAuto:()=>allowAutomaticPreview({width:innerWidth,reducedMotion:highlightMotion.matches,saveData:navigator.connection?.saveData,effectiveType:navigator.connection?.effectiveType,hidden:document.hidden,visible:heroVisible,playing:!!state.current})});
+  heroPreview=createHeroPreview({hero,getScene:()=>hero.querySelector('.highlight-scene.is-visible')||hero.querySelector('.highlight-scene'),launch:$('heroTrailer'),audioToggle:$('heroAudioToggle'),onPlaying:value=>{hero.classList.toggle('has-preview',value);highlightRotation.block('preview',value);},canAuto:()=>allowAutomaticPreview({width:innerWidth,reducedMotion:highlightMotion.matches,saveData:navigator.connection?.saveData,effectiveType:navigator.connection?.effectiveType,hidden:document.hidden,visible:heroVisible,playing:!!state.current})});
   setInterval(()=>{if(!document.hidden&&state.section==='home')loadDiscovery();},60000);
   $('highlightPrevious').onclick=()=>highlightRotation.move(-1);$('highlightNext').onclick=()=>highlightRotation.move(1);
   $('highlightPause').onclick=()=>highlightRotation.pause(!highlightRotation.paused);

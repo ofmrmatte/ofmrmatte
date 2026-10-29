@@ -10,8 +10,32 @@ export function directPreview(value){
 export function allowAutomaticPreview({width=0,reducedMotion=false,saveData=false,effectiveType='',hidden=false,visible=false,playing=false}={}){
  return width>=1000&&!reducedMotion&&!saveData&&!['slow-2g','2g'].includes(effectiveType)&&!hidden&&visible&&!playing;
 }
-export function createHeroPreview({hero,getScene,launch,onPlaying=()=>{},canAuto=()=>false,delay=2800,maxDuration=18000}){
+export function togglePreviewAudio(media){
+ if(!media)return false;
+ media.muted=!media.muted;
+ return !media.muted;
+}
+export function createHeroPreview({hero,getScene,launch,audioToggle,onPlaying=()=>{},canAuto=()=>false,delay=2800,maxDuration=18000}){
  let selected=null,video=null,timer=null,endTimer=null,ticket=0,attempted=false,active=false;
+ const audioLabel=audioToggle?.querySelector('#heroAudioLabel');
+ const mutedIcon=audioToggle?.querySelector('[data-audio-icon="muted"]');
+ const audibleIcon=audioToggle?.querySelector('[data-audio-icon="audible"]');
+ function updateAudioButton(){
+  if(!audioToggle)return;
+  const audible=!!(video&&active&&!video.muted);
+  audioToggle.hidden=!active;
+  audioToggle.setAttribute('aria-pressed',String(audible));
+  audioToggle.setAttribute('aria-label',audible?'Desativar áudio da prévia':'Ativar áudio da prévia');
+  audioToggle.title=audible?'Desativar áudio da prévia':'Ativar áudio da prévia';
+  if(audioLabel)audioLabel.textContent=audible?'Desativar áudio':'Ativar áudio';
+  if(mutedIcon)mutedIcon.hidden=audible;
+  if(audibleIcon)audibleIcon.hidden=!audible;
+ }
+ if(audioToggle)audioToggle.onclick=()=>{
+  if(!active||!video)return;
+  togglePreviewAudio(video);
+  updateAudioButton();
+ };
  function stop(){
   ++ticket;clearTimeout(timer);clearTimeout(endTimer);timer=endTimer=null;
   if(video){
@@ -20,6 +44,7 @@ export function createHeroPreview({hero,getScene,launch,onPlaying=()=>{},canAuto
   }
   hero.classList.remove('has-background-preview');
   if(active){active=false;onPlaying(false);}
+  updateAudioButton();
   launch.setAttribute('aria-pressed','false');
   launch.textContent='Ver prévia';
  }
@@ -33,12 +58,13 @@ export function createHeroPreview({hero,getScene,launch,onPlaying=()=>{},canAuto
   media.setAttribute('playsinline','');media.preload='metadata';
   media.setAttribute('aria-hidden','true');media.disablePictureInPicture=true;
   media.src=directPreview(selected);scene.append(media);
+  media.addEventListener('volumechange',updateAudioButton);
   media.onerror=()=>{if(current===ticket)stop();};
   media.onended=()=>{if(current===ticket)stop();};
   try{
    await media.play();
    if(current!==ticket){media.pause();return;}
-   active=true;hero.classList.add('has-background-preview');
+   active=true;hero.classList.add('has-background-preview');updateAudioButton();
    launch.textContent='Parar prévia';
    launch.setAttribute('aria-pressed','true');
    onPlaying(true);
@@ -52,6 +78,6 @@ export function createHeroPreview({hero,getScene,launch,onPlaying=()=>{},canAuto
  return {
   set(value){stop();selected=value;attempted=false;launch.hidden=!directPreview(selected);resume();},
   resume,stop,
-  destroy(){stop();launch.onclick=null;}
+  destroy(){stop();launch.onclick=null;if(audioToggle)audioToggle.onclick=null;}
  };
 }

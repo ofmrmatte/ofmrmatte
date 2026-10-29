@@ -72,3 +72,20 @@ test('cinematic hero keeps sharp portrait cover and only offers first-party prev
  assert.match(app,/playableHighlightPreview/);
  assert.match(app,/\/api\/catalog\?section=series&kind=info/);
 });
+
+test('preview audio control toggles mute without altering playback',async()=>{
+ const {togglePreviewAudio}=await import('../src/hero-preview.mjs');
+ const fake={muted:true};assert.equal(togglePreviewAudio(fake),true);
+ assert.equal(fake.muted,false);assert.equal(togglePreviewAudio(fake),false);
+ assert.equal(fake.muted,true);assert.equal(togglePreviewAudio(null),false);
+ const html=await readFile(new URL('../index.html',import.meta.url),'utf8');
+ const app=await readFile(new URL('../src/app.js',import.meta.url),'utf8');
+ const module=await readFile(new URL('../src/hero-preview.mjs',import.meta.url),'utf8');
+ const css=await readFile(new URL('../src/scene.css',import.meta.url),'utf8');
+ assert.equal(html.split('id="heroAudioToggle"').length-1,1);
+ assert.match(html,/id="heroAudioToggle"[^>]*aria-pressed="false"[^>]*hidden/);
+ assert.ok(app.includes("audioToggle:$('heroAudioToggle')"));
+ assert.ok(module.includes('audioToggle.hidden=!active'));
+ assert.ok(module.includes("media.addEventListener('volumechange',updateAudioButton)"));
+ assert.ok(css.includes('.hero-audio-toggle[hidden]{display:none!important}'));
+});

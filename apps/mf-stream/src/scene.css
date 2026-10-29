@@ -340,7 +340,21 @@
 .hero.hero-presentation.has-background-preview .highlight-scene .highlight-video{opacity:1!important}
 .hero.hero-presentation.has-background-preview .highlight-scene .highlight-cover,
 .hero.hero-presentation.has-background-preview .highlight-scene .highlight-atmosphere{opacity:0!important}
-.hero.hero-presentation .hero-actions #heroTrailer[hidden]{display:none!important}
+.hero.hero-presentation .hero-actions #heroTrailer[hidden],
+.hero.hero-presentation .hero-actions .hero-audio-toggle[hidden]{display:none!important}
+.hero.hero-presentation .hero-actions .hero-audio-toggle{
+ display:inline-flex;align-items:center;justify-content:center;gap:9px;
+ min-height:48px;padding:0 16px;color:#ebe2fa;
+ background:rgba(29,25,39,.8);border:1px solid rgba(196,166,244,.32);
+ border-radius:9px;backdrop-filter:blur(8px);font-size:12px;
+ font-weight:650;white-space:nowrap;transition:background .16s ease,border-color .16s ease;
+}
+.hero.hero-presentation .hero-actions .hero-audio-toggle:hover{background:rgba(75,49,107,.72);border-color:rgba(214,185,255,.65)}
+.hero.hero-presentation .hero-actions .hero-audio-toggle[aria-pressed=true]{background:rgba(83,51,122,.65);border-color:rgba(186,143,255,.7)}
+.hero.hero-presentation .hero-actions .hero-audio-toggle:focus-visible{outline:2px solid #d4baff;outline-offset:3px}
+.hero.hero-presentation .hero-actions .hero-audio-toggle [hidden]{display:none!important}
+.hero.hero-presentation .hero-actions .hero-audio-toggle svg{display:block}
+@media(max-width:760px){.hero.hero-presentation .hero-actions .hero-audio-toggle{min-height:46px;padding:0 12px;font-size:11px}}
 .hero.hero-presentation .hero-actions #heroTrailer[aria-pressed=true]{
  border-color:rgba(188,150,255,.6);background:rgba(102,69,145,.32);
 }
