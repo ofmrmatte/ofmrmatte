@@ -149,3 +149,164 @@
 @media(max-width:1000px) and (min-width:761px){
  .app-shell>.sidebar>.main-nav:nth-of-type(2){display:none!important}
 }
+
+
+/* Scene Play header v5.2: fixed utility cluster, independently expanding search. */
+.app-shell>.sidebar{height:80px;min-height:80px;align-items:center!important}
+.app-shell>.sidebar>.topbar-actions{
+ display:flex!important;align-items:center!important;justify-content:flex-end;
+ flex:0 0 auto;gap:8px!important;height:44px;min-height:44px;margin-left:auto!important;
+ width:auto!important;min-width:0!important;
+}
+.app-shell>.sidebar .header-search-slot{
+ position:relative;flex:0 0 42px;width:42px;min-width:42px;height:42px;
+ display:flex;align-items:center;
+}
+.app-shell>.sidebar .header-utility-actions{
+ display:flex;align-items:center;justify-content:flex-end;
+ flex:0 0 auto;gap:7px;height:42px;min-height:42px;
+}
+.app-shell>.sidebar .header-utility-actions :is(#downloadsButton,#refreshButton,#openParental,#openAccountProfile){
+ box-sizing:border-box;display:grid!important;place-items:center!important;flex:0 0 42px;
+ width:42px!important;min-width:42px!important;height:42px!important;min-height:42px!important;
+ margin:0!important;padding:0!important;position:relative;top:auto!important;
+ transform:none;border-radius:12px;line-height:1;
+ background:transparent;border:1px solid transparent;color:#cac4d7;
+ cursor:pointer;transition:background .16s,border-color .16s,color .16s;
+}
+.app-shell>.sidebar .header-utility-actions :is(#downloadsButton,#refreshButton,#openParental,#openAccountProfile) svg{
+ display:block!important;flex:none;width:20px!important;height:20px!important;
+ vertical-align:middle;
+}
+.app-shell>.sidebar .header-utility-actions #refreshButton{
+ font-size:0!important;gap:0!important;
+}
+.app-shell>.sidebar .header-utility-actions #openParental>span:not([data-icon]){display:none!important}
+.app-shell>.sidebar .header-utility-actions :is(#downloadsButton,#refreshButton,#openParental):hover{
+ background:#272131;border-color:#6d5086;color:#fff;
+}
+.app-shell>.sidebar .header-utility-actions #openAccountProfile{
+ background:linear-gradient(145deg,#513468,#342441);
+ color:#f7f3ff;border-color:rgba(196,151,255,.25);
+ font:700 16px/1 'Outfit',sans-serif!important;
+}
+.app-shell>.sidebar .header-utility-actions #openAccountProfile[data-profile]{
+ background:linear-gradient(145deg,var(--profile-color,#aa95f5),#39244e);
+ border-color:rgba(236,211,255,.42);
+}
+.app-shell>.sidebar .header-utility-actions #openAccountProfile:hover{filter:brightness(1.12)}
+.app-shell>.sidebar .header-search-slot .global-search{
+ position:relative!important;top:auto!important;right:auto!important;left:auto!important;
+ flex:none;width:42px!important;min-width:42px!important;height:42px!important;
+ border:1px solid transparent!important;background:transparent!important;border-radius:12px!important;
+ overflow:visible!important;margin:0;padding:0!important;
+ transition:background .16s ease,border-color .16s ease;
+}
+.app-shell>.sidebar .header-search-slot .global-search:hover:not(.is-expanded){
+ background:#272131!important;border-color:#6d5086!important;
+}
+.app-shell>.sidebar .header-search-slot .global-search.is-expanded{
+ position:absolute!important;left:auto!important;right:0!important;top:0!important;
+ width:min(360px,calc(100vw - 280px))!important;
+ min-width:0!important;max-width:none!important;height:42px!important;
+ border:1px solid rgba(188,143,255,.56)!important;
+ background:#211b2e!important;border-radius:12px!important;
+ box-shadow:0 10px 27px rgba(0,0,0,.42)!important;z-index:8;
+}
+.app-shell>.sidebar .header-search-slot .global-search input{
+ display:block!important;opacity:0;pointer-events:none;min-width:0;height:40px;
+ color:#fff;font-size:13px!important;padding:0 42px 0 44px!important;
+}
+.app-shell>.sidebar .header-search-slot .global-search.is-expanded input{opacity:1;pointer-events:auto}
+.app-shell>.sidebar .header-search-slot .global-search :is(.search-toggle,.search-close){
+ position:absolute;top:0!important;display:grid;place-items:center;
+ width:40px;height:40px;padding:0;background:transparent;border:0;border-radius:10px;
+ color:#c9c0dc;line-height:0;z-index:9;
+}
+.app-shell>.sidebar .header-search-slot .global-search .search-toggle{left:0!important}
+.app-shell>.sidebar .header-search-slot .global-search .search-close{right:0!important;display:none}
+.app-shell>.sidebar .header-search-slot .global-search.is-expanded .search-close{display:grid}
+.app-shell>.sidebar .header-search-slot .global-search :is(.search-toggle,.search-close) svg{
+ display:block!important;width:20px;height:20px;
+}
+.app-shell>.sidebar .header-search-slot .global-search :is(.search-toggle,.search-close):hover{color:#fff}
+.app-shell>.sidebar .header-utility-actions :is(#downloadsButton,#refreshButton,#openParental,#openAccountProfile):focus-visible,
+.app-shell>.sidebar .header-search-slot .global-search:focus-within{
+ outline:2px solid #ac84f9;outline-offset:3px;
+}
+@media(max-width:1100px) and (min-width:761px){
+ .app-shell>.sidebar .header-utility-actions{gap:3px}
+ .app-shell>.sidebar>.topbar-actions{gap:5px!important}
+}
+@media(max-width:760px){
+ .app-shell>.sidebar{height:64px;min-height:64px}
+ .app-shell>.sidebar .header-search-slot{
+  position:static;flex-basis:40px;width:40px;min-width:40px;height:40px;
+ }
+ .app-shell>.sidebar .header-search-slot .global-search{
+  width:40px!important;min-width:40px!important;height:40px!important;
+ }
+ .app-shell>.sidebar .header-utility-actions{gap:2px;height:40px;min-height:40px}
+ .app-shell>.sidebar .header-utility-actions :is(#downloadsButton,#refreshButton,#openParental,#openAccountProfile){
+  flex-basis:38px;width:38px!important;min-width:38px!important;
+  height:40px!important;min-height:40px!important;
+ }
+ .app-shell>.sidebar .header-search-slot .global-search.is-expanded{
+  position:absolute!important;left:14px!important;right:calc(14px + 4 * 38px + 3 * 2px + 8px)!important;
+  top:10px!important;width:auto!important;min-width:0!important;height:44px!important;
+ }
+ .app-shell>.sidebar .header-search-slot .global-search.is-expanded :is(.search-toggle,.search-close){height:42px}
+}
+@media(max-width:400px){
+ .app-shell>.sidebar{padding-left:10px!important;padding-right:10px!important}
+ .app-shell>.sidebar>.topbar-actions{gap:3px!important}
+ .app-shell>.sidebar .header-utility-actions :is(#downloadsButton,#refreshButton,#openParental,#openAccountProfile){
+  flex-basis:35px;width:35px!important;min-width:35px!important;
+ }
+ .app-shell>.sidebar .header-search-slot .global-search.is-expanded{
+  left:10px!important;right:calc(10px + 4 * 35px + 3 * 2px + 7px)!important;
+ }
+}
+/* Local downloads library */
+.offline-layer .offline-modal{
+ width:min(740px,calc(100vw - 28px));
+ max-width:740px;max-height:min(85dvh,900px);overflow-y:auto;
+ background:#121019;color:#f7f3ff;border:1px solid rgba(172,134,240,.22);
+ border-radius:20px;padding:clamp(22px,3vw,34px);
+ box-shadow:0 24px 100px rgba(0,0,0,.6);
+}
+.offline-modal-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:18px}
+.offline-modal-heading h2{font:700 clamp(26px,3vw,34px)/1.15 'Outfit',sans-serif;margin:7px 0 5px}
+.offline-modal-heading p{font-size:13px;color:#aaa2bb;margin:7px 0}
+.offline-modal-heading .modal-close{position:static;flex:0 0 42px}
+.offline-notice{font-size:12px;line-height:1.65;color:#a9a2b9;margin:18px 0;padding:13px 15px;border-radius:12px;background:#211c2d}
+.offline-list{display:grid;gap:10px;margin:12px 0 5px}
+.offline-entry{display:flex;align-items:center;gap:15px;padding:12px;border-radius:13px;background:#211b2b;border:1px solid #3b304c}
+.offline-entry-cover{width:60px;height:76px;flex:0 0 60px;border-radius:8px;background:linear-gradient(135deg,#6339b0,#231431);display:grid;place-items:center;font-size:23px;color:#f4eaff}
+.offline-entry-data{min-width:0;flex:1;display:grid;gap:6px}
+.offline-entry-data strong{font-size:14px;line-height:1.25;overflow-wrap:anywhere}
+.offline-entry-data small{color:#aaa1b9;font-size:11px}
+.offline-entry-actions{display:flex;flex:0 0 auto;align-items:center;gap:8px;flex-wrap:wrap}
+.offline-entry-actions button{border:1px solid #584370;color:#f4eaff;background:#332640;border-radius:10px;padding:10px 12px;font-size:12px}
+.offline-entry-actions .offline-remove{background:transparent;color:#b9b0c5;border-color:#53495c}
+.offline-empty{border:1px dashed #544269;border-radius:14px;padding:35px 22px;text-align:center;color:#beb4cb;font-size:14px;line-height:1.65}
+.offline-playback[hidden],.offline-list[hidden],.title-download-status[hidden]{display:none!important}
+.offline-playback-head{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:15px 0}
+.offline-playback-head strong{font-size:14px}
+.offline-playback video{display:block;width:100%;aspect-ratio:16/9;background:#000;border-radius:12px}
+#offlineStatus{font-size:13px;color:#c0ade0}
+#offlineStatus:empty{display:none}
+.title-download-status{margin-top:12px;font-size:12px;color:#d5baff}
+.title-download[disabled],.episode-download-action[disabled]{opacity:.55;cursor:not-allowed}
+.episode-download-row{display:flex;align-items:stretch;gap:8px;min-width:0}
+.episode-download-row .title-episode{min-width:0;flex:1;width:auto}
+.episode-download-action{align-self:center;flex:0 0 auto;padding:10px 12px;min-height:40px;
+ border-radius:9px;border:1px solid #604781;background:#2a2138;color:#d6c0f8;font-size:12px}
+.episode-download-action:hover{background:#483058;color:#fff}
+@media(max-width:620px){
+ .offline-entry{flex-wrap:wrap}
+ .offline-entry-actions{width:100%;justify-content:flex-start;padding-left:75px}
+ .episode-download-row{flex-wrap:wrap}
+ .episode-download-row .title-episode{flex:1 1 100%}
+ .episode-download-action{margin-left:auto}
+}

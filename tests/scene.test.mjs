@@ -14,3 +14,33 @@ test('Scene Play header uses accessible search and a named profile button',async
  assert.match(ui,/Limpar e fechar busca/);
  assert.match(ui,/aria-controls/);
 });
+
+test('offline download keys support only authenticated-catalog MP4 movies and episodes',async()=>{
+ const {offlineScope,offlineKey,canDownload,formatDownloadSize,MAX_OFFLINE_BYTES}=await import('../src/offline.mjs');
+ assert.equal(offlineKey({type:'vod',sourceId:123}),'vod/123');
+ assert.equal(offlineKey({type:'series',sourceId:'45'}),'series/45');
+ assert.equal(offlineKey({type:'live',sourceId:42}),'');
+ assert.equal(offlineKey({type:'vod',sourceId:'javascript:1'}),'');
+ assert.equal(canDownload({type:'vod',sourceId:123,extension:'mp4'}),true);
+ assert.equal(canDownload({type:'vod',sourceId:123,extension:'m3u8'}),false);
+ assert.equal(canDownload({type:'series',sourceId:123,extension:'mkv'}),false);
+ assert.equal(offlineScope('user1','profile2'),'user1--profile2');
+ assert.ok(formatDownloadSize(1024**2).includes('MB'));
+ assert.ok(MAX_OFFLINE_BYTES>=1024**3);
+});
+test('offline screen is reachable from the persistent header and PWA shell',async()=>{
+ const html=await readFile(new URL('../index.html',import.meta.url),'utf8');
+ const scene=await readFile(new URL('../src/scene.css',import.meta.url),'utf8');
+ const js=await readFile(new URL('../src/app.js',import.meta.url),'utf8');
+ const server=await readFile(new URL('../server.mjs',import.meta.url),'utf8');
+ const sw=await readFile(new URL('../service-worker.js',import.meta.url),'utf8');
+ for(const id of ['downloadsButton','downloadsModal','offlineVideo','detailsDownload','installButton','refreshButton']){
+  assert.equal(html.split('id="'+id+'"').length-1,1,'unique '+id);
+ }
+ assert.match(html,/header-utility-actions/);
+ assert.match(scene,/header-search-slot/);
+ assert.match(js,/downloadTitle\(ep,save\)/);
+ assert.match(js,/rememberOfflineProfile\(offlineScope\(user\.id,profile\.id\)/);
+ assert.match(server,/\/src\/offline\.mjs/);
+ assert.match(sw,/\/src\/offline\.mjs/);
+});
