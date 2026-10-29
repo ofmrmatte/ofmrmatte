@@ -44,11 +44,10 @@ function fakeXtream(req,res){
  }
  res.writeHead(404);res.end('not found');
 }
-async function startApp(t, {allowPrivate=true,ratings=false} = {}) {
+async function startApp(t, {allowPrivate=true,ratings=false,admin=false,providerUrl='',fixedPort=0} = {}) {
  const dataDir=await mkdtemp(join(tmpdir(),'mfstream-integration-'));
- t.after(async()=>{assert.ok(resolve(dataDir).startsWith(resolve(tmpdir())+sep+'mfstream-integration-'));await rm(dataDir,{recursive:true,force:true});});
- const app=spawn(process.execPath,['server.mjs'],{cwd:resolve(import.meta.dirname,'..'),env:{...process.env,PORT:'0',APP_AUTH_ENABLED:'0',RATING_LOOKUP_ENABLED:ratings?'1':'0',APP_DATA_DIR:'',PARENTAL_DATA_DIR:dataDir,ALLOW_PRIVATE_XTREAM_HOSTS:allowPrivate?'1':'0'},stdio:['ignore','pipe','pipe']});
- t.after(async()=>{if(app.exitCode===null){app.kill();await once(app,'exit');}});
+ const app=spawn(process.execPath,['server.mjs'],{cwd:resolve(import.meta.dirname,'..'),env:{...process.env,PORT:String(fixedPort),APP_AUTH_ENABLED:admin?'1':'0',XTREAM_URL:providerUrl,XTREAM_USERNAME:'testuser',XTREAM_PASSWORD:'testpass',ADMIN_SETUP_TOKEN:'fixture-master-setup',BETTER_AUTH_SECRET:'fixture-auth-secret-for-admin-tests-only-2026',BETTER_AUTH_URL:'http://127.0.0.1:'+fixedPort,RATING_LOOKUP_ENABLED:ratings?'1':'0',APP_DATA_DIR:admin?dataDir:'',PARENTAL_DATA_DIR:dataDir,ALLOW_PRIVATE_XTREAM_HOSTS:allowPrivate?'1':'0'},stdio:['ignore','pipe','pipe']});
+ t.after(async()=>{if(app.exitCode===null){const ended=once(app,'exit');app.kill();await ended;}assert.ok(resolve(dataDir).startsWith(resolve(tmpdir())+sep+'mfstream-integration-'));await rm(dataDir,{recursive:true,force:true});});
  let stderr='';app.stderr.on('data',chunk=>{stderr+=chunk;});
  const lines=createInterface({input:app.stdout});
  try {
@@ -65,7 +64,7 @@ async function startApp(t, {allowPrivate=true,ratings=false} = {}) {
 test('fluxo completo: app, login Xtream, catálogo, séries, manifesto e logout',async t=>{
  const provider=createServer(fakeXtream);provider.listen(0,'127.0.0.1');await once(provider,'listening');
  const providerPort=provider.address().port;
- t.after(()=>new Promise(resolve=>provider.close(resolve)));
+ t.after(()=>{provider.closeAllConnections();return new Promise(resolve=>provider.close(resolve));});
  const origin=await startApp(t);
  const shell=await (await fetch(origin)).text();assert.match(shell,/MF Stream IPTV/);assert.match(shell,/id="listName"/);
  for(const asset of ['/manifest.webmanifest','/service-worker.js','/assets/icon-192.png','/src/styles.css','/src/title-sheet.css','/src/episode-tray.css','/src/mobile.css','/src/mobile.mjs','/vendor/gsap.js'])assert.equal((await fetch(origin+asset)).status,200,asset);
@@ -128,7 +127,7 @@ test('login segue domínio Xtream e usa o destino para catálogo e mídia',async
   fakeXtream(req,res);
  });
  provider.listen(0,'127.0.0.1');await once(provider,'listening');
- t.after(()=>new Promise(resolve=>provider.close(resolve)));
+ t.after(()=>{provider.closeAllConnections();return new Promise(resolve=>provider.close(resolve));});
  const target=`http://localhost:${provider.address().port}`;
  let redirects=0;
  const entry=createServer((req,res)=>{
@@ -158,7 +157,7 @@ test('redirecionamento circular é interrompido sem criar sessão',async t=>{
  let redirects=0;
  const provider=createServer((req,res)=>{redirects++;res.writeHead(302,{Location:req.url});res.end();});
  provider.listen(0,'127.0.0.1');await once(provider,'listening');
- t.after(()=>new Promise(resolve=>provider.close(resolve)));
+ t.after(()=>{provider.closeAllConnections();return new Promise(resolve=>provider.close(resolve));});
  const origin=await startApp(t);
  const response=await fetch(origin+'/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:`http://127.0.0.1:${provider.address().port}`,username:'testuser',password:'testpass'})});
  const body=await response.json();
@@ -170,7 +169,7 @@ test('conexão em produção continua recusando destinos privados antes de envia
  let requests=0;
  const provider=createServer((_req,res)=>{requests++;res.end('{}');});
  provider.listen(0,'127.0.0.1');await once(provider,'listening');
- t.after(()=>new Promise(resolve=>provider.close(resolve)));
+ t.after(()=>{provider.closeAllConnections();return new Promise(resolve=>provider.close(resolve));});
  const origin=await startApp(t,{allowPrivate:false});
  const response=await fetch(origin+'/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:`http://127.0.0.1:${provider.address().port}`,username:'testuser',password:'testpass'})});
  const body=await response.json();
@@ -187,7 +186,7 @@ test('proteção parental filtra API e bloqueia URLs diretas, detalhes e sessõe
   if(action==='get_vod_info')return res.end(JSON.stringify({info:{plot:'Sinopse fornecida pelo servidor',age_rating:16,genre:'Drama'}}));
   return fakeXtream(req,res);
  });
- provider.listen(0,'127.0.0.1');await once(provider,'listening');t.after(()=>new Promise(resolve=>provider.close(resolve)));
+ provider.listen(0,'127.0.0.1');await once(provider,'listening');t.after(()=>{provider.closeAllConnections();return new Promise(resolve=>provider.close(resolve));});
  const origin=await startApp(t),body={url:`http://127.0.0.1:${provider.address().port}`,username:'testuser',password:'testpass'};
  const login=async()=>(await (await fetch(origin+'/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})).json()).token;
  const token=await login(),other=await login(),headers={'x-session-token':token};
@@ -225,9 +224,30 @@ test('o JavaScript da interface é sintaticamente válido',async()=>{
 });
 
 test('consulta de classificação não depende do endpoint de detalhes do provedor',async t=>{
- let details=0;const provider=createServer((req,res)=>{const u=new URL(req.url,'http://localhost');if(u.searchParams.get('action')==='get_vod_info'){details++;res.writeHead(403);res.end();return;}fakeXtream(req,res);});provider.listen(0,'127.0.0.1');await once(provider,'listening');t.after(()=>new Promise(resolve=>provider.close(resolve)));
+ let details=0;const provider=createServer((req,res)=>{const u=new URL(req.url,'http://localhost');if(u.searchParams.get('action')==='get_vod_info'){details++;res.writeHead(403);res.end();return;}fakeXtream(req,res);});provider.listen(0,'127.0.0.1');await once(provider,'listening');t.after(()=>{provider.closeAllConnections();return new Promise(resolve=>provider.close(resolve));});
  const origin=await startApp(t);const login=await fetch(origin+'/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:'http://127.0.0.1:'+provider.address().port,username:'testuser',password:'testpass'})});const {token}=await login.json();
  const response=await fetch(origin+'/api/catalog?section=vod&kind=rating&vod_id=22',{headers:{'x-session-token':token}});assert.equal(response.status,200);assert.equal((await response.json()).data.age,null);assert.equal(details,0);
 });
 
 test('inicia com classificações habilitadas sem APP_DATA_DIR configurado',async t=>{const origin=await startApp(t,{ratings:true});const response=await fetch(origin+'/healthz');assert.equal(response.status,200);assert.equal((await response.json()).ok,true);});
+
+test('Master Admin autoriza resumo, detalhes, teste da conexão e auditoria sem expor segredos',async t=>{
+ const provider=createServer(fakeXtream);provider.listen(0,'127.0.0.1');await once(provider,'listening');t.after(()=>{provider.closeAllConnections();return new Promise(resolve=>provider.close(resolve));});
+ const reservation=createServer();reservation.listen(0,'127.0.0.1');await once(reservation,'listening');const fixedPort=reservation.address().port;await new Promise(resolve=>reservation.close(resolve));
+ const origin=await startApp(t,{admin:true,providerUrl:'http://127.0.0.1:'+provider.address().port,fixedPort});
+ const request=(path,body,cookie)=>fetch(origin+path,{method:body?'POST':'GET',headers:{'Content-Type':'application/json',Origin:origin,...(cookie?{cookie}:{})},...(body?{body:JSON.stringify(body)}:{})});
+ assert.equal((await request('/api/admin/overview')).status,403);
+ assert.equal((await request('/api/admin/setup',{name:'Master',email:'master@example.test',password:'AdminFixture2026!',token:'fixture-master-setup'})).status,201);
+ assert.equal((await request('/api/access/register',{name:'Espectador',email:'viewer@example.test',password:'ViewerFixture2026!'})).status,201);
+ const login=async(email,password)=>{const r=await request('/api/auth/sign-in/email',{email,password});assert.equal(r.status,200);return r.headers.getSetCookie().map(row=>row.split(';')[0]).join('; ');};
+ const ownerCookie=await login('master@example.test','AdminFixture2026!'),viewerCookie=await login('viewer@example.test','ViewerFixture2026!');
+ assert.equal((await request('/api/admin/overview',null,viewerCookie)).status,403);assert.equal((await request('/api/admin/xtream/check',{},viewerCookie)).status,403);
+ const overview=await (await request('/api/admin/overview',null,ownerCookie)).json();assert.equal(overview.summary.users,1);assert.equal(overview.summary.sessions,1);assert.equal(overview.summary.profiles,1);assert.equal(overview.connection.configured,true);assert.equal(JSON.stringify(overview).includes('testpass'),false);
+ const id=overview.users[0].id;assert.equal((await request('/api/admin/users/'+id,null,viewerCookie)).status,403);
+ const detail=await (await request('/api/admin/users/'+id,null,ownerCookie)).json();assert.equal(detail.profiles.length,1);assert.deepEqual(Object.keys(detail.sessions[0]).sort(),['createdAt','expiresAt']);assert.doesNotMatch(JSON.stringify(detail),/preferences|token|password/);
+ const checked=await request('/api/admin/xtream/check',{},ownerCookie);assert.equal(checked.status,200);assert.equal((await checked.json()).maxConnections,2);
+ assert.equal((await request('/api/admin/users/'+id+'/suspension',{suspended:true},ownerCookie)).status,200);assert.ok([401,403].includes((await request('/api/profiles',null,viewerCookie)).status));
+ const updated=await (await request('/api/admin/overview',null,ownerCookie)).json();assert.equal(updated.summary.sessions,0);assert.equal(updated.events.some(e=>e.action==='connection.checked'),true);assert.equal(updated.events.some(e=>e.action==='user.suspended'),true);
+ const failed=await request('/api/admin/xtream',{name:'Inválida',url:'http://127.0.0.1:'+provider.address().port,username:'testuser',password:'wrong'},ownerCookie);assert.equal(failed.status,422);
+ const preserved=await (await request('/api/admin/xtream',null,ownerCookie)).json();assert.notEqual(preserved.name,'Inválida');assert.equal(preserved.password,undefined);
+});

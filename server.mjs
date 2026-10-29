@@ -317,7 +317,7 @@ async function route(req,res) {
   let url;
   try { url = new URL(req.url, 'http://localhost'); } catch { return send(res,400,{error:'URL inválida.'}); }
   const pathname = url.pathname;
-  if(pathname==='/healthz')return send(res,200,{ok:true,version:'4.1.1'});
+  if(pathname==='/healthz')return send(res,200,{ok:true,version:'4.2.0'});
   if(access&&pathname.startsWith('/api/auth/')){
     // Nenhum endpoint de administração do plugin fica acessível publicamente.
     if(!new Set(['/api/auth/sign-in/email','/api/auth/sign-out','/api/auth/get-session']).has(pathname))return send(res,404,{error:'Rota indisponível.'});
@@ -340,6 +340,12 @@ async function route(req,res) {
     }
     const identity=await access.identity(req);
     if(!identity||!await access.isOwner(identity.user.id))return send(res,403,{error:'Acesso exclusivo do proprietário.'});
+    if(pathname==='/api/admin/overview'&&req.method==='GET'){const snapshot=await access.adminSnapshot(identity.user.id),c=activeXtream();return send(res,200,{...snapshot,system:{version:'4.2.0',uptimeSeconds:Math.floor(process.uptime())},connection:{configured:!!(c.url&&c.username&&c.password),name:c.name},updatedAt:new Date().toISOString()});}
+    const userDetail=/^\/api\/admin\/users\/([A-Za-z0-9_-]{1,128})$/.exec(pathname);
+    if(userDetail&&req.method==='GET'){try{return send(res,200,await access.userDetails(identity.user.id,userDetail[1]));}catch(error){return send(res,error.status||500,{error:error.status?error.message:'Não foi possível carregar a conta.'});}}
+    if(pathname==='/api/admin/xtream/check'&&req.method==='POST'){
+      try{const c=activeXtream(),response=await providerJson(apiUrl(c.url,c.username,c.password)),info=response?.user_info;if(!info||![1,'1',true].includes(info.auth)||info.status&&String(info.status).toLowerCase()!=='active')return send(res,422,{error:'O provedor não confirmou uma conta ativa.'});await access.recordConnectionEvent(identity.user.id,'connection.checked');return send(res,200,{ok:true,checkedAt:new Date().toISOString(),activeConnections:Number(info.active_cons)||0,maxConnections:Number(info.max_connections)||null,expiresAt:Number(info.exp_date)>0?new Date(Number(info.exp_date)*1000).toISOString():null});}catch{return send(res,502,{error:'Não foi possível verificar a conexão salva. A configuração foi preservada.'});}
+    }
     if(pathname==='/api/admin/xtream'&&req.method==='GET'){const c=activeXtream();return send(res,200,{name:c.name,url:c.url,username:c.username,configured:!!(c.url&&c.username&&c.password)});}
     if(pathname==='/api/admin/xtream'&&req.method==='POST'){
       try{
@@ -347,7 +353,7 @@ async function route(req,res) {
         if(!name||!url||!username||!password||username.length>200||password.length>200)return send(res,400,{error:'Preencha os dados válidos da conexão.'});
         const response=await providerJson(apiUrl(url,username,password),{withEndpoint:true});const info=response.data?.user_info;
         if(!info||!(info.auth===1||info.auth==='1'||info.auth===true)||info.status&&String(info.status).toLowerCase()!=='active')return send(res,422,{error:'O servidor Xtream não confirmou uma conta ativa. A configuração anterior foi preservada.'});
-        const verifiedUrl=normalizeServerUrl(new URL('.',response.finalUrl).href);const next={name,url:verifiedUrl,username,password},temp=globalConfigPath+'.tmp';await mkdir(resolve(globalConfigPath,'..'),{recursive:true});await writeFile(temp,JSON.stringify(next),{mode:0o600});await rename(temp,globalConfigPath);globalXtream=next;sessions.clear();return send(res,200,{ok:true,message:'Conexão validada e salva. Os espectadores precisarão reconectar.'});
+        const verifiedUrl=normalizeServerUrl(new URL('.',response.finalUrl).href);const next={name,url:verifiedUrl,username,password},temp=globalConfigPath+'.tmp';await mkdir(resolve(globalConfigPath,'..'),{recursive:true});await writeFile(temp,JSON.stringify(next),{mode:0o600});await rename(temp,globalConfigPath);globalXtream=next;sessions.clear();await access.recordConnectionEvent(identity.user.id,'connection.updated');return send(res,200,{ok:true,message:'Conexão validada e salva. Os espectadores precisarão reconectar.'});
       }catch(error){return send(res,422,{error:'Não foi possível validar a nova conexão. A lista anterior foi preservada.'});}
     }
     if(pathname==='/api/admin/users'&&req.method==='GET')return send(res,200,{users:await access.listUsers(identity.user.id)});

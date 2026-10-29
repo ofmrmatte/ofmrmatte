@@ -1,4 +1,14 @@
-# MF Stream 4.1.1
+# MF Stream 4.2.0
+
+## Master Admin 4.2
+
+- Painel exclusivo do proprietário em /admin com navegação por visão geral, usuários, conexão e histórico. Layout adaptado ao celular, campos com fonte de 16 px e cartões de contas em telas pequenas.
+- Resumo real do banco: contas de espectadores, perfis, contas suspensas e sessões ainda válidas. A conta Master fica fora dos indicadores; sessões válidas não representam pessoas assistindo agora.
+- Busca por nome ou e-mail, filtro de status, ordenação e paginação de 15 contas. A lateral de detalhes mostra os perfis e as datas das sessões, sem tokens nem preferências privadas.
+- Suspensão, reativação e encerramento de sessões com confirmação. Suspender encerra os logins; os perfis, favoritos e progresso são preservados.
+- Teste da conexão já salva, com resposta real do provedor, limite de conexões e validade quando informados. Alterar a lista exige validação e confirmação; senha salva nunca é devolvida pela API.
+- Histórico persistente das últimas 50 ações administrativas, iniciado nesta versão. Índices para sessões e data dos eventos em SQLite/PostgreSQL. Nenhuma credencial ou histórico de reprodução é registrado na auditoria.
+- Verificação: 40 testes automatizados, incluindo autorização das rotas administrativas, contagem de sessões, persistência da auditoria e preservação da conexão após validação recusada. Fluxos de suspensão/reativação conferidos no navegador com contas fictícias.
 
 ## Ficha unificada e reprodução contínua
 

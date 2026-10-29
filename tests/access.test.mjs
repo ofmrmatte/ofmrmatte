@@ -57,3 +57,16 @@ test('proprietário único independente de contas de espectadores',async t=>{
  await assert.rejects(a.revokeSessions(viewer.id,owner.id),/exclusivo/);
  assert.deepEqual(await a.revokeSessions(owner.id,viewer.id),{ok:true});
 });
+
+test('resumo administrativo conta sessões reais, protege detalhes e persiste auditoria',async t=>{
+ const dir=await mkdtemp(join(tmpdir(),'mfstream-admin-'));const config={dataDir:dir,baseURL:'http://localhost:3000',secret:randomBytes(48).toString('hex'),adminSetupToken:'fixture-owner-token'};
+ let access=await createAccess(config);t.after(async()=>{await access.close();await rm(dir,{force:true,recursive:true});});
+ const viewer=await access.register({name:'Ana',email:'ana@example.test',password:'ViewerPassword2026!'}),owner=await access.setupOwner({name:'Owner',email:'owner@example.test',password:'OwnerPassword2026!',token:'fixture-owner-token'});
+ await access.auth.api.signInEmail({body:{email:'ana@example.test',password:'ViewerPassword2026!'}});
+ const snapshot=await access.adminSnapshot(owner.id);assert.equal(snapshot.users.length,1);assert.equal(snapshot.summary.sessions,1);assert.equal(snapshot.summary.profiles,1);assert.equal(snapshot.summary.active,1);assert.equal(snapshot.users[0].sessionCount,1);
+ const profile=(await access.profiles(viewer.id))[0];await access.savePreferences(viewer.id,profile.id,{favorites:['private-history']});
+ const detail=await access.userDetails(owner.id,viewer.id);assert.equal(detail.sessions.length,1);assert.deepEqual(Object.keys(detail.sessions[0]).sort(),['createdAt','expiresAt']);assert.equal(detail.profiles[0].preferences,undefined);assert.equal(JSON.stringify(detail).includes('private-history'),false);
+ await assert.rejects(access.adminSnapshot(viewer.id),/exclusivo/);await assert.rejects(access.userDetails(viewer.id,viewer.id),/exclusivo/);await assert.rejects(access.recordConnectionEvent(viewer.id,'connection.updated'),/exclusivo/);
+ await access.setSuspended(owner.id,viewer.id,true);assert.equal((await access.adminSnapshot(owner.id)).summary.sessions,0);await access.recordConnectionEvent(owner.id,'connection.updated');
+ await access.close();access=await createAccess(config);const restored=await access.adminSnapshot(owner.id);assert.equal(restored.summary.suspended,1);assert.equal(restored.events.length,2);assert.equal(restored.events.some(e=>e.action==='user.suspended'&&e.targetName==='Ana'),true);assert.equal(JSON.stringify(restored.events).includes('Password2026'),false);
+});
