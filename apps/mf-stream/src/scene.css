@@ -289,6 +289,7 @@
 .offline-entry-actions{display:flex;flex:0 0 auto;align-items:center;gap:8px;flex-wrap:wrap}
 .offline-entry-actions button{border:1px solid #584370;color:#f4eaff;background:#332640;border-radius:10px;padding:10px 12px;font-size:12px}
 .offline-entry-actions .offline-remove{background:transparent;color:#b9b0c5;border-color:#53495c}
+.offline-cancel{font-size:12px;min-height:36px;margin-bottom:10px}
 .offline-empty{border:1px dashed #544269;border-radius:14px;padding:35px 22px;text-align:center;color:#beb4cb;font-size:14px;line-height:1.65}
 .offline-playback[hidden],.offline-list[hidden],.title-download-status[hidden]{display:none!important}
 .offline-playback-head{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:15px 0}
