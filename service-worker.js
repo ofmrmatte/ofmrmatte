@@ -1,5 +1,5 @@
 // Cache network-first: installing a new ZIP must not leave the previous app stuck.
-const CACHE = 'mf-stream-shell-v4-2-0';
+const CACHE = 'mf-stream-shell-v4-2-1';
 const SHELL = ['/', '/index.html', '/src/styles.css', '/src/app.js', '/src/access-ui.mjs', '/vendor/gsap.js', '/vendor/plyr.js', '/vendor/plyr.css', '/vendor/plyr.svg', '/src/favicon.svg', '/src/xtream.mjs', '/src/content.mjs', '/src/playback.mjs', '/src/library.css', '/src/title-sheet.css', '/src/episode-tray.css', '/src/mobile.css', '/src/mobile.mjs', '/manifest.webmanifest', '/assets/icon-192.png', '/assets/icon-512.png'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(SHELL)).then(()=>self.skipWaiting()));

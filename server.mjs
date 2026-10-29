@@ -317,7 +317,7 @@ async function route(req,res) {
   let url;
   try { url = new URL(req.url, 'http://localhost'); } catch { return send(res,400,{error:'URL inválida.'}); }
   const pathname = url.pathname;
-  if(pathname==='/healthz')return send(res,200,{ok:true,version:'4.2.0'});
+  if(pathname==='/healthz')return send(res,200,{ok:true,version:'4.2.1'});
   if(access&&pathname.startsWith('/api/auth/')){
     // Nenhum endpoint de administração do plugin fica acessível publicamente.
     if(!new Set(['/api/auth/sign-in/email','/api/auth/sign-out','/api/auth/get-session']).has(pathname))return send(res,404,{error:'Rota indisponível.'});
@@ -340,7 +340,7 @@ async function route(req,res) {
     }
     const identity=await access.identity(req);
     if(!identity||!await access.isOwner(identity.user.id))return send(res,403,{error:'Acesso exclusivo do proprietário.'});
-    if(pathname==='/api/admin/overview'&&req.method==='GET'){const snapshot=await access.adminSnapshot(identity.user.id),c=activeXtream();return send(res,200,{...snapshot,system:{version:'4.2.0',uptimeSeconds:Math.floor(process.uptime())},connection:{configured:!!(c.url&&c.username&&c.password),name:c.name},updatedAt:new Date().toISOString()});}
+    if(pathname==='/api/admin/overview'&&req.method==='GET'){const snapshot=await access.adminSnapshot(identity.user.id),c=activeXtream();return send(res,200,{...snapshot,system:{version:'4.2.1',uptimeSeconds:Math.floor(process.uptime())},connection:{configured:!!(c.url&&c.username&&c.password),name:c.name},updatedAt:new Date().toISOString()});}
     const userDetail=/^\/api\/admin\/users\/([A-Za-z0-9_-]{1,128})$/.exec(pathname);
     if(userDetail&&req.method==='GET'){try{return send(res,200,await access.userDetails(identity.user.id,userDetail[1]));}catch(error){return send(res,error.status||500,{error:error.status?error.message:'Não foi possível carregar a conta.'});}}
     if(pathname==='/api/admin/xtream/check'&&req.method==='POST'){

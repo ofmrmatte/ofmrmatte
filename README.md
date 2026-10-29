@@ -1,4 +1,11 @@
-# MF Stream 4.2.0
+# MF Stream 4.2.1
+
+## Mini player persistente
+
+- Clique fora ou use Minimizar para continuar assistindo enquanto navega pelo catálogo e abre outras fichas. O mesmo vídeo permanece montado, inclusive em PiP nativo.
+- Restaurar retorna ao player sem recarregar. Fechar encerra a mídia; no mini player preserva a ficha que estiver aberta. Escape minimiza; sair da conta e alterações de proteção continuam encerrando a reprodução.
+- Janela redimensionável pelo canto inferior no desktop, com limites da tela; tamanho compacto acima da navegação no celular.
+- Fluxo conferido em navegador com vídeo de demonstração: tempo continua avançando ao minimizar, navegar e restaurar.
 
 ## Master Admin 4.2
 
