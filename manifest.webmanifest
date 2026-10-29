@@ -1,6 +1,6 @@
 {
-  "name": "MF Stream IPTV",
-  "short_name": "MF Stream",
+  "name": "Scene Play",
+  "short_name": "Scene Play",
   "description": "Aplicativo de streaming com acesso Xtream Codes API para listas e conteúdos autorizados.",
   "start_url": "/",
   "scope": "/",

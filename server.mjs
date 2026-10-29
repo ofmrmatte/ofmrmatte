@@ -36,7 +36,7 @@ const privateHosts = process.env.ALLOW_PRIVATE_XTREAM_HOSTS === '1';
 const sessions = new Map();
 const globalConfigPath=resolve(process.env.APP_DATA_DIR||resolve(root,'.data'),'xtream-global.json');
 let globalXtream={};try{globalXtream=JSON.parse(await readFile(globalConfigPath,'utf8'))}catch(error){if(error.code!=='ENOENT')console.error('Global Xtream configuration:',error.message)}
-const activeXtream=()=>({name:globalXtream.name||'MF Stream',url:globalXtream.url||process.env.XTREAM_URL,username:globalXtream.username||process.env.XTREAM_USERNAME,password:globalXtream.password||process.env.XTREAM_PASSWORD});
+const activeXtream=()=>({name:globalXtream.name||'Scene Play',url:globalXtream.url||process.env.XTREAM_URL,username:globalXtream.username||process.env.XTREAM_USERNAME,password:globalXtream.password||process.env.XTREAM_PASSWORD});
 
 const parental=await createParentalStore(resolve(process.env.PARENTAL_DATA_DIR || resolve(root,'.data'),'parental.json'));
 const SESSION_IDLE_MS = 2 * 60 * 60_000;
@@ -45,7 +45,7 @@ const MAX_API_JSON = 30_000_000;
 const MAX_MANIFEST = 2_000_000;
 const DNS_WAIT_MS = 5500;
 const CONNECT_WAIT_MS = 12000;
-const staticPaths = new Set(['/', '/index.html', '/manifest.webmanifest', '/service-worker.js', '/src/favicon.svg', '/src/styles.css', '/src/app.js', '/src/access-ui.mjs', '/src/xtream.mjs', '/src/content.mjs', '/src/playback.mjs', '/src/library.css', '/src/title-sheet.css', '/src/episode-tray.css', '/src/mobile.css', '/src/mobile.mjs', '/src/highlights.mjs', '/src/highlights.css', '/src/discovery.css', '/src/hero-preview.mjs', '/admin', '/admin/', '/admin.html', '/src/admin.mjs', '/src/admin.css', '/assets/icon-192.png', '/assets/icon-512.png']);
+const staticPaths = new Set(['/', '/index.html', '/manifest.webmanifest', '/service-worker.js', '/src/favicon.svg', '/src/styles.css', '/src/app.js', '/src/access-ui.mjs', '/src/xtream.mjs', '/src/content.mjs', '/src/playback.mjs', '/src/library.css', '/src/title-sheet.css', '/src/episode-tray.css', '/src/mobile.css', '/src/mobile.mjs', '/src/highlights.mjs', '/src/highlights.css', '/src/scene.css', '/src/scene-ui.mjs', '/assets/scene-play.svg', '/src/discovery.css', '/src/hero-preview.mjs', '/admin', '/admin/', '/admin.html', '/src/admin.mjs', '/src/admin.css', '/assets/icon-192.png', '/assets/icon-512.png']);
 const vendorPaths=new Map(['/vendor/plyr.js','/vendor/plyr.css','/vendor/plyr.svg'].map(path=>[path,resolve(root,'node_modules/plyr/dist',path.endsWith('.js')?'plyr.min.js':path.endsWith('.css')?'plyr.css':'plyr.svg')]));vendorPaths.set('/vendor/gsap.js',resolve(root,'node_modules/gsap/dist/gsap.min.js'));for(const path of vendorPaths.keys())staticPaths.add(path);
 const types = { '.html':'text/html; charset=utf-8', '.css':'text/css; charset=utf-8', '.js':'text/javascript; charset=utf-8', '.mjs':'text/javascript; charset=utf-8', '.svg':'image/svg+xml', '.png':'image/png', '.webmanifest':'application/manifest+json' };
 const securityHeaders = { 'Cache-Control':'no-store', 'X-Content-Type-Options':'nosniff', 'Referrer-Policy':'no-referrer', 'X-Frame-Options':'DENY' };
@@ -332,7 +332,7 @@ async function route(req,res) {
   let url;
   try { url = new URL(req.url, 'http://localhost'); } catch { return send(res,400,{error:'URL inválida.'}); }
   const pathname = url.pathname;
-  if(pathname==='/healthz')return send(res,200,{ok:true,version:'5.0.0'});
+  if(pathname==='/healthz')return send(res,200,{ok:true,version:'5.1.0'});
   if(access&&pathname.startsWith('/api/auth/')){
     // Nenhum endpoint de administração do plugin fica acessível publicamente.
     if(!new Set(['/api/auth/sign-in/email','/api/auth/sign-out','/api/auth/get-session']).has(pathname))return send(res,404,{error:'Rota indisponível.'});
@@ -355,7 +355,7 @@ async function route(req,res) {
     }
     const identity=await access.identity(req);
     if(!identity||!await access.isOwner(identity.user.id))return send(res,403,{error:'Acesso exclusivo do proprietário.'});
-    if(pathname==='/api/admin/overview'&&req.method==='GET'){const snapshot=await access.adminSnapshot(identity.user.id),c=activeXtream();return send(res,200,{...snapshot,system:{version:'5.0.0',uptimeSeconds:Math.floor(process.uptime())},connection:{configured:!!(c.url&&c.username&&c.password),name:c.name},updatedAt:new Date().toISOString()});}
+    if(pathname==='/api/admin/overview'&&req.method==='GET'){const snapshot=await access.adminSnapshot(identity.user.id),c=activeXtream();return send(res,200,{...snapshot,system:{version:'5.1.0',uptimeSeconds:Math.floor(process.uptime())},connection:{configured:!!(c.url&&c.username&&c.password),name:c.name},updatedAt:new Date().toISOString()});}
     const userDetail=/^\/api\/admin\/users\/([A-Za-z0-9_-]{1,128})$/.exec(pathname);
     if(userDetail&&req.method==='GET'){try{return send(res,200,await access.userDetails(identity.user.id,userDetail[1]));}catch(error){return send(res,error.status||500,{error:error.status?error.message:'Não foi possível carregar a conta.'});}}
     if(pathname==='/api/admin/xtream/check'&&req.method==='POST'){
@@ -633,7 +633,7 @@ async function route(req,res) {
 }
 
 const server = createServer((req,res) => { route(req,res).catch(() => { if (!res.headersSent) send(res,500,{error:'Erro interno.'}); else res.destroy(); }); });
-server.listen(port,'0.0.0.0',() => console.log(`MF Stream IPTV disponível na porta ${server.address().port}`));
+server.listen(port,'0.0.0.0',() => console.log(`Scene Play disponível na porta ${server.address().port}`));
 setInterval(() => { for (const [key, s] of sessions) if (Date.now()-s.lastUsed>SESSION_IDLE_MS) sessions.delete(key); },300_000).unref();
 
 // Daily refresh is independent from user sessions; no provider credentials leave this server.

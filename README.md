@@ -1,10 +1,19 @@
-# MF Stream 5.0.0
+# Scene Play 5.1.0
+
+## Identidade Scene Play e navegação unificada
+
+Símbolo vetorial baseado na referência fornecida, wordmark horizontal e assinatura EVERY STORY STARTS HERE. Ícones PNG 192/512 com área de segurança, favicon e nome PWA atualizados. Cookies, tabelas e chaves persistentes mantêm compatibilidade.
+
+O cabeçalho reúne navegação, busca expansível, atualização, controle parental e perfis. As fileiras usam um componente compartilhado com setas, swipe, arraste e teclado, sem barras de rolagem. A rotação pausa durante hover/foco e oferece controle acessível por teclado.
+
+A home começa com imagem estática. Uma prévia direta exige origem explicitamente autorizada, hover de 400 ms e condições adequadas de conexão/movimento. A descoberta atual fornece trailers do YouTube, que abrem oficialmente somente após clique. Nenhum iframe é recortado ou usado como fundo. Não existe uma fonte direta autorizada configurada nesta instalação; portanto, os destaques atuais permanecem com pôster.
+
 
 ## Início cinematográfico e descoberta diária
 
 - Cenário horizontal de largura total, degradês, oito destaques com seleção diária e navegação manual. Quando disponível, um trailer de canal oficial verificado abre ao lado do título, sem cobrir os controles do YouTube. No desktop, pode iniciar sem áudio; no mobile, exige toque. Movimento reduzido, economia de dados, aba oculta, destaque fora da tela e reprodução principal suspendem o preview.
 - Top 10 de filmes e Top 10 de séries independentes, cruzando as tendências públicas globais do [Simkl](https://simkl.com/) com títulos realmente presentes na lista e permitidos pelo controle parental. A posição é entre os títulos disponíveis, não um ranking brasileiro. Cada seção identifica fonte e atualização; não há números fictícios de audiência.
-- O modo MF Stream usa reproduções internas agregadas dos últimos 30 dias. Uma visualização exige 30 segundos de reprodução, com deduplicação por perfil, título e dia. O modo só libera com pelo menos dez visualizações, três títulos e cinco perfis distintos na seção. Perfis são representados por hashes no arquivo privado; identificadores não são enviados aos espectadores.
+- O modo Scene Play usa reproduções internas agregadas dos últimos 30 dias. Uma visualização exige 30 segundos de reprodução, com deduplicação por perfil, título e dia. O modo só libera com pelo menos dez visualizações, três títulos e cinco perfis distintos na seção. Perfis são representados por hashes no arquivo privado; identificadores não são enviados aos espectadores.
 - Tendências e classificações confirmadas têm cache persistente de 24 horas; imagens externas ficam no cache pelo endereço de origem. Falhas mantêm a biblioteca e os últimos dados válidos, identificados como desatualizados. As consultas externas recebem apenas informações públicas do título, nunca credenciais da lista.
 - Classificações confirmadas permanecem após atualizar o catálogo. A correspondência preserva números que fazem parte do nome, verifica título/ano e usa nomes alternativos confirmados. O fluxo prioriza ClassInd/MJSP, TMDB quando configurado, catálogo da Apple e Wikidata. Certificados estrangeiros exibem o país; notas de avaliação não viram idade. Onde não há correspondência confiável, continua aparecendo uma indicação de ausência.
 - O feed oficial legado do ClassInd ficou indisponível durante a validação, e a API atual exigiu autenticação. Não há contorno desse acesso. É possível importar um CSV oficial por `CLASSIND_CSV_FILE`; o conector de dados abertos tenta novamente automaticamente. TMDB é opcional por `TMDB_API_READ_ACCESS_TOKEN`, privado no servidor. Sem essa chave, tendências, imagens e trailers continuam pelo Simkl e as demais fontes de classificação. JustWatch não foi integrado: sua API exige parceria.
@@ -119,7 +128,7 @@ Player web **instalável como aplicativo (PWA)**, com interface para TV ao vivo,
 - Seleção de temporadas e episódios nas séries.
 - Reprodução de vídeos compatíveis com navegador e transmissões HLS (`.m3u8`) via `hls.js`.
 - Proxy integrado para streaming e HLS com chaves e segmentos reescritos, sem credenciais nas URLs retornadas ao frontend.
-- Interface responsiva, tema escuro e identidade **MF Stream IPTV**.
+- Interface responsiva, tema escuro e identidade **Scene Play**.
 - Instalação como PWA no Android, no Windows e em navegadores compatíveis; suporte de instalação no iPhone via menu Compartilhar > Adicionar à Tela de Início.
 - Testes automatizados da API, normalização de dados, login, diagnósticos, catálogos e encaminhamento de mídia.
 - Diagnóstico de conectividade sem transmitir credenciais e mensagens específicas para DNS, porta, timeout, bloqueios de API e incompatibilidade de resposta.
@@ -144,7 +153,7 @@ npm test
 
 1. Clique em **Conectar minha lista** ou **Minha conexão**.
 2. Informe a **URL base do servidor** (por exemplo, `http://servidor.exemplo:8080`), sem `/player_api.php`, usuário ou senha na URL.
-3. Informe o **usuário** e a **senha** e clique em **Entrar no MF Stream**.
+3. Informe o **usuário** e a **senha** e clique em **Entrar no Scene Play**.
 4. Explore TV ao vivo, filmes, séries, categorias e favoritos.
 
 A API deve responder à operação `player_api.php?username=...&password=...`. Os dados são obtidos da conta fornecida, sem listas pré-configuradas.
@@ -172,7 +181,7 @@ Para instalação fora de `localhost`, **é obrigatório publicar em HTTPS** e a
 
 ## Publicar no Railway
 
-O `Dockerfile` e o arquivo `railway.json` já estão preparados. Crie um projeto Railway vinculado ao repositório do MF Stream IPTV e use o domínio HTTPS gerado pela plataforma. `PORT` é definido automaticamente pelo Railway. A senha Xtream não deve ser adicionada como variável de ambiente; cada usuário informa suas credenciais no login.
+O `Dockerfile` e o arquivo `railway.json` já estão preparados. Crie um projeto Railway vinculado ao repositório do Scene Play e use o domínio HTTPS gerado pela plataforma. `PORT` é definido automaticamente pelo Railway. A senha Xtream não deve ser adicionada como variável de ambiente; cada usuário informa suas credenciais no login.
 
 Não configure `ALLOW_PRIVATE_XTREAM_HOSTS=1` em produção. Esse modo é exclusivamente para testes locais com um provedor fictício na rede privada.
 
@@ -195,7 +204,7 @@ Não configure `ALLOW_PRIVATE_XTREAM_HOSTS=1` em produção. Esse modo é exclus
 - Algumas listas exigem formato TS ou personalizações de rede e podem não ser compatíveis com HLS. A reprodução deve ser validada com uma conta Xtream legítima.
 - A autenticação e os catálogos também foram verificados com uma conta real. Ainda é necessário validar a reprodução real e a experiência visual em dispositivos reais.
 
-**Créditos:** MF Stream IPTV — Design e desenvolvimento por Matheus Ferreira.
+**Créditos:** Scene Play — Design e desenvolvimento por Matheus Ferreira.
 
 ## Versão 2.2 — correção do fluxo de conexão
 

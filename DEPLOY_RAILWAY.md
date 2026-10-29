@@ -1,4 +1,4 @@
-# MF Stream no Railway
+# Scene Play no Railway
 
 O aplicativo é um serviço independente do site do portfólio. No repositório `ofmrmatte/ofmrmatte`, seu código fica em `apps/mf-stream/`. Não substitua o serviço `ofmrmatte` existente.
 
