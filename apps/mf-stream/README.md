@@ -1,13 +1,31 @@
-# MF Stream 4.0
+# MF Stream 4.1
+
+## Ficha unificada e reprodução contínua
+
+- Filmes e séries abrem uma ficha com capa, sinopse, classificação e ações. Em séries, **Assistir · Ver episódios** revela temporadas e episódios dentro da mesma ficha, com uma única rolagem e sem outro popup.
+- Abertura a partir do cartão e fechamento com GSAP servido pelo próprio app. Movimento reduzido respeitado. Referências de interação: [Morphing Dialog do 21st](https://21st.dev/@ibelick/components/morphing-dialog), [organização de títulos do Apple TV](https://itunespartner.apple.com/tv-movies/support/5408-apple-tv-app-overview) e navegação de temporadas dos streamers.
+- Em tela cheia, **Episódios** abre uma faixa compacta no rodapé, acima dos controles. Ela fica fechada por padrão e se fecha ao escolher um episódio. O centro da imagem permanece livre. O botão **Próximo episódio** continua dentro do player.
+- Aviso no canto inferior nos últimos 15 segundos, com Assistir agora e Cancelar. A reprodução automática segue inclusive para outra temporada; pode ser desligada na lateral do player. A preferência fica separada por perfil e sincroniza com as demais preferências.
+- Metadados recebidos agora atualizam a ficha. Links `/title/movie/ID` e `/title/series/ID` restauram o título após conectar. A consulta externa de classificação não atrasa a lista de episódios.
+- Classificação complementar usa correspondência de título/ano, rejeita obras ambíguas, identifica país/fonte e mantém cache de resultados confirmados por 24 horas em `APP_DATA_DIR/ratings-cache.json`. Wikidata consulta [ClassInd/P3216](https://www.wikidata.org/wiki/Property:P3216) e MPA/P1657. Onde não há certificado confirmado, o app continua mostrando classificação não confirmada; certificados estrangeiros não são apresentados como brasileiros.
+- Verificação: 35 testes automatizados, inclusive persistência do cache e rejeição de classificações ambíguas; fluxo em navegador com fonte fictícia e vídeo CC0, troca de temporada, retomada, passagem automática de T1 E2 para T2 E1 e faixa em tela cheia. Layout conferido em 320×568, 390×844 e 844×390, além do desktop.
+
+## Mobile
+
+- Formulários com fonte de 16 px, áreas de toque maiores, rolagem de teclado baseada na altura visual disponível e respeito aos recortes de tela. O zoom manual continua permitido.
+- Biblioteca com cabeçalho alinhado, cartões proporcionais e navegação inferior. Capas da ficha são contidas por inteiro, com fundo desfocado; os episódios usam uma única rolagem.
+- Ao tocar em um episódio ou filme no celular, o player solicita tela cheia diretamente no gesto e tenta travar a orientação em paisagem. Em navegadores sem esse suporte, usa tela cheia dentro do app e um player horizontal que acompanha a rotação física. O vídeo usa object-fit: contain para não recortar a imagem. A disponibilidade da trava nativa depende do navegador; consulte a [API de orientação](https://developer.mozilla.org/en-US/docs/Web/API/ScreenOrientation/lock).
+- Botão de retorno aos detalhes dentro da tela cheia, controles por toque e faixa discreta de próximos episódios, inclusive da próxima temporada. A preferência de reprodução automática permanece por perfil.
+- A verificação usou dimensões responsivas no navegador e testes das falhas das APIs de tela cheia/orientação. Não substitui validação em aparelhos físicos Android/iOS.
 
 ## Contas, perfis e acesso permanente
 
 - A lista é definida por `XTREAM_URL`, `XTREAM_USERNAME` e `XTREAM_PASSWORD` no ambiente do servidor. A instalação local já utiliza um `.env` privado; essas credenciais não fazem parte do repositório nem do JavaScript entregue ao navegador.
-- Tela de login sem rolagem, com criação de acesso por convite, sessão persistente de 30 dias e até cinco perfis por conta. Contas e senhas são geridas pelo Better Auth; não existe senha padrão.
+- Tela de login sem rolagem, com código de convite opcional no cadastro, sessão persistente de 30 dias e até cinco perfis por conta. Contas e senhas são geridas pelo Better Auth; não existe senha padrão.
 - SQLite local em `.data/stream.sqlite` e PostgreSQL opcional por `DATABASE_URL`. Favoritos, histórico e progresso ficam separados por perfil e sincronizam com o servidor. A proteção parental vale para a conta inteira.
 - Player Plyr com controles de ±10s, próximo episódio, volume, velocidade e tela cheia dentro do vídeo. HLS continua usando hls.js. Os controles são acessíveis por teclado e toque.
 - Busca, título, atualização e ordenação em uma faixa compacta. Os cartões visíveis consultam metadados gradualmente e atualizam a classificação sem precisar abrir a ficha. Onde nenhuma fonte tiver correspondência confiável, aparece um traço com explicação; não são inventadas classificações.
-- Testes automatizados cobrem autenticação, sessão após reabrir o banco, convites, isolamento de perfis, persistência de preferências e o fluxo Xtream. O login foi conferido em 320×568, 390×844, 844×390, 768×1024 e 1440×900.
+- Testes automatizados cobrem autenticação, sessão após reabrir o banco, cadastro com e sem convite, isolamento de perfis, persistência de preferências e o fluxo Xtream. O login foi conferido em 320×568, 390×844, 844×390, 768×1024 e 1440×900.
 
 Veja [DEPLOY_RAILWAY.md](DEPLOY_RAILWAY.md) para publicação do serviço separado do portfólio, armazenamento persistente e configuração das variáveis.
 

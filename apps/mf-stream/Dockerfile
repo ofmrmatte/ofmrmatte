@@ -2,13 +2,16 @@ FROM node:24-slim
 WORKDIR /app
 COPY package.json package-lock.json .npmrc ./
 RUN npm ci --omit=dev
-COPY server.mjs index.html manifest.webmanifest service-worker.js ./
+COPY server.mjs index.html admin.html manifest.webmanifest service-worker.js ./
 COPY src ./src
 COPY lib ./lib
 COPY assets ./assets
+COPY tests ./tests
+# Fail the build if a JavaScript module cannot be parsed by the runtime.
+RUN node --check server.mjs && node --check src/app.js && node --check src/admin.mjs && node --check src/access-ui.mjs
+RUN npm test
 ENV NODE_ENV=production
 ENV PARENTAL_DATA_DIR=/data
 ENV APP_DATA_DIR=/data
-VOLUME ["/data"]
 EXPOSE 3000
 CMD ["node", "server.mjs"]

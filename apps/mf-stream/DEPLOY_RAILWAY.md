@@ -16,7 +16,7 @@ O aplicativo é um serviço independente do site do portfólio. No repositório 
 | XTREAM_USERNAME | Usuário do provedor |
 | XTREAM_PASSWORD | Senha do provedor |
 | BETTER_AUTH_SECRET | Segredo aleatório de pelo menos 32 caracteres, estável entre deploys |
-| REGISTRATION_CODE | Código aleatório privado para criar contas por convite |
+| REGISTRATION_CODE | Opcional. Quando um código é enviado no cadastro, ele precisa corresponder a este valor |
 | APP_DATA_DIR | `/data` |
 | PARENTAL_DATA_DIR | `/data` |
 | NODE_ENV | `production` |
@@ -31,13 +31,18 @@ Railway hospeda PostgreSQL; a autenticação dos espectadores é feita pelo **Be
 ## Primeiro acesso
 
 - Localmente, `http://localhost:3000` permite criar o primeiro acesso sem convite. Escolha seu e-mail e uma senha de pelo menos dez caracteres.
-- Na hospedagem, clique em **Criar acesso** e use o valor privado de `REGISTRATION_CODE` configurado no Railway. O primeiro usuário é administrador. Não há cadastro público aberto nem senha padrão.
+- Na hospedagem, clique em **Criar acesso**. O **código de convite é opcional**: deixe o campo vazio para cadastrar ou, se preencher, use o valor de `REGISTRATION_CODE` configurado no Railway. O primeiro usuário cadastrado é administrador. **Atenção:** o cadastro público fica aberto sem convite; crie a conta administradora antes de divulgar a URL. Não há senha padrão.
 - Cada conta pode criar até cinco perfis. Favoritos, episódio selecionado e progresso são salvos por perfil no banco. O login usa cookie HttpOnly com sessão de 30 dias.
 - A proteção parental pertence à conta e vale para todos os seus perfis. Perfis não são contas de autenticação separadas.
 - SMTP e recuperação de senha por e-mail não estão configurados nesta versão. Proteja o acesso administrativo ao banco e mantenha backups.
 
 ## Publicação e conferência
 
-`npm ci`, `npm test`, iniciar o serviço e conferir `/healthz`. Abra o domínio HTTPS, crie o acesso por convite e escolha um perfil. Reinicie a implantação e confirme que a sessão e o progresso continuam disponíveis. O servidor de streaming precisa permitir requisições originadas da região do Railway; testes locais não garantem a disponibilidade do provedor a partir da nuvem.
+`npm ci`, `npm test`, iniciar o serviço e conferir `/healthz`. Abra o domínio HTTPS, crie uma conta sem convite e escolha um perfil. Verifique também que um código incorreto, quando fornecido, é rejeitado. Reinicie a implantação e confirme que a sessão e o progresso continuam disponíveis. O servidor de streaming precisa permitir requisições originadas da região do Railway; testes locais não garantem a disponibilidade do provedor a partir da nuvem.
 
 Use uma réplica enquanto a proteção parental e os limites de consultas estiverem no processo/volume. Os streams usam o backend como proxy: CPU, tráfego e limites de conexões do provedor continuam se aplicando.
+
+
+## Master Admin separado
+
+Acesse `/admin` para entrar no painel administrativo, separado do streaming. Configure `ADMIN_SETUP_TOKEN` no Railway, crie a conta proprietária com um e-mail exclusivo e uma senha própria; após o cadastro inicial, a chave pode ser removida. A tabela `stream_owner` identifica exclusivamente o dono. O primeiro espectador não vira administrador. O painel permite consultar espectadores, suspender e reativar contas e revogar sessões, mas a conta Master Admin não pode abrir a biblioteca de streaming.

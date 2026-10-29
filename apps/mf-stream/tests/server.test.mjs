@@ -67,7 +67,7 @@ test('fluxo completo: app, login Xtream, catálogo, séries, manifesto e logout'
  t.after(()=>new Promise(resolve=>provider.close(resolve)));
  const origin=await startApp(t);
  const shell=await (await fetch(origin)).text();assert.match(shell,/MF Stream IPTV/);assert.match(shell,/id="listName"/);
- for(const asset of ['/manifest.webmanifest','/service-worker.js','/assets/icon-192.png','/src/styles.css'])assert.equal((await fetch(origin+asset)).status,200,asset);
+ for(const asset of ['/manifest.webmanifest','/service-worker.js','/assets/icon-192.png','/src/styles.css','/src/title-sheet.css','/src/episode-tray.css','/src/mobile.css','/src/mobile.mjs','/vendor/gsap.js'])assert.equal((await fetch(origin+asset)).status,200,asset);
  let res=await fetch(origin+'/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:`http://localhost:${providerPort}`,username:'testuser',password:'invalid'})});assert.equal(res.status,401);
  res=await fetch(origin+'/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({listName:'iptv',url:`http://localhost:${providerPort}`,username:'testuser',password:'testpass'})});assert.equal(res.status,200);
  const {token,host,account}=await res.json();assert.ok(token);assert.equal(account.listName,'iptv');assert.equal(host,`http://localhost:${providerPort}`);
@@ -204,4 +204,20 @@ test('proteção parental filtra API e bloqueia URLs diretas, detalhes e sessõe
  const newToken=await login();response=await fetch(origin+'/api/parental',{headers:{'x-session-token':newToken}});assert.equal((await response.json()).maxAge,12);
  response=await update({hideAdult:false,maxAge:null,blockUnknown:false,pin:'7429'});assert.equal(response.status,200);
  response=await fetch(origin+'/api/catalog?section=live&kind=items',{headers});assert.equal((await response.json()).data.length,2);
+});
+
+test('rotas individuais de filmes e séries servem o aplicativo',async t=>{
+ const origin=await startApp(t);
+ for(const path of ['/title/movie/22','/title/series/33','/title/movie/22/']){
+  const response=await fetch(origin+path);
+  assert.equal(response.status,200,path);
+  assert.match(response.headers.get('content-type')||'',/text\/html/);
+  assert.match(await response.text(),/id="detailsModal"/);
+ }
+ for(const path of ['/title/movie/invalid','/title/series/33/extra','/title/other/22'])
+  assert.equal((await fetch(origin+path)).status,404,path);
+});
+test('o JavaScript da interface é sintaticamente válido',async()=>{
+ const {execFileSync}=await import('node:child_process');
+ assert.doesNotThrow(()=>execFileSync(process.execPath,['--check','src/app.js'],{cwd:resolve(import.meta.dirname,'..'),encoding:'utf8'}));
 });

@@ -1,7 +1,7 @@
 import { createServer } from 'node:http';
 import http from 'node:http';
 import https from 'node:https';
-import { readFile, stat } from 'node:fs/promises';
+import { readFile, stat, writeFile, rename, mkdir } from 'node:fs/promises';
 import { extname, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { lookup, resolve4, resolve6 } from 'node:dns/promises';
@@ -13,7 +13,7 @@ import {createParentalStore,parentalKey} from './lib/parental.mjs';
 import {contentMetadata,contentAllowed} from './src/content.mjs';
 import {createRatingLookup} from './lib/ratings.mjs';
 import {createAccess} from './lib/access.mjs';
-const lookupRating=process.env.RATING_LOOKUP_ENABLED==='0'?async()=>null:createRatingLookup();
+const lookupRating=process.env.RATING_LOOKUP_ENABLED==='0'?async()=>null:createRatingLookup(fetch,{cachePath:resolve(process.env.APP_DATA_DIR||resolve(root,'.data'),'ratings-cache.json')});
 import { CATALOG_ACTIONS, SECTIONS, normalizeServerUrl, apiUrl, buildStreamUrl, rewriteHlsManifest } from './src/xtream.mjs';
 
 const root = resolve(fileURLToPath(new URL('.', import.meta.url)));
@@ -22,9 +22,13 @@ const port = Number.parseInt(process.env.PORT || '3000', 10);
 const fixedMode=process.env.APP_AUTH_ENABLED!=='0'&&!!(process.env.XTREAM_URL&&process.env.XTREAM_USERNAME&&process.env.XTREAM_PASSWORD);
 if(process.env.APP_AUTH_ENABLED==='1'&&!fixedMode)throw new Error('Configure as variáveis XTREAM_URL, XTREAM_USERNAME e XTREAM_PASSWORD.');
 const appBase=process.env.BETTER_AUTH_URL||(process.env.RAILWAY_PUBLIC_DOMAIN?'https://'+process.env.RAILWAY_PUBLIC_DOMAIN:`http://localhost:${port||3000}`);
-const access=fixedMode?await createAccess({dataDir:process.env.APP_DATA_DIR||resolve(root,'.data'),baseURL:appBase,secret:process.env.BETTER_AUTH_SECRET,registrationCode:process.env.REGISTRATION_CODE,databaseURL:process.env.DATABASE_URL,cookiePrefix:process.env.AUTH_COOKIE_PREFIX||'mf-stream'}):null;
+const access=fixedMode?await createAccess({dataDir:process.env.APP_DATA_DIR||resolve(root,'.data'),baseURL:appBase,secret:process.env.BETTER_AUTH_SECRET,registrationCode:process.env.REGISTRATION_CODE,adminSetupToken:process.env.ADMIN_SETUP_TOKEN,databaseURL:process.env.DATABASE_URL,cookiePrefix:process.env.AUTH_COOKIE_PREFIX||'mf-stream'}):null;
 const privateHosts = process.env.ALLOW_PRIVATE_XTREAM_HOSTS === '1';
 const sessions = new Map();
+const globalConfigPath=resolve(process.env.APP_DATA_DIR||resolve(root,'.data'),'xtream-global.json');
+let globalXtream={};try{globalXtream=JSON.parse(await readFile(globalConfigPath,'utf8'))}catch(error){if(error.code!=='ENOENT')console.error('Global Xtream configuration:',error.message)}
+const activeXtream=()=>({name:globalXtream.name||'MF Stream',url:globalXtream.url||process.env.XTREAM_URL,username:globalXtream.username||process.env.XTREAM_USERNAME,password:globalXtream.password||process.env.XTREAM_PASSWORD});
+
 const parental=await createParentalStore(resolve(process.env.PARENTAL_DATA_DIR || resolve(root,'.data'),'parental.json'));
 const SESSION_IDLE_MS = 2 * 60 * 60_000;
 const MAX_BODY = 8_000;
@@ -32,8 +36,8 @@ const MAX_API_JSON = 30_000_000;
 const MAX_MANIFEST = 2_000_000;
 const DNS_WAIT_MS = 5500;
 const CONNECT_WAIT_MS = 12000;
-const staticPaths = new Set(['/', '/index.html', '/manifest.webmanifest', '/service-worker.js', '/src/favicon.svg', '/src/styles.css', '/src/app.js', '/src/access-ui.mjs', '/src/xtream.mjs', '/src/content.mjs', '/src/playback.mjs', '/src/library.css', '/assets/icon-192.png', '/assets/icon-512.png']);
-const vendorPaths=new Map(['/vendor/plyr.js','/vendor/plyr.css','/vendor/plyr.svg'].map(path=>[path,resolve(root,'node_modules/plyr/dist',path.endsWith('.js')?'plyr.min.js':path.endsWith('.css')?'plyr.css':'plyr.svg')]));for(const path of vendorPaths.keys())staticPaths.add(path);
+const staticPaths = new Set(['/', '/index.html', '/manifest.webmanifest', '/service-worker.js', '/src/favicon.svg', '/src/styles.css', '/src/app.js', '/src/access-ui.mjs', '/src/xtream.mjs', '/src/content.mjs', '/src/playback.mjs', '/src/library.css', '/src/title-sheet.css', '/src/episode-tray.css', '/src/mobile.css', '/src/mobile.mjs', '/admin', '/admin/', '/admin.html', '/src/admin.mjs', '/src/admin.css', '/assets/icon-192.png', '/assets/icon-512.png']);
+const vendorPaths=new Map(['/vendor/plyr.js','/vendor/plyr.css','/vendor/plyr.svg'].map(path=>[path,resolve(root,'node_modules/plyr/dist',path.endsWith('.js')?'plyr.min.js':path.endsWith('.css')?'plyr.css':'plyr.svg')]));vendorPaths.set('/vendor/gsap.js',resolve(root,'node_modules/gsap/dist/gsap.min.js'));for(const path of vendorPaths.keys())staticPaths.add(path);
 const types = { '.html':'text/html; charset=utf-8', '.css':'text/css; charset=utf-8', '.js':'text/javascript; charset=utf-8', '.mjs':'text/javascript; charset=utf-8', '.svg':'image/svg+xml', '.png':'image/png', '.webmanifest':'application/manifest+json' };
 const securityHeaders = { 'Cache-Control':'no-store', 'X-Content-Type-Options':'nosniff', 'Referrer-Policy':'no-referrer', 'X-Frame-Options':'DENY' };
 
@@ -247,7 +251,7 @@ async function catalogFor(session,section) {
   session.catalogs.set(section,{time:Date.now(),promise});
   try{return await promise;}catch(error){session.catalogs.delete(section);throw error;}
 }
-async function allowedEntry(session,section,id,details=false,refresh=false) {
+async function allowedEntry(session,section,id,details=false,refresh=false,enrich=true) {
   const catalog=await catalogFor(session,section);
   const key=`${section}:${id}`;let metadata=session.entries.get(key);
   if(refresh)session.details.delete(key);
@@ -256,12 +260,14 @@ async function allowedEntry(session,section,id,details=false,refresh=false) {
   if(details && section!=='live' && !session.details.has(key)){
     const data=await providerJson(apiUrl(session.base,session.username,session.password,section==='vod'?'get_vod_info':'get_series_info',{[section==='vod'?'vod_id':'series_id']:id}));
     const info=contentMetadata({...data?.movie_data,...data?.info,...data});
-    const classification=info.ageLabel==='Não informada'?(refresh&&metadata.ageSource==='Apple TV'?{age:null,ageLabel:'Não informada',ageCountry:'',ageSource:'',ageSourceUrl:'',ageReference:false}:Object.fromEntries(Object.entries(metadata).filter(([key])=>key.startsWith('age')))):Object.fromEntries(Object.entries(info).filter(([key])=>key.startsWith('age')));
+    const classification=info.ageLabel==='Não informada'?(refresh&&['Apple TV','Wikidata'].includes(metadata.ageSource)?{age:null,ageLabel:'Não informada',ageCountry:'',ageSource:'',ageSourceUrl:'',ageReference:false}:Object.fromEntries(Object.entries(metadata).filter(([key])=>key.startsWith('age')))):Object.fromEntries(Object.entries(info).filter(([key])=>key.startsWith('age')));
     metadata={...metadata,...info,...classification,adult:metadata.adult||info.adult};
-    if(metadata.ageLabel==='Não informada'){
+    session.entries.set(key,metadata);session.details.set(key,{...data,metadata});
+  }
+  if(details&&enrich&&section!=='live'&&metadata.ageLabel==='Não informada'){
+      const data=session.details.get(key);
       const item=catalog.items.find(item=>String(section==='series'?item.series_id:item.stream_id)===String(id));
-      if(item){const rating=await lookupRating(item.name||data?.info?.name,section,item.releaseDate||item.release_date||'',{refresh});if(rating)metadata={...metadata,...rating,adult:metadata.adult||rating.age===18};}
-    }
+      if(item){const rating=await lookupRating(item.name||data?.info?.name,section,item.releaseDate||item.release_date||item.year||/\b(?:19|20)\d{2}\b/.exec(item.name||'')?.[0]||'',{refresh});if(rating)metadata={...metadata,...rating,adult:metadata.adult||rating.age===18};}
     session.entries.set(key,metadata);session.details.set(key,{...data,metadata});
   }
   return contentAllowed(metadata,parental.get(session.policyKey))?metadata:null;
@@ -309,12 +315,59 @@ async function route(req,res) {
   let url;
   try { url = new URL(req.url, 'http://localhost'); } catch { return send(res,400,{error:'URL inválida.'}); }
   const pathname = url.pathname;
-  if(pathname==='/healthz')return send(res,200,{ok:true,version:'4.0.0'});
-  if(access&&pathname.startsWith('/api/auth/'))return access.handler(req,res);
+  if(pathname==='/healthz')return send(res,200,{ok:true,version:'4.1.0'});
+  if(access&&pathname.startsWith('/api/auth/')){
+    // Nenhum endpoint de administração do plugin fica acessível publicamente.
+    if(!new Set(['/api/auth/sign-in/email','/api/auth/sign-out','/api/auth/get-session']).has(pathname))return send(res,404,{error:'Rota indisponível.'});
+    return access.handler(req,res);
+  }
+  if(pathname==='/api/admin/bootstrap'){
+    const identity=access?await access.identity(req):null;
+    const owner=!!identity&&await access.isOwner(identity.user.id);
+    return send(res,200,{enabled:!!access,configured:access?await access.hasOwner():false,owner,user:owner?{id:identity.user.id,name:identity.user.name,email:identity.user.email}:null});
+  }
+  if(pathname.startsWith('/api/admin/')){
+    if(!access)return send(res,503,{error:'Autenticação não configurada.'});
+    if(req.method!=='GET'&&req.method!=='HEAD'){
+      if(!String(req.headers['content-type']||'').includes('application/json'))return send(res,415,{error:'Use JSON.'});
+      if(req.headers.origin&&req.headers.origin!==new URL(appBase).origin)return send(res,403,{error:'Origem não autorizada.'});
+    }
+    if(pathname==='/api/admin/setup'&&req.method==='POST'){
+      try{await access.setupOwner(await getJsonBody(req));return send(res,201,{ok:true});}
+      catch(error){return send(res,error.status||400,{error:error.status?error.message:'Não foi possível criar o proprietário. Use e-mail ainda não cadastrado.'});}
+    }
+    const identity=await access.identity(req);
+    if(!identity||!await access.isOwner(identity.user.id))return send(res,403,{error:'Acesso exclusivo do proprietário.'});
+    if(pathname==='/api/admin/xtream'&&req.method==='GET'){const c=activeXtream();return send(res,200,{name:c.name,url:c.url,username:c.username,configured:!!(c.url&&c.username&&c.password)});}
+    if(pathname==='/api/admin/xtream'&&req.method==='POST'){
+      try{
+        const body=await getJsonBody(req),current=activeXtream();const name=String(body.name||'').trim().slice(0,60),url=normalizeServerUrl(String(body.url||'')),username=String(body.username||'').trim(),password=String(body.password||'')||current.password;
+        if(!name||!url||!username||!password||username.length>200||password.length>200)return send(res,400,{error:'Preencha os dados válidos da conexão.'});
+        const response=await providerJson(apiUrl(url,username,password),{withEndpoint:true});const info=response.data?.user_info;
+        if(!info||!(info.auth===1||info.auth==='1'||info.auth===true)||info.status&&String(info.status).toLowerCase()!=='active')return send(res,422,{error:'O servidor Xtream não confirmou uma conta ativa. A configuração anterior foi preservada.'});
+        const verifiedUrl=normalizeServerUrl(new URL('.',response.finalUrl).href);const next={name,url:verifiedUrl,username,password},temp=globalConfigPath+'.tmp';await mkdir(resolve(globalConfigPath,'..'),{recursive:true});await writeFile(temp,JSON.stringify(next),{mode:0o600});await rename(temp,globalConfigPath);globalXtream=next;sessions.clear();return send(res,200,{ok:true,message:'Conexão validada e salva. Os espectadores precisarão reconectar.'});
+      }catch(error){return send(res,422,{error:'Não foi possível validar a nova conexão. A lista anterior foi preservada.'});}
+    }
+    if(pathname==='/api/admin/users'&&req.method==='GET')return send(res,200,{users:await access.listUsers(identity.user.id)});
+    const action=/^\/api\/admin\/users\/([A-Za-z0-9_-]{1,128})\/(suspension|revoke-sessions)$/.exec(pathname);
+    if(action&&req.method==='POST'){
+      try{
+        if(action[2]==='suspension'){
+          const body=await getJsonBody(req);
+          if(typeof body.suspended!=='boolean')return send(res,400,{error:'Informe suspended como boolean.'});
+          return send(res,200,await access.setSuspended(identity.user.id,action[1],body.suspended));
+        }
+        return send(res,200,await access.revokeSessions(identity.user.id,action[1]));
+      }catch(error){return send(res,error.status||500,{error:error.status?error.message:'Não foi possível atualizar o usuário.'});}
+    }
+    return send(res,404,{error:'Rota administrativa não encontrada.'});
+  }
   if(pathname==='/api/access/bootstrap'){
     const local=['127.0.0.1','::1','::ffff:127.0.0.1'].includes(req.socket.remoteAddress)&&['localhost','127.0.0.1'].includes(String(req.headers.host||'').split(':')[0]);
     const identity=access?await access.identity(req):null;
-    return send(res,200,{fixedMode,user:identity?{id:identity.user.id,name:identity.user.name,email:identity.user.email}:null,canSetup:!!access&&local&&!await access.hasUsers()});
+    const owner=!!identity&&await access.isOwner(identity.user.id);
+    const suspended=!!identity&&!owner&&await access.isSuspended(identity.user.id);
+    return send(res,200,{fixedMode,owner,user:identity&&!owner&&!suspended?{id:identity.user.id,name:identity.user.name,email:identity.user.email}:null,canSetup:!!access&&local&&!await access.hasUsers()});
   }
   let identity=null;
   if(access&&pathname.startsWith('/api/')){
@@ -323,9 +376,11 @@ async function route(req,res) {
       if(req.headers.origin&&req.headers.origin!==new URL(appBase).origin)return send(res,403,{error:'Origem não autorizada.'});
     }
     if(pathname==='/api/access/register'&&req.method==='POST'){
-      try{const body=await getJsonBody(req);const local=['127.0.0.1','::1','::ffff:127.0.0.1'].includes(req.socket.remoteAddress)&&['localhost','127.0.0.1'].includes(String(req.headers.host||'').split(':')[0]);if(local&&!await access.hasUsers()&&!body.code)body.code=process.env.REGISTRATION_CODE;await access.register(body);return send(res,201,{ok:true});}catch(error){return send(res,Number.isInteger(error.status)?error.status:400,{error:Number.isInteger(error.status)?error.message:'Não foi possível criar o acesso. Confira e-mail e senha (mínimo 10 caracteres).'});}
+      try{const body=await getJsonBody(req);await access.register(body);return send(res,201,{ok:true});}catch(error){return send(res,Number.isInteger(error.status)?error.status:400,{error:Number.isInteger(error.status)?error.message:'Não foi possível criar o acesso. Confira e-mail e senha (mínimo 10 caracteres).'});}
     }
     identity=await access.identity(req);if(!identity)return send(res,401,{error:'Entre na sua conta para continuar.'});
+    if(await access.isOwner(identity.user.id))return send(res,403,{error:'Conta administrativa: utilize /admin.'});
+    if(await access.isSuspended(identity.user.id))return send(res,403,{error:'Sua conta está suspensa pelo administrador.'});
     if(pathname==='/api/profiles'){
       try{if(req.method==='GET')return send(res,200,{profiles:await access.profiles(identity.user.id)});if(req.method==='POST'){const body=await getJsonBody(req);return send(res,201,await access.createProfile(identity.user.id,body.name,body.avatar));}if(req.method==='PATCH'){const body=await getJsonBody(req);return send(res,200,await access.updateProfile(identity.user.id,body.id,body));}}catch(error){return send(res,error.status||500,{error:error.status?error.message:'Não foi possível salvar o perfil.'});}
     }
@@ -339,7 +394,7 @@ async function route(req,res) {
     if (req.method === 'POST' && (pathname === '/api/login'||pathname==='/api/connect'&&access)) {
       try {
         let body = await getJsonBody(req),profile=null;
-        if(access){profile=await access.profile(identity.user.id,body.profileId);if(!profile)return send(res,404,{error:'Perfil não encontrado.'});body={listName:'MF Stream',url:process.env.XTREAM_URL,username:process.env.XTREAM_USERNAME,password:process.env.XTREAM_PASSWORD};}
+        if(access){profile=await access.profile(identity.user.id,body.profileId);if(!profile)return send(res,404,{error:'Perfil não encontrado.'});{const c=activeXtream();body={listName:c.name,url:c.url,username:c.username,password:c.password};}}
         const base = normalizeServerUrl(body.url);
         const username = String(body.username || '').trim(), password = String(body.password || '');
         const listName = String(body.listName || 'Minha lista').trim();
@@ -447,7 +502,7 @@ async function route(req,res) {
         let data;
         if(kind==='info'||kind==='rating'){
           const id=params.series_id||params.vod_id;
-          if(!await allowedEntry(session,section,id,true,url.searchParams.get('refresh')==='1'))return send(res,403,{error:'Conteúdo bloqueado pelo controle parental.'});
+          if(!await allowedEntry(session,section,id,true,url.searchParams.get('refresh')==='1',kind==='rating'))return send(res,403,{error:'Conteúdo bloqueado pelo controle parental.'});
           if(kind==='rating')return send(res,200,{data:session.entries.get(`${section}:${id}`)});
           data=session.details.get(`${section}:${id}`);
           if(section==='series'){
@@ -467,6 +522,24 @@ async function route(req,res) {
         if(kind==='items')data=data.map(item=>({...item,metadata:session.entries.get(`${section}:${section==='series'?item.series_id:item.stream_id}`)}));
         return send(res,200,{data});
       } catch (err) { return sendFailure(res,502,err); }
+    }
+    // Image relay: derive URL from the authenticated catalog, never accept arbitrary user URLs.
+    const poster=/^\/api\/poster\/([A-Za-z0-9_-]{20,60})\/(live|vod|series)\/(\d{1,15})$/.exec(pathname);
+    if(req.method==='GET'&&poster){
+      const s=sessionFor(poster[1]);if(!s||access&&s.ownerId!==identity.user.id)return send(res,401,{error:'Sessão inválida.'});
+      try{
+        const section=poster[2],id=poster[3];if(!await allowedEntry(s,section,id,false))return send(res,403,{error:'Conteúdo indisponível.'});
+        const catalog=await catalogFor(s,section),item=catalog.items.find(row=>String(section==='series'?row.series_id:row.stream_id)===id);
+        const raw=item?.stream_icon||item?.cover||item?.cover_big||item?.movie_image||item?.poster||item?.image||item?.info?.movie_image||item?.info?.cover;
+        if(!raw)return send(res,404,{error:'Provedor não informou pôster.'});
+        const imageUrl=new URL(String(raw),s.base+'/');if(!['http:','https:'].includes(imageUrl.protocol)||imageUrl.username||imageUrl.password)return send(res,400,{error:'Imagem inválida.'});
+        const {response}=await getRemote(imageUrl.href);
+        const contentType=String(response.headers['content-type']||'').split(';')[0].trim().toLowerCase();
+        if(response.statusCode!==200||!['image/jpeg','image/png','image/webp','image/gif','image/avif'].includes(contentType)){response.resume();return send(res,502,{error:'Imagem indisponível no provedor.'});}
+        const size=Number(response.headers['content-length']||0);if(size>5_000_000){response.resume();return send(res,413,{error:'Imagem muito grande.'});}
+        res.writeHead(200,{'Content-Type':contentType,'Cache-Control':'private, max-age=1800','X-Content-Type-Options':'nosniff'});
+        let count=0;for await(const chunk of response){count+=chunk.length;if(count>5_000_000){res.destroy();return;}if(!res.write(chunk))await new Promise(resolve=>res.once('drain',resolve));}res.end();return;
+      }catch(error){return sendFailure(res,502,error);}
     }
     const stream = /^\/api\/stream\/([A-Za-z0-9_-]{20,60})\/(live|vod|series)\/(\d{1,15})\.([a-z0-9]{2,5})$/.exec(pathname);
     const media = /^\/api\/media\/([A-Za-z0-9_-]{20,60})\/([A-Za-z0-9_-]{15,30})$/.exec(pathname);
@@ -491,8 +564,9 @@ async function route(req,res) {
     return send(res,404,{error:'Rota não encontrada.'});
   }
   if (req.method !== 'GET' && req.method !== 'HEAD') return send(res,405,{error:'Método não permitido.'});
-  if (!staticPaths.has(pathname)) return send(res,404,{error:'Arquivo não encontrado.'});
-  const path = vendorPaths.get(pathname)||resolve(root, '.' + pathname);
+  const isTitleRoute=/^\/title\/(?:movie|series)\/\d{1,15}\/?$/.test(pathname);
+  if (!staticPaths.has(pathname)&&!isTitleRoute) return send(res,404,{error:'Arquivo não encontrado.'});
+  const path = isTitleRoute?resolve(root,'index.html'):pathname==='/admin'||pathname==='/admin/'?resolve(root,'admin.html'):vendorPaths.get(pathname)||resolve(root, '.' + pathname);
   if (path !== root && !path.startsWith(root + sep)) return send(res,403,{error:'Acesso negado.'});
   try {
     const filePath = (await stat(path)).isDirectory() ? resolve(path,'index.html') : path;

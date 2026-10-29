@@ -1,0 +1,31 @@
+.episode-menu-button{display:none!important}.tray-close{display:none}
+.autoplay-setting{display:flex;align-items:center;gap:8px;padding:12px 17px;margin:0;border-bottom:1px solid #ffffff12;color:#aaa4b7;font-size:10px;line-height:1.5}
+.autoplay-setting input{accent-color:#bea3ee;flex:none;width:14px;height:14px}
+.up-next-card{position:absolute;z-index:12;right:22px;bottom:85px;width:min(330px,calc(100% - 44px));background:#18151ef2;border:1px solid #c6b5ed44;border-radius:13px;padding:18px;box-shadow:0 15px 40px #0008;backdrop-filter:blur(14px);color:#fff}
+.up-next-card[hidden]{display:none!important}.up-next-card>span{font-size:11px;color:#c7b4eb}.up-next-card>strong{display:block;font-size:14px;line-height:1.5;margin:9px 0 14px}.up-next-card>div{display:flex;align-items:center;gap:16px}.up-next-card .btn{min-height:36px;padding:0 14px;font-size:11px}.up-next-card .text-action{font-size:11px}
+/* An opt-in low strip leaves the center of the fullscreen picture clear. */
+:is(.player-layout:fullscreen,.player-layout.is-full-window) .episode-menu-button:not([hidden]){display:block!important;min-width:32px;font-size:20px!important}
+:is(.player-layout:fullscreen,.player-layout.is-full-window).episodes-open .player-episodes{display:flex!important;position:absolute;z-index:22;left:3%;right:3%;bottom:68px;max-height:136px;width:auto;border:1px solid #ffffff26;border-radius:10px;background:#17151ce8;backdrop-filter:blur(22px);box-shadow:0 15px 70px #000b}
+:is(.player-layout:fullscreen,.player-layout.is-full-window) .queue-heading{position:relative;display:flex;align-items:center;gap:12px;padding:8px 46px 6px 12px;min-height:32px;border-bottom:0}
+:is(.player-layout:fullscreen,.player-layout.is-full-window) .queue-heading>.eyebrow,:is(.player-layout:fullscreen,.player-layout.is-full-window) .queue-heading>label{display:none}
+:is(.player-layout:fullscreen,.player-layout.is-full-window) .queue-heading h3{font-size:12px;margin:0 auto 0 0;max-width:60%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+:is(.player-layout:fullscreen,.player-layout.is-full-window) .queue-heading select{padding:4px 9px;width:140px;font-size:10px}
+:is(.player-layout:fullscreen,.player-layout.is-full-window) .tray-close{position:absolute;display:grid;place-items:center;top:7px;right:9px;border:0;background:#ffffff12;border-radius:50%;width:24px;height:24px;color:#fff;font-size:17px;cursor:pointer}
+:is(.player-layout:fullscreen,.player-layout.is-full-window) .autoplay-setting{display:none}
+:is(.player-layout:fullscreen,.player-layout.is-full-window) .player-episode-list{display:grid;grid-auto-flow:column;grid-auto-columns:200px;gap:8px;overflow-x:auto;overflow-y:hidden;padding:0 12px 10px;scroll-snap-type:x proximity}
+:is(.player-layout:fullscreen,.player-layout.is-full-window) .queue-episode{background:#ffffff06;margin:0;min-height:65px;padding:9px 11px;gap:3px;border-radius:6px;scroll-snap-align:start;justify-content:center}
+:is(.player-layout:fullscreen,.player-layout.is-full-window) .queue-episode-copy{gap:3px}
+:is(.player-layout:fullscreen,.player-layout.is-full-window) .queue-episode-copy strong{font-size:10px}
+:is(.player-layout:fullscreen,.player-layout.is-full-window) .queue-episode-copy>span{font-size:11px;white-space:nowrap;text-overflow:ellipsis;overflow:hidden}
+:is(.player-layout:fullscreen,.player-layout.is-full-window) .queue-episode-copy small{font-size:9px}
+:is(.player-layout:fullscreen,.player-layout.is-full-window).episodes-open .plyr__controls{opacity:1!important;transform:none!important;pointer-events:auto!important}
+:is(.player-layout:fullscreen,.player-layout.is-full-window).episodes-open .up-next-card{display:none!important}
+@media(max-width:760px){
+ .up-next-card{bottom:62px;right:12px;width:min(280px,calc(100% - 24px));padding:12px}.up-next-card>strong{font-size:12px;margin:6px 0 9px}.up-next-card .btn{min-height:30px;font-size:10px}
+ :is(.player-layout:fullscreen,.player-layout.is-full-window).episodes-open .player-episodes{left:8px;right:8px;bottom:52px;max-height:124px}
+ :is(.player-layout:fullscreen,.player-layout.is-full-window) .queue-heading h3{font-size:11px;max-width:50%}
+ :is(.player-layout:fullscreen,.player-layout.is-full-window) .queue-heading select{width:120px;font-size:9px}
+ :is(.player-layout:fullscreen,.player-layout.is-full-window) .player-episode-list{grid-auto-columns:155px}
+ :is(.player-layout:fullscreen,.player-layout.is-full-window) .queue-episode{min-height:60px}
+ :is(.player-layout:fullscreen,.player-layout.is-full-window) .episode-menu-button:not([hidden]){min-width:25px;font-size:17px!important}
+}
