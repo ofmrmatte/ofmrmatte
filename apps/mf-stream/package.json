@@ -1,9 +1,9 @@
 {
   "name": "mf-stream-iptv",
-  "version": "5.0.0",
+  "version": "5.1.0",
   "private": true,
   "type": "module",
-  "description": "MF Stream IPTV - aplicativo web instalável com Xtream Codes API",
+  "description": "Scene Play — filmes, séries e TV ao vivo",
   "scripts": {
     "start": "node server.mjs",
     "dev": "node --watch server.mjs",
