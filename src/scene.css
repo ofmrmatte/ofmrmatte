@@ -252,7 +252,7 @@
   height:40px!important;min-height:40px!important;
  }
  .app-shell>.sidebar .header-search-slot .global-search.is-expanded{
-  position:absolute!important;left:14px!important;right:calc(14px + 4 * 38px + 3 * 2px + 8px)!important;
+  position:absolute!important;left:14px!important;right:180px!important;
   top:10px!important;width:auto!important;min-width:0!important;height:44px!important;
  }
  .app-shell>.sidebar .header-search-slot .global-search.is-expanded :is(.search-toggle,.search-close){height:42px}
@@ -264,7 +264,7 @@
   flex-basis:35px;width:35px!important;min-width:35px!important;
  }
  .app-shell>.sidebar .header-search-slot .global-search.is-expanded{
-  left:10px!important;right:calc(10px + 4 * 35px + 3 * 2px + 7px)!important;
+  left:10px!important;right:163px!important;
  }
 }
 /* Local downloads library */
