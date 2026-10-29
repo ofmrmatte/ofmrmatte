@@ -1,6 +1,27 @@
 .episode-menu-button{display:none!important}.tray-close{display:none}
 .autoplay-setting{display:flex;align-items:center;gap:8px;padding:12px 17px;margin:0;border-bottom:1px solid #ffffff12;color:#aaa4b7;font-size:10px;line-height:1.5}
 .autoplay-setting input{accent-color:#bea3ee;flex:none;width:14px;height:14px}
+.intro-controls{position:absolute;z-index:15;right:22px;bottom:82px;display:flex;flex-direction:column;align-items:flex-end;gap:10px;pointer-events:none}
+.intro-controls[hidden],.intro-controls [hidden]{display:none!important}
+.intro-action-row{display:flex;align-items:center;justify-content:flex-end;gap:8px;pointer-events:auto}
+.skip-intro-button{border:1px solid #f8f5ffb0;background:#15131bcf;color:#fff;border-radius:6px;min-height:42px;padding:0 17px;font:650 13px/1 'DM Sans',sans-serif;white-space:nowrap;backdrop-filter:blur(12px);box-shadow:0 6px 24px #0008;cursor:pointer;display:flex;align-items:center;gap:8px}
+.skip-intro-button:hover,.skip-intro-button:focus-visible{background:#39264d;border-color:#d6baff}
+.skip-intro-button>span{font-size:19px;line-height:0}
+.skip-intro-button small{font:500 10px/1 'DM Sans',sans-serif;color:#dbc9ee}
+.intro-adjust-button{border:1px solid #f8f5ff40;background:#17141fc7;color:#e7ddf3;min-height:36px;border-radius:7px;padding:0 11px;font:550 11px 'DM Sans',sans-serif;cursor:pointer;backdrop-filter:blur(10px)}
+.intro-adjust-button:hover,.intro-adjust-button[aria-expanded=true]{background:#413053;color:#fff;border-color:#bb97eb}
+.intro-settings{pointer-events:auto;width:min(328px,calc(100vw - 40px));padding:15px;background:#18151eec;color:#f1eafd;border:1px solid #b499d267;border-radius:11px;box-shadow:0 12px 38px #000b;backdrop-filter:blur(20px)}
+.intro-settings-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.intro-settings-head strong{font:650 13px 'Outfit',sans-serif}
+.intro-settings-head button{background:transparent;border:0;color:#d9c8ee;font-size:21px;cursor:pointer;min-width:30px;min-height:30px}
+.intro-settings p{color:#beb1ce;font:400 11px/1.6 'DM Sans',sans-serif;margin:9px 0 12px}
+.intro-settings-actions{display:flex;gap:5px;flex-wrap:wrap}
+.intro-settings-actions button{min-height:34px;border:1px solid #76628a;background:#31283e;color:#faf5ff;padding:0 8px;border-radius:6px;font:500 10px 'DM Sans',sans-serif;cursor:pointer}
+.intro-settings-actions button:hover{background:#563f71}
+#introSettingsStatus{display:block;color:#d5b5ee;font-size:10px;line-height:1.5;margin-top:9px}
+#introSettingsStatus:empty{display:none}
+.player-layer.is-minimized .intro-controls,.native-mobile .intro-controls{display:none!important}
+@media(max-width:760px){.intro-controls{right:12px;bottom:65px}.skip-intro-button{min-height:40px;font-size:12px;padding:0 12px}.intro-adjust-button{min-height:36px;font-size:10px}}
 .up-next-card{position:absolute;z-index:12;right:22px;bottom:85px;width:min(330px,calc(100% - 44px));background:#18151ef2;border:1px solid #c6b5ed44;border-radius:13px;padding:18px;box-shadow:0 15px 40px #0008;backdrop-filter:blur(14px);color:#fff}
 .up-next-card[hidden]{display:none!important}.up-next-card>span{font-size:11px;color:#c7b4eb}.up-next-card>strong{display:block;font-size:14px;line-height:1.5;margin:9px 0 14px}.up-next-card>div{display:flex;align-items:center;gap:16px}.up-next-card .btn{min-height:36px;padding:0 14px;font-size:11px}.up-next-card .text-action{font-size:11px}
 /* An opt-in low strip leaves the center of the fullscreen picture clear. */

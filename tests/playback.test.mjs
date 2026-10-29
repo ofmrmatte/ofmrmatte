@@ -56,3 +56,37 @@ test('classificações confirmadas sobrevivem à recriação do lookup sem nova 
 });
 
 test('lookup informa indisponibilidade sem inventar classificação',async()=>{const lookup=createRatingLookup(async()=>{throw Error('offline')});const result=await lookup('Filme','vod','',{withStatus:true});assert.equal(result.age,null);assert.equal(result.ageLookupStatus,'unavailable');});
+
+test('intro skip uses markers, estimates conservatively, and validates seekability',async()=>{
+ const {resolveIntro,introSeasonKey,shouldOfferIntro,skipIntroPosition,confirmedIntro}=await import('../src/intro.mjs');
+ const ep={type:'series',parentId:'series:17',id:'series:102',season:'2',sourceId:'102'};
+ const key=introSeasonKey(ep);assert.equal(key,'series:17:season:2');
+ assert.deepEqual(resolveIntro(ep,1800,{}),{start:0,end:85,origin:'estimated'});
+ assert.deepEqual(resolveIntro({...ep,info:{intro:{start:'0:45',end:'2:30'}}},1800,{}),{start:45,end:150,origin:'metadata'});
+ const saved={[key]:{start:55,end:115}};
+ assert.deepEqual(resolveIntro(ep,1800,saved),{start:55,end:115,origin:'manual'});
+ assert.equal(shouldOfferIntro(resolveIntro(ep,1800,saved),56,1800),true);
+ assert.equal(shouldOfferIntro(resolveIntro(ep,1800,saved),118,1800),false);
+ assert.equal(skipIntroPosition(resolveIntro(ep,1800,saved),65,1800),115);
+ assert.equal(skipIntroPosition(resolveIntro(ep,1800,saved),120,1800),null);
+ assert.equal(skipIntroPosition(resolveIntro(ep,1800,saved),60,1800,{length:1,start:()=>120,end:()=>600}),null);
+ assert.equal(confirmedIntro(32,132,1800).end,132);
+ assert.equal(confirmedIntro(32,34,1800),null);
+ assert.equal(confirmedIntro(0,900,1800),null);
+ assert.equal(resolveIntro({...ep,type:'vod'},1800,{}),null);
+ assert.equal(resolveIntro(ep,300,{}),null);
+});
+test('intro skip controls are series-specific and are bundled for PWA',async()=>{
+ const {readFile}=await import('node:fs/promises');
+ const html=await readFile(new URL('../index.html',import.meta.url),'utf8');
+ const app=await readFile(new URL('../src/app.js',import.meta.url),'utf8');
+ const server=await readFile(new URL('../server.mjs',import.meta.url),'utf8');
+ const sw=await readFile(new URL('../service-worker.js',import.meta.url),'utf8');
+ for(const id of ['skipIntroButton','introAdjustButton','introSettings','markIntroStart','markIntroEnd','resetIntroMark'])assert.equal(html.split('id="'+id+'"').length-1,1);
+ assert.match(app,/introSeasonKey\(state\.current\)/);
+ assert.match(app,/updateIntroControls\(\);updateUpNext\(\)/);
+ assert.match(app,/state\.introManual\[key\]=mark/);
+ assert.match(app,/introStorageKey\(/);
+ assert.match(server,/\/src\/intro\.mjs/);
+ assert.match(sw,/\/src\/intro\.mjs/);
+});
