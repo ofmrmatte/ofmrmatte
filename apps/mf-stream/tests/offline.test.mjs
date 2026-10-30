@@ -43,7 +43,7 @@ test('range download saves each chunk durably and resumes after cancellation',as
  const oldIndexed=Object.getOwnPropertyDescriptor(globalThis,'indexedDB');
  const media=new Map(),blocks=new Map(),payload=new TextEncoder().encode('abcdefghij'),ranges=[];
  const s={
-  BLOCK_SIZE:4,idFor:(scope,key)=>scope+'|'+key,
+  BLOCK_SIZE:4,idFor:(scope,key)=>scope+'|'+key,open:async()=>true,
   get:async id=>media.get(id)||null,
   put:async row=>{media.set(row.id,structuredClone(row));},
   commit:async(id,index,bytes,row)=>{blocks.set(index,Uint8Array.from(bytes));media.set(id,structuredClone(row));},
