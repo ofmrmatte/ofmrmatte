@@ -57,7 +57,7 @@ test('trailers oficiais exigem canal publicador reconhecido; autoplay respeita c
   assert.equal(verifiedTrailer({...info,author_url:'https://www.youtube.com.evil/@Netflix'},'abcdefghijk'),null);
   assert.equal(verifiedTrailer(info,'invalid'),null);
   const context={hovered:true,width:1280,visible:true};assert.equal(allowAutomaticPreview(context),true);
-  for(const extra of [{width:390},{reducedMotion:true},{saveData:true},{effectiveType:'2g'},{playing:true},{hidden:true},{visible:false}])assert.equal(allowAutomaticPreview({...context,...extra}),false);
+  for(const extra of [{width:280},{reducedMotion:true},{saveData:true},{effectiveType:'2g'},{playing:true},{hidden:true},{visible:false}])assert.equal(allowAutomaticPreview({...context,...extra}),false);
 });
 test('TMDB opcional não faz chamadas sem chave; resolve BR e rejeita trailers não oficiais',async t=>{
   assert.equal(await createTmdb({fetcher:()=>{throw Error('Sem chave');}}).lookup('Filme','vod'),null);

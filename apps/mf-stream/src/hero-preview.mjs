@@ -1,5 +1,6 @@
-// Scene Play hero previews use only direct, authorized video from the connected provider.
-// A preview plays the beginning of the title, muted, for a short interval. No YouTube embeds.
+// Scene Play previews use only compatible, authorized video from the connected IPTV provider.
+// This is a muted excerpt of the title (not an external YouTube trailer).
+export const HERO_PREVIEW_MAX_MS=90000;
 export function directPreview(value){
  if(value?.kind!=='direct'||value.authorized!==true)return null;
  try{
@@ -8,15 +9,20 @@ export function directPreview(value){
  }catch{return null;}
 }
 export function allowAutomaticPreview({width=0,reducedMotion=false,saveData=false,effectiveType='',hidden=false,visible=false,playing=false}={}){
- return width>=1000&&!reducedMotion&&!saveData&&!['slow-2g','2g'].includes(effectiveType)&&!hidden&&visible&&!playing;
+ // iPhone Safari and Android can autoplay muted inline video when their platform permits.
+ // A tap-to-play control remains available if WebKit rejects autoplay.
+ return width>=320&&!reducedMotion&&!saveData&&!['slow-2g','2g'].includes(effectiveType)&&!hidden&&visible&&!playing;
 }
 export function togglePreviewAudio(media){
  if(!media)return false;
  media.muted=!media.muted;
  return !media.muted;
 }
-export function createHeroPreview({hero,getScene,launch,audioToggle,onPlaying=()=>{},canAuto=()=>false,delay=2800,maxDuration=18000}){
- let selected=null,video=null,timer=null,endTimer=null,ticket=0,attempted=false,active=false;
+export function createHeroPreview({
+ hero,getScene,launch,audioToggle,onPlaying=()=>{},onPreparing=()=>{},canAuto=()=>false,
+ delay=2800,maxDuration=HERO_PREVIEW_MAX_MS,loadingTimeout=12000
+}){
+ let selected=null,video=null,startTimer=null,endTimer=null,watchdog=null,ticket=0,attempted=false,active=false,preparing=false;
  const audioLabel=audioToggle?.querySelector('#heroAudioLabel');
  const mutedIcon=audioToggle?.querySelector('[data-audio-icon="muted"]');
  const audibleIcon=audioToggle?.querySelector('[data-audio-icon="audible"]');
@@ -31,50 +37,80 @@ export function createHeroPreview({hero,getScene,launch,audioToggle,onPlaying=()
   if(mutedIcon)mutedIcon.hidden=audible;
   if(audibleIcon)audibleIcon.hidden=!audible;
  }
- if(audioToggle)audioToggle.onclick=()=>{
-  if(!active||!video)return;
-  togglePreviewAudio(video);
-  updateAudioButton();
- };
+ function setPreparing(value){
+  if(preparing!==value){preparing=value;onPreparing(value);}
+ }
  function stop(){
-  ++ticket;clearTimeout(timer);clearTimeout(endTimer);timer=endTimer=null;
+  ++ticket;
+  clearTimeout(startTimer);clearTimeout(endTimer);clearTimeout(watchdog);
+  startTimer=endTimer=watchdog=null;
   if(video){
-   video.onended=null;video.onerror=null;
+   video.onerror=video.onended=null;
    video.pause();video.removeAttribute('src');video.load();video.remove();video=null;
   }
   hero.classList.remove('has-background-preview');
   if(active){active=false;onPlaying(false);}
-  updateAudioButton();
+  setPreparing(false);updateAudioButton();
   launch.setAttribute('aria-pressed','false');
   launch.textContent='Ver prévia';
  }
- async function start(manual=false){
-  clearTimeout(timer);timer=null;
-  if(video||!directPreview(selected)||(!manual&&!canAuto()))return;
+ function start(manual=false){
+  clearTimeout(startTimer);startTimer=null;
+  const source=directPreview(selected);
+  if(video||!source||(!manual&&!canAuto()))return;
   const scene=getScene();if(!scene||!scene.isConnected)return;
-  attempted=true;const current=++ticket,media=document.createElement('video');
-  video=media;media.className='highlight-video';
-  media.muted=true;media.defaultMuted=true;media.playsInline=true;
-  media.setAttribute('playsinline','');media.preload='metadata';
+  attempted=true;
+  const current=++ticket,media=document.createElement('video');
+  video=media;
+  media.className='highlight-video';
+  media.muted=true;media.defaultMuted=true;media.autoplay=true;
+  media.playsInline=true;media.controls=false;media.preload='auto';
+  media.setAttribute('muted','');media.setAttribute('autoplay','');
+  media.setAttribute('playsinline','');media.setAttribute('webkit-playsinline','');
   media.setAttribute('aria-hidden','true');media.disablePictureInPicture=true;
-  media.src=directPreview(selected);scene.append(media);
   media.addEventListener('volumechange',updateAudioButton);
   media.onerror=()=>{if(current===ticket)stop();};
   media.onended=()=>{if(current===ticket)stop();};
-  try{
-   await media.play();
-   if(current!==ticket){media.pause();return;}
-   active=true;hero.classList.add('has-background-preview');updateAudioButton();
-   launch.textContent='Parar prévia';
-   launch.setAttribute('aria-pressed','true');
+  // Block the 9-second slideshow rotation *before* waiting for video.play().
+  // Otherwise the slide changes and destroys the video while it is loading.
+  setPreparing(true);
+  launch.textContent='Carregando prévia…';
+  scene.append(media);
+  // A fully hidden scene can prevent iPhone WebKit from starting muted video.
+  scene.classList.add('is-visible');
+  media.src=source;
+  watchdog=setTimeout(()=>{if(current===ticket&&!active)stop();},loadingTimeout);
+  // Keep play() in the same user gesture on mobile; no await before it.
+  let result;
+  try{result=media.play();}
+  catch{if(current===ticket)stop();return;}
+  Promise.resolve(result).then(()=>{
+   if(current!==ticket)return;
+   clearTimeout(watchdog);watchdog=null;setPreparing(false);
+   active=true;hero.classList.add('has-background-preview');
+   updateAudioButton();
+   launch.textContent='Parar prévia';launch.setAttribute('aria-pressed','true');
    onPlaying(true);
    endTimer=setTimeout(()=>{if(current===ticket)stop();},maxDuration);
-  }catch{if(current===ticket)stop();}
+  }).catch(()=>{
+   // iOS may deny muted autoplay even with playsinline, e.g. low-power mode.
+   // Keep 'Ver prévia' available: the user can tap to start explicitly.
+   if(current===ticket)stop();
+  });
  }
  function resume(){
-  if(!attempted&&!video&&timer===null&&directPreview(selected)&&canAuto())timer=setTimeout(()=>start(),delay);
+  if(!attempted&&!video&&startTimer===null&&directPreview(selected)&&canAuto()){
+   startTimer=setTimeout(()=>start(false),delay);
+  }
  }
- launch.onclick=()=>{if(video)stop();else start(true);};
+ if(audioToggle)audioToggle.onclick=()=>{
+  if(!active||!video)return;
+  togglePreviewAudio(video);updateAudioButton();
+ };
+ launch.onclick=()=>{
+  if(video){stop();return;}
+  start(true);
+ };
  return {
   set(value){stop();selected=value;attempted=false;launch.hidden=!directPreview(selected);resume();},
   resume,stop,

@@ -48,7 +48,7 @@ test('offline screen is reachable from the persistent header and PWA shell',asyn
 test('highlight autoplay works without mouse hover but honors visibility and data-saving',async()=>{
  const {allowAutomaticPreview}=await import('../src/hero-preview.mjs');
  assert.equal(allowAutomaticPreview({hovered:false,width:1600,visible:true}),true);
- assert.equal(allowAutomaticPreview({width:390,visible:true}),false);
+ assert.equal(allowAutomaticPreview({width:390,visible:true}),true);
  assert.equal(allowAutomaticPreview({width:1600,visible:true,saveData:true}),false);
  assert.equal(allowAutomaticPreview({width:1600,visible:true,reducedMotion:true}),false);
  const app=await readFile(new URL('../src/app.js',import.meta.url),'utf8');
@@ -88,4 +88,56 @@ test('preview audio control toggles mute without altering playback',async()=>{
  assert.ok(module.includes('audioToggle.hidden=!active'));
  assert.ok(module.includes("media.addEventListener('volumechange',updateAudioButton)"));
  assert.ok(css.includes('.hero-audio-toggle[hidden]{display:none!important}'));
+});
+
+test('preview loads without rotating the highlight and stays available on iPhone',async()=>{
+ const {createHeroPreview,HERO_PREVIEW_MAX_MS}=await import('../src/hero-preview.mjs');
+ assert.ok(HERO_PREVIEW_MAX_MS>=90000,'preview should not stop after the nine-second slideshow delay');
+ assert.equal(allowAutomaticPreview({width:390,visible:true,hidden:false}),true);
+ assert.equal(allowAutomaticPreview({width:390,visible:true,hidden:true}),false);
+ assert.equal(allowAutomaticPreview({width:390,visible:true,saveData:true}),false);
+ const savedDocument=globalThis.document,savedLocation=globalThis.location;
+ let unblock,video;
+ const preparing=[],playing=[];
+ const hero={classList:{add(){},remove(){}}};
+ const launch={hidden:true,setAttribute(){},textContent:'',onclick:null};
+ const scene={isConnected:true,classList:{add(name){assert.equal(name,'is-visible');}},append(element){assert.equal(element,video);}};
+ try{
+  globalThis.document={createElement(tag){
+   assert.equal(tag,'video');
+   video={
+    muted:false,defaultMuted:false,playsInline:false,autoplay:false,preload:null,src:'',
+    setAttribute(){},removeAttribute(){},addEventListener(){},pause(){},load(){},remove(){},
+    play(){return new Promise(resolve=>{unblock=resolve;});}
+   };
+   return video;
+  }};
+  globalThis.location={origin:'https://example.test'};
+  const preview=createHeroPreview({
+   hero,getScene:()=>scene,launch,canAuto:()=>false,
+   onPreparing:value=>preparing.push(value),
+   onPlaying:value=>playing.push(value),
+   loadingTimeout:12000,maxDuration:HERO_PREVIEW_MAX_MS
+  });
+  try{
+   preview.set({kind:'direct',authorized:true,url:'/api/stream/123'});
+   assert.equal(launch.hidden,false);
+   launch.onclick();
+   assert.deepEqual(preparing,[true],'rotation must be blocked before play resolves');
+   assert.deepEqual(playing,[]);
+   assert.equal(video.playsInline,true);
+   assert.equal(video.muted,true);
+   assert.equal(video.autoplay,true);
+   unblock();
+   await new Promise(resolve=>setImmediate(resolve));
+   assert.deepEqual(preparing,[true,false]);
+   assert.deepEqual(playing,[true]);
+   assert.equal(launch.textContent,'Parar prévia');
+  }finally{preview.destroy();}
+ }finally{
+  if(savedDocument===undefined)delete globalThis.document;else globalThis.document=savedDocument;
+  if(savedLocation===undefined)delete globalThis.location;else globalThis.location=savedLocation;
+ }
+ const app=await readFile(new URL('../src/app.js',import.meta.url),'utf8');
+ assert.ok(app.includes("highlightRotation.block('preview-loading',value)"));
 });
