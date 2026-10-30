@@ -93,13 +93,13 @@ test('iPhone notch-aware header and auto-resume are part of the deployed shell',
  const css=await readFile(new URL('../src/scene.css',import.meta.url),'utf8');
  const app=await readFile(new URL('../src/app.js',import.meta.url),'utf8');
  const sw=await readFile(new URL('../service-worker.js',import.meta.url),'utf8');
- assert.match(css,/height:calc\(64px \+ env\(safe-area-inset-top/);
- assert.match(css,/padding-top:env\(safe-area-inset-top/);
+ assert.match(css,/height:calc\(58px \+ var\(--scene-app-safe-top\)\)/);
+ assert.match(css,/html\.scene-ios-standalone\{--scene-app-safe-top:max\(47px/);
  assert.match(css,/\.brand \.scene-wordmark/);
  assert.match(css,/overflow-x:clip/);
  assert.match(css,/min-height:clamp\(490px,142vw,620px\)/);
  assert.match(app,/function resumeInterruptedDownload/);
  assert.match(app,/function pauseDownloadForBackground/);
  assert.match(app,/rememberDownloadJob\(identity\.scope,item\)/);
- assert.match(sw,/scene-play-shell-v5-4-1/);
+ assert.match(sw,/scene-play-shell-v5-4-2/);
 });
