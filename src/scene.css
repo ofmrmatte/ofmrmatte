@@ -519,7 +519,7 @@
    The iOS installed PWA uses a translucent system status bar. Reserve at
    least the iPhone's status-bar inset even when iOS returns env(...)=0. */
 :root{--scene-app-safe-top:env(safe-area-inset-top,0px)}
-html.scene-ios-standalone{--scene-app-safe-top:max(47px,env(safe-area-inset-top,0px))}
+html.scene-ios-standalone{--scene-app-safe-top:max(56px,env(safe-area-inset-top,0px))}
 @media(max-width:760px){
  html,body{width:100%;max-width:100%;overflow-x:clip}
  .app-shell{min-width:0!important;max-width:100%!important}
@@ -527,8 +527,8 @@ html.scene-ios-standalone{--scene-app-safe-top:max(47px,env(safe-area-inset-top,
   position:sticky!important;top:0!important;left:0!important;right:0!important;
   box-sizing:border-box;z-index:50!important;
   width:100%!important;max-width:100%!important;min-width:0!important;
-  height:calc(58px + var(--scene-app-safe-top))!important;
-  min-height:calc(58px + var(--scene-app-safe-top))!important;
+  height:calc(60px + var(--scene-app-safe-top))!important;
+  min-height:calc(60px + var(--scene-app-safe-top))!important;
   padding:var(--scene-app-safe-top) max(12px,env(safe-area-inset-right,0px)) 0 max(12px,env(safe-area-inset-left,0px))!important;
   margin:0!important;gap:5px!important;
   display:flex!important;flex-direction:row!important;align-items:center!important;
@@ -572,7 +572,7 @@ html.scene-ios-standalone{--scene-app-safe-top:max(47px,env(safe-area-inset-top,
   margin:0!important;padding:0!important;top:auto!important;transform:none!important;
  }
  .app-shell>.sidebar .header-search-slot .global-search.is-expanded{
-  position:absolute!important;top:calc(var(--scene-app-safe-top) + 7px)!important;
+  position:absolute!important;top:calc(var(--scene-app-safe-top) + 8px)!important;
   left:max(12px,env(safe-area-inset-left,0px))!important;
   right:calc(max(12px,env(safe-area-inset-right,0px)) + 151px)!important;
   height:44px!important;width:auto!important;min-width:0!important;
@@ -591,7 +591,7 @@ html.scene-ios-standalone{--scene-app-safe-top:max(47px,env(safe-area-inset-top,
   box-sizing:border-box;min-width:0!important;width:auto!important;
   height:auto!important;min-height:0!important;max-height:none!important;
   margin:0 -16px 8px!important;
-  padding:clamp(138px,44vw,185px) 18px 64px!important;
+  padding:clamp(152px,48vw,198px) 18px 64px!important;
   display:flex!important;flex-direction:column!important;
   justify-content:flex-end!important;align-items:stretch!important;
   overflow:hidden!important;
@@ -695,4 +695,13 @@ html.scene-ios-standalone{--scene-app-safe-top:max(47px,env(safe-area-inset-top,
 @media(max-width:760px) and (max-height:530px) and (orientation:landscape){
  .hero.hero-presentation{padding-top:82px!important;padding-bottom:62px!important}
  .hero.hero-presentation .hero-copy p{-webkit-line-clamp:1!important}
+}
+
+/* Keep muted inline autoplay eligible on Safari: a fully transparent video
+   is treated as hidden and may be denied by WebKit. */
+.hero.hero-presentation:not(.has-background-preview) .highlight-scene .highlight-video{
+ opacity:.025!important;
+}
+.hero.hero-presentation.has-background-preview .highlight-scene .highlight-video{
+ opacity:1!important;
 }

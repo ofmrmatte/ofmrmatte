@@ -38,5 +38,5 @@ test('iPhone header uses top safe inset and mobile hero is content-sized',async(
  const server=await read('../server.mjs'),sw=await read('../service-worker.js');
  assert.match(server,/\/src\/mobile-viewport\.js/);
  assert.match(sw,/\/src\/mobile-viewport\.js/);
- assert.match(sw,/scene-play-shell-v5-4-2/);
+ assert.match(sw,/scene-play-shell-v5-4-3/);
 });
