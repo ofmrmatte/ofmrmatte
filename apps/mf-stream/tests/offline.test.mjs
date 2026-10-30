@@ -68,7 +68,7 @@ test('range download saves each chunk durably and resumes after cancellation',as
   assert.equal(row.received,4);assert.equal(row.status,'partial');assert.equal(row.parts,1);
   const done=await saveOffline(config);
   assert.equal(done.size,10);assert.equal(done.status,'complete');assert.equal(done.parts,3);
-  assert.deepEqual(ranges,['bytes=0-3','bytes=4-7','bytes=8-11']);
+  assert.deepEqual(ranges,['bytes=0-3','bytes=4-7','bytes=8-9']);
   assert.equal([...blocks.values()].reduce((a,b)=>a+b.length,0),10);
  }finally{
   globalThis.SceneOfflineStore=previousStore;globalThis.fetch=previousFetch;
