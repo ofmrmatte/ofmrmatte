@@ -269,7 +269,7 @@ export async function saveOffline({scope,item,url,headers={},signal,onProgress=(
   if(!meta.received)await s.put({...meta});
   onProgress(meta.size?Math.floor(meta.received/meta.size*100):null,meta.received,meta.size||null);
   const response=await fetch(url,{
-   headers:{...headers,Range:'bytes='+meta.received+'-'+(meta.received+rangeWindowBytes(s.BLOCK_SIZE)-1)},
+   headers:{...headers,Range:'bytes='+meta.received+'-'+(meta.size?Math.min(meta.size-1,meta.received+rangeWindowBytes(s.BLOCK_SIZE)-1):meta.received+rangeWindowBytes(s.BLOCK_SIZE)-1)},
    signal,cache:'no-store',credentials:'same-origin'
   });
   return await rangedDownload({s,meta,url,headers,signal,onProgress,first:response});
