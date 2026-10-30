@@ -27,11 +27,11 @@ test('installed iPhone adds standalone safe-area class before styles load',async
 test('iPhone header uses top safe inset and mobile hero is content-sized',async()=>{
  const css=await read('../src/scene.css');
  const lines=css.slice(css.indexOf('/* Scene Play mobile layout v5.4.2'));
- assert.match(lines,/html\.scene-ios-standalone\{--scene-app-safe-top:max\(47px,env\(safe-area-inset-top/);
- assert.match(lines,/height:calc\(58px \+ var\(--scene-app-safe-top\)\)!important/);
+ assert.match(lines,/html\.scene-ios-standalone\{--scene-app-safe-top:max\(56px,env\(safe-area-inset-top/);
+ assert.match(lines,/height:calc\(60px \+ var\(--scene-app-safe-top\)\)!important/);
  assert.match(lines,/padding:var\(--scene-app-safe-top\)/);
  assert.match(lines,/height:auto!important;min-height:0!important;max-height:none!important/);
- assert.match(lines,/padding:clamp\(138px,44vw,185px\) 18px 64px!important/);
+ assert.match(lines,/padding:clamp\(152px,48vw,198px\) 18px 64px!important/);
  assert.match(lines,/hero-data-note\{[\s\S]*?position:absolute!important/);
  assert.match(lines,/\.highlight-controls\{[\s\S]*?position:absolute!important/);
  assert.doesNotMatch(lines,/\+ 4 \*/);
