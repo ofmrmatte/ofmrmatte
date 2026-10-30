@@ -126,7 +126,7 @@ function currentOfflineProfile(){
 function stopOfflineVideo(){
  const video=$('offlineVideo');if(!video)return;
  video.pause();video.removeAttribute('src');video.load();
- if(offlineVideoUrl){URL.revokeObjectURL(offlineVideoUrl);offlineVideoUrl=null;}
+ if(offlineVideoUrl?.startsWith('blob:'))URL.revokeObjectURL(offlineVideoUrl);offlineVideoUrl=null;
  $('offlinePlayback').hidden=true;$('offlineList').hidden=false;
 }
 async function refreshOfflineList(){
@@ -142,25 +142,34 @@ async function refreshOfflineList(){
   list.replaceChildren();
   if(!items.length){list.append(el('p','offline-empty','Nenhum título salvo neste perfil. Abra um filme ou episódio MP4 no catálogo e selecione “Baixar offline”.'));return;}
   for(const item of items){
-   const row=el('article','offline-entry');
+   const row=el('article','offline-entry'+(item.partial?' is-partial':''));
    const image=el('span','offline-entry-cover','▶');image.setAttribute('aria-hidden','true');
    const data=el('div','offline-entry-data');
    data.append(el('strong','',item.name),el('small','',[
     item.type==='vod'?'Filme':'Episódio',
     item.season?'T'+item.season+' · E'+item.episodeNumber:'',
-    formatDownloadSize(item.size),
-    new Date(item.savedAt).toLocaleDateString('pt-BR')
+    item.partial?('Interrompido · '+formatDownloadSize(item.received||0)+(item.size?' de '+formatDownloadSize(item.size):'')):formatDownloadSize(item.size),
+    new Date(item.savedAt||item.updatedAt||Date.now()).toLocaleDateString('pt-BR')
    ].filter(Boolean).join(' · ')));
    const actions=el('div','offline-entry-actions');
    const watch=el('button','','Assistir offline');watch.type='button';watch.onclick=()=>playOfflineFile(identity.scope,item);
+   const resume=el('button','offline-resume','Retomar');resume.type='button';
+   resume.disabled=!!downloadingOffline||!state.token||!state.account;
+   resume.title=!state.token?'Conecte-se ao provedor para retomar este download.':'Continuar do trecho salvo quando o servidor permitir.';
+   resume.onclick=()=>downloadTitle({
+     type:item.type,sourceId:item.key.split('/')[1],id:item.type+':'+item.key.split('/')[1],
+     parentId:item.parentId,name:item.name,extension:'mp4',
+     season:item.season,episodeNumber:item.episodeNumber
+   },resume);
    const remove=el('button','offline-remove','Remover');remove.type='button';
    remove.onclick=async()=>{
     if(!confirm('Remover “'+item.name+'” deste dispositivo?'))return;
+    if(downloadingOffline?.key===item.key&&downloadingOffline.scope===identity.scope){status.textContent='Pause o download antes de removê-lo.';return;}
     remove.disabled=true;
     try{await removeOffline(identity.scope,item.key);status.textContent='Download removido deste dispositivo.';await refreshOfflineList();}
     catch(error){status.textContent=error.message;remove.disabled=false;}
    };
-   actions.append(watch,remove);row.append(image,data,actions);list.append(row);
+   actions.append(item.partial?resume:watch,remove);row.append(image,data,actions);list.append(row);
   }
  }catch(error){list.replaceChildren(el('p','offline-empty','Não foi possível consultar os arquivos armazenados. '+error.message));}
 }
@@ -172,7 +181,9 @@ async function playOfflineFile(scope,item){
   offlineVideoUrl=src;
   $('offlinePlayingTitle').textContent=item.name;
   $('offlineList').hidden=true;$('offlinePlayback').hidden=false;
-  const video=$('offlineVideo');video.src=src;video.load();
+  const video=$('offlineVideo');
+   video.onerror=()=>{status.textContent='O aparelho não conseguiu reproduzir este arquivo. Confira o formato de vídeo/áudio ou tente reabrir o Scene Play pela Tela de Início.';};
+   video.src=src;video.load();
   status.textContent='Reprodução local. Não é necessária conexão com o provedor.';
   await video.play().catch(error=>{
    if(error.name!=='NotAllowedError')status.textContent='Toque em reproduzir para assistir. Se o vídeo não abrir, o formato pode ser incompatível.';
@@ -182,6 +193,13 @@ async function playOfflineFile(scope,item){
 function showDownloads(){
  if(!state.account&&navigator.onLine!==false&&!state.offlineMode){toast('Entre em um perfil para ver seus downloads.');return;}
  stopOfflineVideo();$('offlineStatus').textContent=downloadingOffline?'Download em andamento…':'';
+ $('offlineCancelDownload').hidden=!downloadingOffline;
+ if(downloadingOffline){
+   const progress=downloadingOffline.progress;
+   $('offlineProgress').hidden=false;
+   if(progress?.percent==null)$('offlineProgress').removeAttribute('value');
+   else $('offlineProgress').value=progress.percent;
+ }else $('offlineProgress').hidden=true;
  showModal('downloadsModal',$('downloadsButton'));refreshOfflineList();
 }
 async function downloadTitle(item,button){
@@ -193,7 +211,8 @@ async function downloadTitle(item,button){
  const identity=currentOfflineProfile();
  if(!identity?.scope){toast('Perfil não identificado. Reconecte-se.');return;}
  const controller=new AbortController(),key=offlineKey(item),previous=button?.textContent;
- downloadingOffline={controller,key,scope:identity.scope};$('offlineCancelDownload').hidden=false;
+ downloadingOffline={controller,key,scope:identity.scope,progress:{percent:null,received:0,total:null}};$('offlineCancelDownload').hidden=false;
+ $('offlineProgress').hidden=false;$('offlineProgress').removeAttribute('value');
  const status=$('downloadStatus'),panelStatus=$('offlineStatus');
  if(status){status.hidden=false;status.textContent='Preparando o download de '+item.name+'…';}
  if(button){button.disabled=true;button.textContent='Preparando…';}
@@ -202,10 +221,13 @@ async function downloadTitle(item,button){
   const saved=await saveOffline({
    scope:identity.scope,item,url:streamPath(item),headers:sessionHeaders(),signal:controller.signal,
    onProgress:(percent,received,total)=>{
-    const progress='Baixando '+item.name+' · '+percent+'% ('+formatDownloadSize(received)+' de '+formatDownloadSize(total)+')';
+    if(downloadingOffline)downloadingOffline.progress={percent,received,total};
+    if(percent===null)$('offlineProgress').removeAttribute('value');
+    else $('offlineProgress').value=percent;
+    const progress='Baixando '+item.name+' · '+(percent===null?'tamanho em apuração':percent+'%')+' · '+formatDownloadSize(received)+(total?' de '+formatDownloadSize(total):'');
     if(status)status.textContent=progress;
     if(panelStatus)panelStatus.textContent=progress;
-    if(button)button.textContent=percent+'%';
+    if(button)button.textContent=percent===null?formatDownloadSize(received):percent+'%';
    }
   });
   if(status)status.textContent='Download concluído · '+formatDownloadSize(saved.size)+' · disponível offline neste dispositivo.';
@@ -213,12 +235,13 @@ async function downloadTitle(item,button){
   toast('“'+item.name+'” salvo para assistir offline.');
   if(!$('downloadsModal').hidden)refreshOfflineList();
  }catch(error){
-  const message=error.name==='AbortError'?'Download cancelado.':error.message||'Não foi possível baixar este título.';
+  const message=error.message||'Não foi possível baixar este título. Você pode retomar pelo menu Downloads.';
   if(status)status.textContent=message;
   if(panelStatus)panelStatus.textContent=message;
   toast(message);
  }finally{
-  downloadingOffline=null;$('offlineCancelDownload').hidden=true;
+  downloadingOffline=null;$('offlineCancelDownload').hidden=true;$('offlineProgress').hidden=true;
+  if(!$('downloadsModal').hidden)refreshOfflineList();
   if(button){button.disabled=false;button.textContent=previous||'Baixar offline';}
  }
 }

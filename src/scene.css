@@ -280,6 +280,14 @@
 .offline-modal-heading p{font-size:13px;color:#aaa2bb;margin:7px 0}
 .offline-modal-heading .modal-close{position:static;flex:0 0 42px}
 .offline-notice{font-size:12px;line-height:1.65;color:#a9a2b9;margin:18px 0;padding:13px 15px;border-radius:12px;background:#211c2d}
+.offline-progress{display:block;width:100%;height:8px;border:0;border-radius:99px;overflow:hidden;margin:9px 0 14px;accent-color:#ae85ec;background:#251d32}
+.offline-progress[hidden]{display:none!important}
+.offline-progress::-webkit-progress-bar{background:#2f2540;border-radius:99px}
+.offline-progress::-webkit-progress-value{background:linear-gradient(90deg,#8e59d5,#c6a0ff);border-radius:99px}
+.offline-entry.is-partial{border-color:#8d6ca555;background:#2a2034}
+.offline-entry .offline-entry-data small{line-height:1.4}
+.offline-entry-actions .offline-resume{background:#65468d;border-color:#9e78cc;color:white}
+.offline-entry-actions .offline-resume:hover{background:#8059b3}
 .offline-list{display:grid;gap:10px;margin:12px 0 5px}
 .offline-entry{display:flex;align-items:center;gap:15px;padding:12px;border-radius:13px;background:#211b2b;border:1px solid #3b304c}
 .offline-entry-cover{width:60px;height:76px;flex:0 0 60px;border-radius:8px;background:linear-gradient(135deg,#6339b0,#231431);display:grid;place-items:center;font-size:23px;color:#f4eaff}
