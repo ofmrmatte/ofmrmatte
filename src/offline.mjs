@@ -2,6 +2,10 @@
 // IndexedDB blocks instead of a single Cache API response or a giant Blob.
 export const OFFLINE_CACHE_PREFIX='scene-play-offline-media-v1:';
 export const MAX_OFFLINE_BYTES=2*1024*1024*1024;
+// 8 MiB per network request, persisted as individual 1 MiB IndexedDB blocks.
+// Reduces connection overhead by up to 8x while keeping the memory ceiling low.
+export const RANGE_WINDOW_BLOCKS=8;
+export const rangeWindowBytes=blockSize=>blockSize*RANGE_WINDOW_BLOCKS;
 const LIST_PREFIX='scene-play:offline-list:',LAST_PROFILE='scene-play:offline-last-profile';
 const TYPES=new Set(['vod','series']);
 const mimeTypes=new Set(['video/mp4','application/mp4','application/octet-stream','binary/octet-stream']);
@@ -138,13 +142,55 @@ async function completeDownload(s,meta,total,onProgress){
  await s.put({...meta});onProgress(100,total,total);
  return {...meta,partial:false};
 }
+// Consume an HTTP 206 response progressively, writing 1-MiB blocks to IndexedDB.
+// Unlike response.arrayBuffer(), this never buffers the entire network window.
+async function storeRangeWindow({s,meta,response,range,signal,onProgress}){
+ const blockSize=s.BLOCK_SIZE,expected=range.end-range.start+1;
+ if(!response.body?.getReader)throw new Error('O navegador não permite receber o arquivo em partes.');
+ const reader=response.body.getReader();
+ let transferred=0,pending=0,blockBuffer=new Uint8Array(blockSize);
+ try{
+  while(true){
+   if(signal?.aborted)throw new DOMException('Cancelado','AbortError');
+   const {value,done}=await reader.read();
+   if(done)break;
+   if(!value?.byteLength)continue;
+   transferred+=value.byteLength;
+   if(transferred>expected)throw new Error('O provedor enviou mais dados do que o intervalo solicitado.');
+   let offset=0;
+   while(offset<value.byteLength){
+    if(signal?.aborted)throw new DOMException('Cancelado','AbortError');
+    const amount=Math.min(blockSize-pending,value.byteLength-offset);
+    blockBuffer.set(value.subarray(offset,offset+amount),pending);
+    offset+=amount;pending+=amount;
+    if(pending===blockSize){
+     meta.mode='range';
+     await s.commit(meta.id,meta.parts,blockBuffer,setPartMeta(meta,blockSize,range.total));
+     progress(onProgress,meta.received,range.total);
+     pending=0;blockBuffer=new Uint8Array(blockSize);
+    }
+   }
+  }
+  if(transferred!==expected)throw new Error('Conexão interrompida antes de completar este trecho. Use Retomar.');
+  if(pending){
+   if(range.end!==range.total-1)throw new Error('O provedor encerrou a transferência no meio de um bloco.');
+   if(signal?.aborted)throw new DOMException('Cancelado','AbortError');
+   meta.mode='range';
+   await s.commit(meta.id,meta.parts,blockBuffer.slice(0,pending),setPartMeta(meta,pending,range.total));
+   progress(onProgress,meta.received,range.total);
+  }
+ }finally{
+  // Release the reader after each 8-MiB window, including early cancellation.
+  try{await reader.cancel();}catch{}
+ }
+}
 async function rangedDownload({s,meta,url,headers,signal,onProgress,first}){
- const blockSize=s.BLOCK_SIZE;
+ const blockSize=s.BLOCK_SIZE,windowBytes=rangeWindowBytes(blockSize);
  let response=first;
  while(true){
   if(signal?.aborted)throw new DOMException('Cancelado','AbortError');
   if(!response){
-   const end=meta.size?Math.min(meta.size-1,meta.received+blockSize-1):meta.received+blockSize-1;
+   const end=meta.size?Math.min(meta.size-1,meta.received+windowBytes-1):meta.received+windowBytes-1;
    response=await fetch(url,{headers:{...headers,Range:'bytes='+meta.received+'-'+end},cache:'no-store',credentials:'same-origin',signal});
   }
   if(response.status===200){
@@ -159,18 +205,14 @@ async function rangedDownload({s,meta,url,headers,signal,onProgress,first}){
   if(response.status!==206)throw new Error('O provedor não permitiu baixar este trecho (HTTP '+response.status+').');
   validateMime(response);
   const range=s.parseContentRange(response.headers.get('Content-Range'));
-  if(!range||range.start!==meta.received||range.end-range.start+1>blockSize||range.total>MAX_OFFLINE_BYTES)
+  if(!range||range.start!==meta.received||range.end-range.start+1>windowBytes||range.total>MAX_OFFLINE_BYTES)
    throw new Error('O provedor enviou um intervalo de vídeo inválido. Não é possível continuar com segurança.');
   if(meta.size&&range.total!==meta.size)throw new Error('O arquivo mudou no provedor. Remova o download parcial e tente novamente.');
   if(!meta.size){await safeCapacity(range.total);meta.size=range.total;}
-  const bytes=new Uint8Array(await response.arrayBuffer());
-  if(signal?.aborted)throw new DOMException('Cancelado','AbortError');
-  if(bytes.length!==range.end-range.start+1)throw new Error('Trecho recebido incompleto. Toque em Retomar.');
-  // All nonfinal blocks must be full-sized so the Service Worker can locate them by offset.
-  if(bytes.length!==blockSize&&range.end!==range.total-1)throw new Error('O provedor retornou um trecho truncado.');
-  meta.mode='range';
-  await s.commit(meta.id,meta.parts,bytes,setPartMeta(meta,bytes.length,range.total));
-  progress(onProgress,meta.received,range.total);
+  // Every nonfinal network response must end on a full IndexedDB-block boundary.
+  if((range.end!==range.total-1)&&((range.end+1)%blockSize!==0))
+   throw new Error('O provedor enviou um intervalo desalinhado. Não é possível retomar este arquivo com segurança.');
+  await storeRangeWindow({s,meta,response,range,signal,onProgress});
   if(meta.received===range.total)return completeDownload(s,meta,range.total,onProgress);
   response=null;
  }
@@ -227,7 +269,7 @@ export async function saveOffline({scope,item,url,headers={},signal,onProgress=(
   if(!meta.received)await s.put({...meta});
   onProgress(meta.size?Math.floor(meta.received/meta.size*100):null,meta.received,meta.size||null);
   const response=await fetch(url,{
-   headers:{...headers,Range:'bytes='+meta.received+'-'+(meta.received+s.BLOCK_SIZE-1)},
+   headers:{...headers,Range:'bytes='+meta.received+'-'+(meta.received+rangeWindowBytes(s.BLOCK_SIZE)-1)},
    signal,cache:'no-store',credentials:'same-origin'
   });
   return await rangedDownload({s,meta,url,headers,signal,onProgress,first:response});
