@@ -68,11 +68,38 @@ test('range download saves each chunk durably and resumes after cancellation',as
   assert.equal(row.received,4);assert.equal(row.status,'partial');assert.equal(row.parts,1);
   const done=await saveOffline(config);
   assert.equal(done.size,10);assert.equal(done.status,'complete');assert.equal(done.parts,3);
-  assert.deepEqual(ranges,['bytes=0-3','bytes=4-7','bytes=8-9']);
+  assert.deepEqual(ranges,['bytes=0-31','bytes=4-9']);
   assert.equal([...blocks.values()].reduce((a,b)=>a+b.length,0),10);
  }finally{
   globalThis.SceneOfflineStore=previousStore;globalThis.fetch=previousFetch;
   if(descriptor)Object.defineProperty(globalThis,'navigator',descriptor);else delete globalThis.navigator;
   if(oldIndexed)Object.defineProperty(globalThis,'indexedDB',oldIndexed);else delete globalThis.indexedDB;
  }
+});
+
+test('fast download groups network requests while persisting 1-MiB blocks safely',async()=>{
+ const {RANGE_WINDOW_BLOCKS,rangeWindowBytes}=await import('../src/offline.mjs');
+ const s=globalThis.SceneOfflineStore;
+ assert.equal(RANGE_WINDOW_BLOCKS,8);
+ assert.equal(rangeWindowBytes(s.BLOCK_SIZE),8*1024*1024);
+ assert.equal(rangeWindowBytes(4),32);
+ const code=await readFile(new URL('../src/offline.mjs',import.meta.url),'utf8');
+ assert.match(code,/async function storeRangeWindow/);
+ assert.match(code,/response\.body\?\.getReader/);
+ assert.doesNotMatch(code,/new Uint8Array\(await response\.arrayBuffer\(\)\)/);
+ assert.match(code,/await s\.commit\(meta\.id,meta\.parts/);
+});
+test('iPhone notch-aware header and auto-resume are part of the deployed shell',async()=>{
+ const css=await readFile(new URL('../src/scene.css',import.meta.url),'utf8');
+ const app=await readFile(new URL('../src/app.js',import.meta.url),'utf8');
+ const sw=await readFile(new URL('../service-worker.js',import.meta.url),'utf8');
+ assert.match(css,/height:calc\(64px \+ env\(safe-area-inset-top/);
+ assert.match(css,/padding-top:env\(safe-area-inset-top/);
+ assert.match(css,/\.brand \.scene-wordmark/);
+ assert.match(css,/overflow-x:clip/);
+ assert.match(css,/min-height:clamp\(490px,142vw,620px\)/);
+ assert.match(app,/function resumeInterruptedDownload/);
+ assert.match(app,/function pauseDownloadForBackground/);
+ assert.match(app,/rememberDownloadJob\(identity\.scope,item\)/);
+ assert.match(sw,/scene-play-shell-v5-4-1/);
 });

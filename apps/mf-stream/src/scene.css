@@ -388,3 +388,128 @@
   object-position:center top!important;
  }
 }
+
+
+/* Mobile viewport & Safe Area reconciliation.
+   Scene Play's fixed 64px header previously ignored the iPhone notch/status bar. */
+@media (max-width:760px){
+ html,body{width:100%;max-width:100%;overflow-x:clip;-webkit-text-size-adjust:100%}
+ .app-shell{width:100%;max-width:100%;min-width:0}
+ .app-shell>.sidebar{
+  position:sticky!important;top:0!important;z-index:50!important;
+  box-sizing:border-box;width:100%!important;max-width:100%;min-width:0;
+  height:calc(64px + env(safe-area-inset-top,0px))!important;
+  min-height:calc(64px + env(safe-area-inset-top,0px))!important;
+  padding-top:env(safe-area-inset-top,0px)!important;
+  padding-bottom:0!important;
+  padding-left:max(12px,env(safe-area-inset-left,0px))!important;
+  padding-right:max(12px,env(safe-area-inset-right,0px))!important;
+  gap:clamp(4px,1.8vw,10px)!important;
+  align-items:center!important;justify-content:space-between!important;
+  transform:none!important;
+ }
+ .app-shell>.sidebar .brand{
+  box-sizing:border-box;display:flex!important;
+  width:clamp(72px,23vw,115px)!important;min-width:0!important;
+  height:52px;max-width:115px;flex:0 1 auto!important;
+  align-items:center;justify-content:flex-start;
+  background:none!important;margin:0!important;padding:0!important;
+ }
+ .app-shell>.sidebar .brand .scene-wordmark{
+  display:block!important;width:100%!important;max-width:100%!important;
+  max-height:46px;height:auto!important;object-fit:contain;
+ }
+ .app-shell>.sidebar>.topbar-actions{
+  min-width:0!important;max-width:calc(100% - 76px);
+  margin-left:auto!important;flex:0 0 auto!important;
+  justify-content:flex-end!important;gap:clamp(2px,1vw,6px)!important;
+  height:44px!important;min-height:44px!important;
+ }
+ .app-shell>.sidebar .header-search-slot{width:38px;min-width:38px;flex:0 0 38px;height:42px}
+ .app-shell>.sidebar .header-search-slot .global-search{
+  width:38px!important;min-width:38px!important;height:42px!important;
+ }
+ .app-shell>.sidebar .header-utility-actions{
+  min-width:0;flex-shrink:0;gap:clamp(1px,.6vw,4px);
+  height:42px!important;min-height:42px!important;
+ }
+ .app-shell>.sidebar .header-utility-actions :is(#downloadsButton,#refreshButton,#openParental,#openAccountProfile){
+  flex:0 0 clamp(35px,9.4vw,40px)!important;
+  width:clamp(35px,9.4vw,40px)!important;
+  min-width:0!important;height:42px!important;min-height:42px!important;
+  top:0!important;transform:none!important;
+ }
+ .app-shell>.sidebar .header-search-slot .global-search.is-expanded{
+  position:absolute!important;top:calc(env(safe-area-inset-top,0px) + 10px)!important;
+  left:max(12px,env(safe-area-inset-left,0px))!important;
+  right:calc(max(12px,env(safe-area-inset-right,0px)) + clamp(150px,40vw,172px))!important;
+  width:auto!important;min-width:0!important;height:44px!important;
+  z-index:11!important;
+ }
+ .app-shell>.sidebar .header-search-slot .global-search.is-expanded input{
+  font-size:16px!important;height:42px!important;
+ }
+ .app-shell>.main-area{width:100%;max-width:100%;min-width:0;padding-top:0!important}
+ .app-shell>.main-area>.page-content{
+  width:100%;max-width:100%;min-width:0;
+  padding-left:16px!important;padding-right:16px!important;
+  overflow-x:clip;
+ }
+ .hero.hero-presentation{
+  box-sizing:border-box;width:auto!important;max-width:none;
+  min-height:clamp(490px,142vw,620px)!important;
+  margin:0 -16px 10px!important;
+  padding:clamp(200px,53vw,290px) 18px 78px!important;
+  display:flex!important;align-items:flex-end!important;
+ }
+ .hero.hero-presentation .hero-copy{
+  width:100%!important;max-width:100%!important;
+  min-width:0;overflow-wrap:break-word;
+ }
+ .hero.hero-presentation h1{
+  font-size:clamp(27px,7vw,39px)!important;
+  line-height:1.09!important;max-width:100%!important;
+  overflow-wrap:break-word;
+ }
+ .hero.hero-presentation .hero-copy p{
+  max-width:100%!important;line-height:1.6!important;
+  font-size:12px!important;
+ }
+ .hero.hero-presentation .highlight-scene{
+  overflow:hidden!important;max-width:100%;
+ }
+ .hero.hero-presentation .highlight-scene.is-landscape .highlight-cover,
+ .hero.hero-presentation .highlight-scene .highlight-video{
+  width:100%!important;max-width:100%;height:100%!important;
+  object-fit:cover!important;object-position:center top!important;
+ }
+ .hero.hero-presentation .highlight-scene:not(.is-landscape) .highlight-cover{
+  width:min(90vw,var(--hero-poster-width,460px))!important;
+  max-width:100%!important;height:min(370px,72%)!important;
+  object-fit:contain!important;object-position:right top!important;
+ }
+ .offline-layer{box-sizing:border-box;max-width:100vw}
+ .offline-layer .offline-modal{
+  box-sizing:border-box;
+  width:100%!important;max-width:min(740px,calc(100vw - 24px))!important;
+  max-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 24px)!important;
+  padding:20px 16px!important;
+ }
+ .offline-playback video{
+  width:100%!important;max-width:100%;height:auto!important;
+  aspect-ratio:16/9;object-fit:contain;
+ }
+}
+@media(max-width:360px){
+ .app-shell>.sidebar{padding-left:9px!important;padding-right:9px!important;gap:3px!important}
+ .app-shell>.sidebar .brand{width:68px!important}
+ .app-shell>.sidebar>.topbar-actions{gap:2px!important}
+ .app-shell>.sidebar .header-utility-actions :is(#downloadsButton,#refreshButton,#openParental,#openAccountProfile){
+  width:33px!important;flex-basis:33px!important;
+ }
+ .app-shell>.sidebar .header-search-slot{width:34px;min-width:34px;flex-basis:34px}
+ .app-shell>.sidebar .header-search-slot .global-search{width:34px!important;min-width:34px!important}
+ .app-shell>.sidebar .header-search-slot .global-search.is-expanded{
+  left:9px!important;right:155px!important;
+ }
+}

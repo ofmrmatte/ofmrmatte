@@ -1,6 +1,6 @@
 import {createHeroPreview,allowAutomaticPreview} from './hero-preview.mjs';
 import {mountRail,disposeRails,bindSearch} from './scene-ui.mjs';
-import {offlineScope,offlineKey,canDownload,formatDownloadSize,rememberOfflineProfile,lastOfflineProfile,listOffline,removeOffline,openOffline,saveOffline} from './offline.mjs';
+import {offlineScope,offlineKey,canDownload,formatDownloadSize,isMobileSafari,rememberOfflineProfile,lastOfflineProfile,listOffline,removeOffline,openOffline,saveOffline} from './offline.mjs';
 import {selectHighlights,createHighlightRotation,displayTitle} from './highlights.mjs';
 import { normalizeCatalog } from './xtream.mjs';
 import {contentAllowed} from './content.mjs';
@@ -116,6 +116,36 @@ function loadPrefs() { state.autoNext=storage.get(`${scopeKey()}:autoNext`,true)
 
 // Offline library is isolated by the previously authenticated user and profile.
 let downloadingOffline=null,offlineVideoUrl=null;
+const OFFLINE_RESUME_PREFIX='scene-play:pending-download:';
+function resumeJobKey(scope){return OFFLINE_RESUME_PREFIX+scope;}
+function rememberDownloadJob(scope,item){
+ try{localStorage.setItem(resumeJobKey(scope),JSON.stringify({updated:Date.now(),item:{
+  type:item.type,sourceId:item.sourceId,parentId:item.parentId||null,
+  name:String(item.name||'Título').slice(0,180),extension:'mp4',
+  season:item.season??null,episodeNumber:item.episodeNumber??null
+ }}));}catch{}
+}
+function clearDownloadJob(scope){try{localStorage.removeItem(resumeJobKey(scope));}catch{}}
+function resumeInterruptedDownload(){
+ if(document.hidden||!navigator.onLine||downloadingOffline||!state.token||!state.account)return;
+ const identity=currentOfflineProfile();if(!identity?.scope)return;
+ let pending;try{pending=JSON.parse(localStorage.getItem(resumeJobKey(identity.scope))||'null');}catch{}
+ if(!pending?.item)return;
+ if(Date.now()-Number(pending.updated||0)>24*60*60*1000){clearDownloadJob(identity.scope);return;}
+ const item=pending.item;
+ if(!canDownload(item)||(item.type==='series'&&!item.parentId)){clearDownloadJob(identity.scope);return;}
+ // Consume once. Failures remain in the offline library for manual resumption.
+ clearDownloadJob(identity.scope);
+ setTimeout(()=>{
+  if(!document.hidden&&navigator.onLine&&!downloadingOffline&&state.token&&state.account&&currentOfflineProfile()?.scope===identity.scope)
+   downloadTitle(item,null);
+ },450);
+}
+function pauseDownloadForBackground(){
+ if(!downloadingOffline||!isMobileSafari())return;
+ downloadingOffline.pauseReason='background';downloadingOffline.controller.abort();
+}
+
 function currentOfflineProfile(){
  if(state.account){
   const scope=offlineScope(state.appUser?.id||state.account.username,state.profile?.id||'default');
@@ -211,7 +241,8 @@ async function downloadTitle(item,button){
  const identity=currentOfflineProfile();
  if(!identity?.scope){toast('Perfil não identificado. Reconecte-se.');return;}
  const controller=new AbortController(),key=offlineKey(item),previous=button?.textContent;
- downloadingOffline={controller,key,scope:identity.scope,progress:{percent:null,received:0,total:null}};$('offlineCancelDownload').hidden=false;
+ rememberDownloadJob(identity.scope,item);
+ downloadingOffline={controller,key,scope:identity.scope,pauseReason:null,progress:{percent:null,received:0,total:null}};$('offlineCancelDownload').hidden=false;
  $('offlineProgress').hidden=false;$('offlineProgress').removeAttribute('value');
  const status=$('downloadStatus'),panelStatus=$('offlineStatus');
  if(status){status.hidden=false;status.textContent='Preparando o download de '+item.name+'…';}
@@ -232,10 +263,14 @@ async function downloadTitle(item,button){
   });
   if(status)status.textContent='Download concluído · '+formatDownloadSize(saved.size)+' · disponível offline neste dispositivo.';
   if(panelStatus)panelStatus.textContent='Download concluído: '+item.name+'.';
+  clearDownloadJob(identity.scope);
   toast('“'+item.name+'” salvo para assistir offline.');
   if(!$('downloadsModal').hidden)refreshOfflineList();
  }catch(error){
-  const message=error.message||'Não foi possível baixar este título. Você pode retomar pelo menu Downloads.';
+  if(downloadingOffline?.pauseReason==='user'||downloadingOffline?.pauseReason===null)clearDownloadJob(identity.scope);
+  const message=downloadingOffline?.pauseReason==='background'
+    ?'Download pausado pelo iPhone. O Scene Play retomará quando o aplicativo voltar à tela.'
+    :error.message||'Não foi possível baixar este título. Você pode retomar pelo menu Downloads.';
   if(status)status.textContent=message;
   if(panelStatus)panelStatus.textContent=message;
   toast(message);
@@ -243,6 +278,7 @@ async function downloadTitle(item,button){
   downloadingOffline=null;$('offlineCancelDownload').hidden=true;$('offlineProgress').hidden=true;
   if(!$('downloadsModal').hidden)refreshOfflineList();
   if(button){button.disabled=false;button.textContent=previous||'Baixar offline';}
+  if(!document.hidden)resumeInterruptedDownload();
  }
 }
 
@@ -326,7 +362,7 @@ async function login(event) {
     state.diagnosticReport='';$('copyDiagnostics').hidden=true;
     sessionStorage.setItem('mfstream:session',JSON.stringify({token:state.token,host:state.host,account:state.account,listName:state.listName}));
     $('xtreamPassword').value='';loadPrefs();updateSessionUI();hideModal('accountModal');toast('Conta conectada ao Scene Play.');
-    await loadParental();setSection('home',true);
+    await loadParental();setSection('home',true);resumeInterruptedDownload();
   } catch (err) {
     $('loginError').textContent=[err.message,err.hint].filter(Boolean).join(' ');$('loginError').hidden=false;
     // Investigate the same hostname and protocol WITHOUT the password.
@@ -362,7 +398,7 @@ async function restoreSession() {
   let previous;try{previous=JSON.parse(sessionStorage.getItem('mfstream:session'));}catch{}
   if(!previous?.token)return;
   state.token=previous.token;
-  try {const result=await api('/api/account');state.account=result.account;state.host=result.host||previous.host;state.listName=result.account?.listName||previous.listName||'Minha lista';rememberOfflineProfile(offlineScope(state.account?.username,'default'),state.listName);loadPrefs();await loadParental();updateSessionUI();for(const type of types)loadSection(type);}
+  try {const result=await api('/api/account');state.account=result.account;state.host=result.host||previous.host;state.listName=result.account?.listName||previous.listName||'Minha lista';rememberOfflineProfile(offlineScope(state.account?.username,'default'),state.listName);loadPrefs();await loadParental();updateSessionUI();for(const type of types)loadSection(type);resumeInterruptedDownload();}
   catch {setDisconnected();}
 }
 async function loadSection(type, force=false) {
@@ -855,7 +891,12 @@ function bind() {
   $('videoPlayer').addEventListener('timeupdate',()=>{updateIntroControls();updateUpNext();if(Date.now()-lastProgressSave>3000){saveProgress();lastProgressSave=Date.now();}});
   $('videoPlayer').addEventListener('pause',()=>saveProgress());$('videoPlayer').addEventListener('seeked',()=>{updateIntroControls();saveProgress();});
   $('videoPlayer').addEventListener('ended',()=>{saveProgress(true);renderPlayerQueue();if(!$('nextEpisode').disabled&&state.autoNext!==false&&state.dismissedNext!==state.current?.id){nextEpisode();return;}toast($('nextEpisode').disabled?'Conteúdo concluído.':'Episódio concluído. O próximo já está disponível.');});
-  window.addEventListener('pagehide',()=>{saveProgress();flushCloud();});document.addEventListener('visibilitychange',()=>{if(document.hidden){saveProgress();flushCloud();}});
+  window.addEventListener('pagehide',()=>{saveProgress();flushCloud();pauseDownloadForBackground();});
+   document.addEventListener('visibilitychange',()=>{
+     if(document.hidden){saveProgress();flushCloud();pauseDownloadForBackground();}
+     else resumeInterruptedDownload();
+   });
+   window.addEventListener('online',resumeInterruptedDownload);
   document.addEventListener('keydown',event=>{if($('playerModal').hidden||event.target.closest('.plyr')||['INPUT','TEXTAREA','SELECT'].includes(event.target.tagName)||event.altKey||event.ctrlKey||event.metaKey)return;if(event.key==='ArrowLeft'){event.preventDefault();seekBy(-10);}if(event.key==='ArrowRight'){event.preventDefault();seekBy(10);}});
   document.addEventListener('keydown',event=>{const modal=[...document.querySelectorAll('.modal-layer:not([hidden]):not(.is-minimized)')].at(-1);if(!modal)return;if(event.key==='Escape'){event.preventDefault();event.stopImmediatePropagation();modal.id==='playerModal'?minimizePlayback():hideModal(modal.id);}if(event.key==='Tab'){const nodes=[...modal.querySelectorAll('button,input,select,[tabindex="0"]')].filter(node=>!node.disabled&&node.getClientRects().length);const first=nodes[0],last=nodes.at(-1);if(event.shiftKey&&document.activeElement===first){event.preventDefault();last?.focus();}else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first?.focus();}}},true);
   uiIcon();
@@ -868,7 +909,7 @@ function bind() {
   $('detailsPlay').onclick=()=>{const item=state.detailItem;if(!item)return;item.type==='series'?openSeries(item):playItem(item);};
   $('detailsDownload').onclick=()=>{if(state.detailItem)downloadTitle(state.detailItem,$('detailsDownload'));};
   $('downloadsButton').onclick=showDownloads;
-  $('offlineCancelDownload').onclick=()=>downloadingOffline?.controller.abort();
+  $('offlineCancelDownload').onclick=()=>{if(!downloadingOffline)return;downloadingOffline.pauseReason='user';clearDownloadJob(downloadingOffline.scope);downloadingOffline.controller.abort();};
   $('offlineBack').onclick=stopOfflineVideo;
   $('detailsFavorite').onclick=()=>{if(state.detailItem){favorite(state.detailItem.id);$('detailsFavorite').textContent=state.favorites.has(state.detailItem.id)?'Remover da minha lista':'Adicionar à minha lista';}};
   $('openParental').onclick=async()=>{if(!state.token){showModal('accountModal');return;}try{await loadParental();$('hideAdult').checked=state.policy.hideAdult;$('maxAge').value=state.policy.maxAge??'';$('blockUnknown').checked=state.policy.blockUnknown;$('currentPinField').hidden=!state.policy.pinSet;$('parentalPin').required=state.policy.pinSet;$('newParentalPin').required=!state.policy.pinSet;$('newPinLabel').textContent=state.policy.pinSet?'Novo PIN (opcional)':'Criar PIN';for(const id of ['parentalPin','newParentalPin','confirmParentalPin'])$(id).value='';$('parentalError').hidden=true;showModal('parentalModal');}catch(error){toast(error.message);}};
@@ -894,5 +935,5 @@ function bind() {
   window.addEventListener('appinstalled',()=>{$('installButton').hidden=true;toast('Scene Play instalado.');});
   if('serviceWorker'in navigator&&['https:','http:'].includes(location.protocol)){navigator.serviceWorker.register('/service-worker.js').catch(()=>{});}
 }
-async function main(){bind();document.body.dataset.page='home';updateSessionUI();render();try{const fixed=await setupAccess({state,onReset:()=>{flushCloud();setDisconnected();},onConnected:async(result,profile,user)=>{state.token=result.token;state.account=result.account;state.host=result.host;state.listName=profile.name;state.profile=profile;state.appUser=user;state.offlineMode=false;updateProfileButton(profile);rememberOfflineProfile(offlineScope(user.id,profile.id),profile.name);$('openAccount').setAttribute('aria-label','Trocar perfil');$('openAccountSidebar').querySelector('span:not([data-icon])').textContent='Perfis';loadPrefs();const prefs=await api('/api/preferences');if(Array.isArray(prefs.favorites))state.favorites=new Set(prefs.favorites);if(Array.isArray(prefs.recents))state.recents=prefs.recents;if(prefs.progress&&typeof prefs.progress==='object')state.progress=prefs.progress;if(prefs.seriesProgress&&typeof prefs.seriesProgress==='object')state.seriesProgress=prefs.seriesProgress;if(typeof prefs.autoNext==='boolean')state.autoNext=prefs.autoNext;await loadParental();updateSessionUI();setSection('home');}});if(!fixed)await restoreSession();}catch(error){document.body.classList.remove('auth-pending');if(lastOfflineProfile()?.scope){state.offlineMode=true;showDownloads();}else toast('Não foi possível carregar o acesso. Atualize a página.');}}
+async function main(){bind();document.body.dataset.page='home';updateSessionUI();render();try{const fixed=await setupAccess({state,onReset:()=>{flushCloud();setDisconnected();},onConnected:async(result,profile,user)=>{state.token=result.token;state.account=result.account;state.host=result.host;state.listName=profile.name;state.profile=profile;state.appUser=user;state.offlineMode=false;updateProfileButton(profile);rememberOfflineProfile(offlineScope(user.id,profile.id),profile.name);$('openAccount').setAttribute('aria-label','Trocar perfil');$('openAccountSidebar').querySelector('span:not([data-icon])').textContent='Perfis';loadPrefs();const prefs=await api('/api/preferences');if(Array.isArray(prefs.favorites))state.favorites=new Set(prefs.favorites);if(Array.isArray(prefs.recents))state.recents=prefs.recents;if(prefs.progress&&typeof prefs.progress==='object')state.progress=prefs.progress;if(prefs.seriesProgress&&typeof prefs.seriesProgress==='object')state.seriesProgress=prefs.seriesProgress;if(typeof prefs.autoNext==='boolean')state.autoNext=prefs.autoNext;await loadParental();updateSessionUI();setSection('home');resumeInterruptedDownload();}});if(!fixed)await restoreSession();}catch(error){document.body.classList.remove('auth-pending');if(lastOfflineProfile()?.scope){state.offlineMode=true;showDownloads();}else toast('Não foi possível carregar o acesso. Atualize a página.');}}
 main();
