@@ -513,3 +513,186 @@
   left:9px!important;right:155px!important;
  }
 }
+
+
+/* Scene Play mobile layout v5.4.2
+   The iOS installed PWA uses a translucent system status bar. Reserve at
+   least the iPhone's status-bar inset even when iOS returns env(...)=0. */
+:root{--scene-app-safe-top:env(safe-area-inset-top,0px)}
+html.scene-ios-standalone{--scene-app-safe-top:max(47px,env(safe-area-inset-top,0px))}
+@media(max-width:760px){
+ html,body{width:100%;max-width:100%;overflow-x:clip}
+ .app-shell{min-width:0!important;max-width:100%!important}
+ .app-shell>.sidebar{
+  position:sticky!important;top:0!important;left:0!important;right:0!important;
+  box-sizing:border-box;z-index:50!important;
+  width:100%!important;max-width:100%!important;min-width:0!important;
+  height:calc(58px + var(--scene-app-safe-top))!important;
+  min-height:calc(58px + var(--scene-app-safe-top))!important;
+  padding:var(--scene-app-safe-top) max(12px,env(safe-area-inset-right,0px)) 0 max(12px,env(safe-area-inset-left,0px))!important;
+  margin:0!important;gap:5px!important;
+  display:flex!important;flex-direction:row!important;align-items:center!important;
+  justify-content:space-between!important;transform:none!important;
+ }
+ .app-shell>.sidebar .brand{
+  box-sizing:border-box;flex:0 1 clamp(85px,28vw,116px)!important;
+  display:flex!important;width:clamp(85px,28vw,116px)!important;
+  min-width:0!important;max-width:116px!important;
+  height:44px!important;min-height:44px!important;
+  margin:0!important;padding:0!important;background:none!important;
+  justify-content:flex-start;align-items:center;
+ }
+ .app-shell>.sidebar .brand .scene-wordmark{
+  display:block!important;width:100%!important;max-width:100%!important;
+  height:auto!important;max-height:42px!important;object-fit:contain;
+ }
+ .app-shell>.sidebar>.main-nav{display:none!important}
+ .app-shell>.sidebar>.topbar-actions{
+  display:flex!important;position:static!important;align-items:center!important;
+  margin:0 0 0 auto!important;flex:0 0 auto!important;min-width:0!important;
+  max-width:calc(100% - 85px)!important;width:auto!important;
+  height:44px!important;min-height:44px!important;gap:3px!important;
+ }
+ .app-shell>.sidebar .header-search-slot{
+  position:static!important;flex:0 0 36px!important;width:36px!important;
+  min-width:36px!important;height:42px!important;
+ }
+ .app-shell>.sidebar .header-search-slot .global-search{
+  width:36px!important;min-width:36px!important;height:42px!important;
+ }
+ .app-shell>.sidebar .header-utility-actions{
+  display:flex!important;flex:0 0 auto!important;gap:2px!important;
+  align-items:center!important;height:42px!important;min-height:42px!important;
+ }
+ .app-shell>.sidebar .header-utility-actions :is(#downloadsButton,#refreshButton,#openParental,#openAccountProfile){
+  flex:0 0 clamp(34px,9.3vw,39px)!important;
+  width:clamp(34px,9.3vw,39px)!important;
+  min-width:0!important;max-width:39px!important;
+  height:42px!important;min-height:42px!important;
+  margin:0!important;padding:0!important;top:auto!important;transform:none!important;
+ }
+ .app-shell>.sidebar .header-search-slot .global-search.is-expanded{
+  position:absolute!important;top:calc(var(--scene-app-safe-top) + 7px)!important;
+  left:max(12px,env(safe-area-inset-left,0px))!important;
+  right:calc(max(12px,env(safe-area-inset-right,0px)) + 151px)!important;
+  height:44px!important;width:auto!important;min-width:0!important;
+  max-width:none!important;z-index:55!important;
+ }
+ .app-shell>.sidebar .header-search-slot .global-search.is-expanded input{
+  font-size:16px!important;height:42px!important;
+ }
+ .app-shell>.main-area{width:100%!important;max-width:100%!important;min-width:0!important;padding-top:0!important}
+ .app-shell>.main-area>.page-content{
+  width:100%!important;max-width:100%!important;min-width:0!important;
+  padding:0 16px!important;overflow-x:clip;
+ }
+ /* The image remains full-bleed. Content does not require a giant empty top row. */
+ .hero.hero-presentation{
+  box-sizing:border-box;min-width:0!important;width:auto!important;
+  height:auto!important;min-height:0!important;max-height:none!important;
+  margin:0 -16px 8px!important;
+  padding:clamp(138px,44vw,185px) 18px 64px!important;
+  display:flex!important;flex-direction:column!important;
+  justify-content:flex-end!important;align-items:stretch!important;
+  overflow:hidden!important;
+ }
+ .hero.hero-presentation .hero-copy,
+ .hero.hero-presentation:has(.hero-preview:not([hidden])) .hero-copy{
+  position:relative!important;z-index:3!important;
+  width:100%!important;max-width:100%!important;min-width:0!important;
+  overflow-wrap:break-word;
+ }
+ .hero.hero-presentation .hero-kicker{font-size:9px!important;letter-spacing:1.35px!important;line-height:1.4!important}
+ .hero.hero-presentation h1,
+ .hero.hero-presentation:has(.hero-preview:not([hidden])) h1{
+  font-size:clamp(27px,7.2vw,35px)!important;line-height:1.08!important;
+  letter-spacing:-.9px!important;max-width:100%!important;
+  margin:9px 0 10px!important;overflow-wrap:break-word;
+  display:-webkit-box!important;-webkit-line-clamp:3!important;
+  -webkit-box-orient:vertical!important;overflow:hidden!important;
+ }
+ .hero.hero-presentation .hero-title-meta{
+  margin:0 0 10px!important;gap:6px!important;
+  font-size:11px!important;line-height:1.35!important;
+ }
+ .hero.hero-presentation .hero-title-meta .age-badge{
+  min-width:26px!important;min-height:25px!important;font-size:11px!important;
+ }
+ .hero.hero-presentation .hero-copy p{
+  display:-webkit-box!important;-webkit-line-clamp:2!important;
+  -webkit-box-orient:vertical!important;overflow:hidden!important;
+  max-width:100%!important;font-size:12px!important;
+  line-height:1.5!important;margin:0!important;
+ }
+ .hero.hero-presentation .hero-actions{
+  display:flex!important;flex-wrap:wrap!important;
+  align-items:center!important;gap:8px!important;
+  margin:15px 0 0!important;
+ }
+ .hero.hero-presentation .hero-actions .btn{
+  box-sizing:border-box;min-height:42px!important;
+  padding:0 13px!important;font-size:12px!important;
+  max-width:100%;
+ }
+ .hero.hero-presentation .hero-actions .hero-audio-toggle{
+  min-height:42px!important;padding:0 11px!important;
+ }
+ .hero.hero-presentation .hero-data-note{
+  position:absolute!important;left:18px!important;bottom:19px!important;
+  z-index:4!important;margin:0!important;padding:0!important;
+  display:flex!important;flex-wrap:wrap!important;gap:0 7px!important;
+  max-width:calc(100% - 185px)!important;min-width:0!important;
+  font-size:9px!important;line-height:1.5!important;
+ }
+ .hero.hero-presentation .highlight-controls{
+  position:absolute!important;bottom:13px!important;right:13px!important;
+  z-index:5!important;gap:6px!important;
+ }
+ .hero.hero-presentation .highlight-controls button{
+  min-width:34px!important;min-height:34px!important;
+  width:34px!important;height:34px!important;
+ }
+ .hero.hero-presentation .highlight-counter{
+  min-width:51px!important;font-size:10px!important;letter-spacing:1.2px!important;
+ }
+ .hero.hero-presentation:after{
+  background:linear-gradient(180deg,
+   rgba(8,9,11,.18) 0%,rgba(8,9,11,.08) 23%,
+   rgba(8,9,11,.54) 43%,rgba(8,9,11,.95) 73%,#08090b 100%)!important;
+ }
+ .hero.hero-presentation .highlight-scene,
+ .hero.hero-presentation .highlight-scene.is-visible{max-width:100%!important;overflow:hidden!important}
+ .hero.hero-presentation .highlight-scene.is-landscape .highlight-cover,
+ .hero.hero-presentation .highlight-scene .highlight-video{
+  width:100%!important;height:100%!important;object-fit:cover!important;
+  object-position:center top!important;
+ }
+ .hero.hero-presentation .highlight-scene:not(.is-landscape) .highlight-cover{
+  width:min(100%,var(--hero-poster-width,460px))!important;
+  height:min(72%,350px)!important;
+  object-fit:contain!important;object-position:center top!important;
+  right:0!important;
+ }
+ .mobile-bottom-nav{max-width:100vw!important}
+ .offline-layer .offline-modal{max-width:calc(100vw - 24px)!important}
+}
+@media(max-width:360px){
+ .app-shell>.sidebar{padding-left:9px!important;padding-right:9px!important;gap:2px!important}
+ .app-shell>.sidebar .brand{flex-basis:75px!important;width:75px!important}
+ .app-shell>.sidebar>.topbar-actions{gap:1px!important}
+ .app-shell>.sidebar .header-search-slot{flex-basis:34px!important;width:34px!important;min-width:34px!important}
+ .app-shell>.sidebar .header-utility-actions :is(#downloadsButton,#refreshButton,#openParental,#openAccountProfile){
+  flex-basis:33px!important;width:33px!important;min-width:0!important;
+ }
+ .app-shell>.sidebar .header-search-slot .global-search.is-expanded{
+  left:9px!important;right:153px!important;
+ }
+ .hero.hero-presentation{padding:130px 14px 60px!important;margin:0 -16px 8px!important}
+ .hero.hero-presentation .hero-actions .btn{padding:0 10px!important;font-size:11px!important}
+ .hero.hero-presentation .hero-data-note{left:14px!important;max-width:calc(100% - 162px)!important}
+ .hero.hero-presentation .highlight-controls{right:10px!important}
+}
+@media(max-width:760px) and (max-height:530px) and (orientation:landscape){
+ .hero.hero-presentation{padding-top:82px!important;padding-bottom:62px!important}
+ .hero.hero-presentation .hero-copy p{-webkit-line-clamp:1!important}
+}
