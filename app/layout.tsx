@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: "Matheus Ferreira Folgado | Processos, Software e IA aplicada",
   description:
-    "Portfólio de Matheus Ferreira Folgado. Conheça os projetos ALC Prevenção de Perdas e ALC Atendimento, com foco em processos operacionais, automação e software.",
+    "Portfólio de Matheus Ferreira Folgado. Conheça os projetos MLDDS, ALC Prevenção de Perdas e ALC Atendimento, com foco em logística, processos operacionais, automação e software.",
   alternates: {
     canonical: "/"
   },
