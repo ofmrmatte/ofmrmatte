@@ -299,6 +299,31 @@ export default function Page() {
                 </Card>
               </div>
             ))}
+
+            <div className="showcase-feature">
+              <Card className="showcase-card" data-spotlight-card>
+                <div className="showcase-feature-upper">
+                  <CardContent className="showcase-copy">
+                    <div className="showcase-number"><span>PROJETO 03</span><span>DESKTOP / LOGÍSTICA</span></div>
+                    <span className="showcase-small-kicker">AUTOMAÇÃO / ROTEIRIZAÇÃO / PROCESSOS</span>
+                    <h3>MLDDS</h3>
+                    <p>Automação e roteirização de processos logísticos, com regras de negócio, validações e rastreabilidade.</p>
+                    <StackTags items={["C#", ".NET 8", "WPF", "Automação"]} />
+                  </CardContent>
+                  <div className="system-preview system-preview-real" style={{ height: "100%", minHeight: 340 }}>
+                    <Image
+                      src="/projects/mldds.png"
+                      alt="Interface real do MLDDS, sistema desktop de automação logística e roteirização"
+                      fill
+                      sizes="(max-width: 850px) 100vw, 50vw"
+                      className="mldds-real-screenshot"
+                    />
+                    <div className="mldds-image-shade" aria-hidden="true" />
+                    <span className="actual-screenshot-tag"><span /> INTERFACE REAL / MLDDS</span>
+                  </div>
+                </div>
+              </Card>
+            </div>
           </SpotlightGrid>
         </div>
       </section>
