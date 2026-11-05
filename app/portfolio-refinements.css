@@ -489,3 +489,52 @@
     transform:none!important;
   }
 }
+
+/* Public Railway portfolio: only ALC Prevenção de Perdas and ALC Atendimento. */
+.alc-case-card { overflow:hidden; border-color:rgba(171,220,218,.17)!important; }
+.alc-case-visual {
+  position:relative;isolation:isolate;display:grid;grid-template-rows:auto minmax(0,1fr) auto;
+  min-height:285px;overflow:hidden;padding:1.4rem 1.65rem 1.25rem;
+  border-bottom:1px solid rgba(170,216,233,.12);
+  background:radial-gradient(ellipse at 50% 68%,rgba(65,171,154,.17),transparent 53%),linear-gradient(135deg,#122c35,#0b1726 68%,#152735);
+}
+.alc-case-card--atendimento .alc-case-visual {
+  background:radial-gradient(ellipse at 50% 68%,rgba(85,132,196,.18),transparent 57%),linear-gradient(135deg,#142838,#0a192b 68%,#112535);
+}
+.alc-case-visual::before {
+  content:"";position:absolute;z-index:-1;inset:12% 18%;border:1px solid rgba(171,232,225,.10);
+  border-radius:50%;transform:scaleX(1.2);
+  box-shadow:0 0 0 34px rgba(171,232,225,.018),0 0 0 71px rgba(171,232,225,.018);
+}
+.alc-case-topline,.alc-case-footline {
+  display:flex;align-items:center;justify-content:space-between;gap:1rem;
+  color:#91b6b9;font-size:.59rem;font-weight:730;letter-spacing:.15em;
+}
+.alc-case-footline {color:#7d9fae;}
+.alc-case-center {
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:.4rem;text-align:center;min-width:0;
+}
+.alc-case-emblem {
+  display:grid;place-items:center;width:78px;height:78px;margin-bottom:.35rem;
+  border:1px solid rgba(171,232,225,.24);border-radius:21px;
+  background:rgba(143,232,213,.065);color:#a3e7d8;
+  box-shadow:0 16px 48px rgba(0,0,0,.20),inset 0 1px rgba(255,255,255,.035);
+}
+.alc-case-card--atendimento .alc-case-emblem {color:#b8cee9;border-color:rgba(171,197,232,.22);}
+.alc-case-center strong {
+  color:#edf9ff;font-size:clamp(1.45rem,2.6vw,2.05rem);
+  line-height:1.1;font-weight:680;letter-spacing:.06em;
+}
+.alc-case-center > span:last-child {
+  color:#9ec5c7;font-size:.65rem;font-weight:650;letter-spacing:.18em;
+}
+.alc-case-card .showcase-secondary-copy {min-height:255px;}
+.alc-case-card .showcase-secondary-copy > p {min-height:0;}
+.alc-case-card .showcase-number > span:last-child {text-align:right;}
+@media(max-width:650px) {
+  .alc-case-visual {min-height:228px;padding:1.1rem 1.2rem;}
+  .alc-case-center strong {font-size:1.48rem;}
+  .alc-case-topline,.alc-case-footline {font-size:.51rem;letter-spacing:.1em;}
+  .alc-case-card .showcase-secondary-copy {min-height:0;}
+}

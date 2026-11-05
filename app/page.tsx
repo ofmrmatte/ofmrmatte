@@ -17,7 +17,6 @@ import {
 } from "@phosphor-icons/react/dist/ssr";
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
-import { archiSubsystems, portfolioProjects } from "../lib/portfolio-data";
 import { Reveal, ScrollProgress, SpotlightGrid } from "./components/ImmersiveEffects";
 import { KineticEmphasisTitle, KineticHeroTitle, KineticSectionTitle, ScrollSignature } from "./components/CinematicTypography";
 import { PortfolioTypingText } from "./components/PortfolioTypingText";
@@ -30,16 +29,22 @@ const navItems = [
   { href: "#formacao", label: "Formação" }
 ] as const;
 
-const projectByName = (name: string) => {
-  const project = portfolioProjects.find((item) => item.name === name);
-  if (!project) throw new Error("Projeto não configurado: " + name);
-  return project;
-};
-
-const archi = projectByName("ALC ARCHI");
-const mldds = projectByName("MLDDS");
-const alcSite = projectByName("Site ALC & Pereira Filho");
-const mfStream = projectByName("MF Stream");
+const featuredProjects = [
+  {
+    id: "prevencao",
+    name: "ALC Prevenção de Perdas",
+    category: "INTELIGÊNCIA OPERACIONAL",
+    description: "Sistema para apoiar a análise de perdas operacionais e tratativas de PNR. Organiza ocorrências, evidências, regras de negócio e acompanhamento de pendências, com foco em controle e rastreabilidade.",
+    stack: ["PNR", "Rastreabilidade", "Regras de negócio", "Painéis operacionais"]
+  },
+  {
+    id: "atendimento",
+    name: "ALC Atendimento",
+    category: "CENTRAL DE ATENDIMENTO",
+    description: "Central para organizar demandas e tratativas operacionais, com filas de atendimento, registros de interações, evidências e comunicação via WhatsApp para acompanhamento das solicitações.",
+    stack: ["Atendimento", "WhatsApp", "Evidências", "Fluxos operacionais"]
+  }
+] as const;
 
 const capabilities = [
   {
@@ -148,66 +153,6 @@ function SectionHeading({
       </div>
       {description ? <p>{description}</p> : null}
     </Reveal>
-  );
-}
-
-function ArchiSymbol({ size = 52 }: { size?: number }) {
-  return (
-    <svg className="archi-symbol" width={size} height={size} viewBox="0 0 100 100" fill="none" aria-hidden="true">
-      <defs>
-        <linearGradient id="archi-symbol-gradient" x1="14" y1="16" x2="88" y2="90">
-          <stop stopColor="#DAFFF1" />
-          <stop offset="0.54" stopColor="#98F4DD" />
-          <stop offset="1" stopColor="#6BACC9" />
-        </linearGradient>
-      </defs>
-      <circle cx="50" cy="50" r="40" stroke="url(#archi-symbol-gradient)" strokeOpacity=".32" strokeWidth="1.4" />
-      <path d="M14 51a36 36 0 0 1 70-6" stroke="url(#archi-symbol-gradient)" strokeWidth="2" strokeLinecap="round" />
-      <path d="M24 77L49.5 23L75 77M36 58H63" stroke="url(#archi-symbol-gradient)" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round" />
-      <circle cx="83" cy="43" r="5.5" fill="#B5FFE7" />
-      <circle cx="18" cy="70" r="3" fill="#6AD5CE" />
-    </svg>
-  );
-}
-
-function ArchitectureDisplay() {
-  return (
-    <div className="architecture-visual" role="img" aria-label="Diagrama conceitual do ARCHI conectando os subsistemas da ALC">
-      <div className="architecture-ring ring-outer" aria-hidden="true" />
-      <div className="architecture-ring ring-middle" aria-hidden="true" />
-      <div className="architecture-ring ring-inner" aria-hidden="true" />
-      <span className="architecture-small-label">ECOSSISTEMA ALC / VISTA CONCEITUAL</span>
-      <div className="architecture-line architecture-line-one" aria-hidden="true" />
-      <div className="architecture-line architecture-line-two" aria-hidden="true" />
-      <div className="architecture-line architecture-line-three" aria-hidden="true" />
-      <div className="architecture-line architecture-line-four" aria-hidden="true" />
-      <div className="architecture-core">
-        <div className="core-icon"><ArchiSymbol size={72} /></div>
-        <strong>ARCHI</strong>
-        <span>CENTRAL ALC</span>
-      </div>
-      <span className="architecture-node architecture-node-top"><i /> Administrativo</span>
-      <span className="architecture-node architecture-node-right"><i /> Financeiro</span>
-      <span className="architecture-node architecture-node-left"><i /> Prevenção</span>
-      <span className="architecture-node architecture-node-bottom"><i /> Atendimento</span>
-      <span className="architecture-footnote">GOVERNANÇA • MODULARIDADE • ACESSO</span>
-    </div>
-  );
-}
-
-function SystemPreview() {
-  return (
-    <div className="system-preview system-preview-real">
-      <Image
-        src="/projects/mldds.png"
-        alt="Captura da interface real do sistema desktop de roteirização MLDDS"
-        fill
-        sizes="(max-width: 650px) 100vw, 50vw"
-        className="mldds-real-screenshot"
-      />
-      <div className="mldds-image-shade" aria-hidden="true" />
-      <span className="actual-screenshot-tag"><span /> INTERFACE REAL / MLDDS</span>
-    </div>
   );
 }
 
@@ -331,96 +276,29 @@ export default function Page() {
         <div className="container">
           <SectionHeading index="02" label="TRABALHOS SELECIONADOS" title="Projetos que saíram do contexto e viraram solução." description="Sistemas concebidos para operações e necessidades concretas. Explore a arquitetura, os fluxos e as tecnologias envolvidas." />
           <SpotlightGrid className="showcase-grid">
-            <div className="showcase-feature">
-              <Card className="showcase-card showcase-archi" data-spotlight-card>
-                <div className="showcase-feature-upper">
-                  <CardContent className="showcase-copy">
-                    <div className="showcase-number"><span>PROJETO 01</span><span className="project-kind"><i /> PLATAFORMA CORPORATIVA</span></div>
-                    <span className="showcase-small-kicker">SISTEMA / GOVERNANÇA / INTEGRAÇÕES</span>
-                    <h3 className="archi-project-heading"><ArchiSymbol size={50} /> ALC <em>ARCHI</em></h3>
-                    <p>{archi.description}</p>
-                    <div className="showcase-detail"><ArchiSymbol size={23} /><span>Um ecossistema, <strong>{archiSubsystems.length} áreas e subsistemas</strong> com papéis independentes.</span></div>
-                    <StackTags items={archi.stack} />
-                  </CardContent>
-                  <ArchitectureDisplay />
-                </div>
-                <details className="archi-more">
-                  <summary><span><span className="archi-summary-icon">+</span> Ver mais sobre os subsistemas do ARCHI</span><ArrowDown size={19} weight="bold" /></summary>
-                  <div className="archi-expanded">
-                    <div className="archi-expanded-intro">
-                      <span>ARQUITETURA / ECOSSISTEMA ALC</span>
-                      <p>O ARCHI é a porta de entrada e camada de identidade do ecossistema. Cada área tem responsabilidades próprias: algumas estão operacionais, outras em implantação ou homologação. Prevenção de Perdas e Atendimento são subsistemas, não projetos independentes deste portfólio.</p>
+            {featuredProjects.map((project, index) => (
+              <div className="showcase-half" key={project.id}>
+                <Card className={`showcase-card showcase-secondary alc-case-card alc-case-card--${project.id}`} data-spotlight-card>
+                  <div className="alc-case-visual" aria-hidden="true">
+                    <div className="alc-case-topline"><span>MF / SISTEMAS ALC</span><span>CASO 0{index + 1}</span></div>
+                    <div className="alc-case-center">
+                      <span className="alc-case-emblem">
+                        {project.id === "prevencao" ? <CheckCircle size={43} weight="thin" /> : <EnvelopeSimple size={43} weight="thin" />}
+                      </span>
+                      <strong>{project.id === "prevencao" ? "PREVENÇÃO" : "ATENDIMENTO"}</strong>
+                      <span>{project.id === "prevencao" ? "PERDAS / PNR" : "CENTRAL OPERACIONAL"}</span>
                     </div>
-                    {archiGroups.map((group, groupIndex) => (
-                      <div className="archi-group" key={group.name}>
-                        <div className="archi-group-heading">
-                          <span>0{groupIndex + 1} / ÁREAS DO ECOSSISTEMA</span>
-                          <h4>{group.name}</h4>
-                          <p>{group.subtitle}</p>
-                        </div>
-                        <div className="archi-modules">
-                          {archiSubsystems.filter((subsystem) => (group.systems as readonly string[]).includes(subsystem.name)).map((subsystem) => (
-                            <article className="archi-module" key={subsystem.name}>
-                              <span className="archi-module-index">{subsystem.status}</span>
-                              <h5>{subsystem.name}</h5>
-                              <p>{subsystem.description}</p>
-                            </article>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
+                    <div className="alc-case-footline"><span>PROCESSOS & SOFTWARE</span><span>ALC</span></div>
                   </div>
-                </details>
-              </Card>
-            </div>
-
-            <div className="showcase-half">
-              <Card className="showcase-card showcase-secondary" data-spotlight-card>
-                <SystemPreview />
-                <CardContent className="showcase-secondary-copy">
-                  <div className="showcase-number"><span>PROJETO 02</span><span>DESKTOP / LOGÍSTICA</span></div>
-                  <h3>MLDDS</h3>
-                  <p>{mldds.description}</p>
-                  <StackTags items={mldds.stack} />
-                </CardContent>
-              </Card>
-            </div>
-            <div className="showcase-half">
-              <Card className="showcase-card showcase-secondary" data-spotlight-card>
-                <div className="alc-preview">
-                  <Image
-                    src="https://raw.githubusercontent.com/ofmrmatte/ALC-Pereira-Filho-Transportes/main/assets/images/frota/alc-frota-operacao.jpg"
-                    alt="Frota da ALC & Pereira Filho Transportes em operação"
-                    fill
-                    sizes="(max-width: 850px) 100vw, 50vw"
-                  />
-                  <div className="alc-photo-shade" />
-                  <div className="alc-preview-label"><span>ALC & PEREIRA FILHO</span><strong>Logística em movimento.</strong></div>
-                </div>
-                <CardContent className="showcase-secondary-copy">
-                  <div className="showcase-number"><span>PROJETO 03</span><span>WEB / INSTITUCIONAL</span></div>
-                  <h3>ALC & Pereira Filho</h3>
-                  <p>{alcSite.description}</p>
-                  <StackTags items={alcSite.stack} />
-                </CardContent>
-              </Card>
-            </div>
-            <div className="showcase-feature">
-              <Card className="showcase-card" data-spotlight-card>
-                <div className="showcase-feature-upper">
-                  <CardContent className="showcase-copy">
-                    <div className="showcase-number"><span>PROJETO 04</span><span>STREAMING / EXPERIÊNCIA DIGITAL</span></div>
-                    <h3>MF Stream</h3>
-                    <p>{mfStream.description}</p>
-                    <StackTags items={mfStream.stack} />
-                    <a className="text-link" href="https://github.com/ofmrmatte/ofmrmatte/tree/main/apps/mf-stream" target="_blank" rel="noreferrer">Ver projeto no GitHub ↗</a>
+                  <CardContent className="showcase-secondary-copy">
+                    <div className="showcase-number"><span>PROJETO 0{index + 1}</span><span>{project.category}</span></div>
+                    <h3>{project.name}</h3>
+                    <p>{project.description}</p>
+                    <StackTags items={project.stack} />
                   </CardContent>
-                  <div className="alc-preview" style={{ height: "100%", minHeight: 260, aspectRatio: "auto" }}>
-                    <Image src="/projects/mf-stream.png" alt="Tela de login do MF Stream com acesso por conta e perfis" fill sizes="(max-width: 850px) 100vw, 50vw" />
-                  </div>
-                </div>
-              </Card>
-            </div>
+                </Card>
+              </div>
+            ))}
           </SpotlightGrid>
         </div>
       </section>
