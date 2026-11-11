@@ -110,3 +110,9 @@ Formação voltada à gestão empresarial, processos, finanças, pessoas, opera�
 ---
 
 > Meu foco é conectar visão de negócio, processos e tecnologia para transformar problemas operacionais em soluções digitais confiáveis.
+
+## Aplicativos independentes no monorepo
+
+Além do portfólio Next.js implantado a partir da raiz, este repositório mantém aplicativos isolados em `apps/`. Cada aplicativo tem suas dependências e seu processo de deploy, sem alterar o serviço principal do Railway.
+
+- **Consumo por Convicção** — diretório de declarações institucionais públicas de estabelecimentos, com busca por cidade e UF, envio anônimo de fontes, moderação antes de publicar e contestação. Código em [apps/consumo-por-conviccao](apps/consumo-por-conviccao), com [instruções de execução](apps/consumo-por-conviccao/README.md). Aplicativo FastAPI/Python, com testes próprios em `.github/workflows/consumo-por-conviccao.yml`. **Não faz parte do build Next.js da raiz e não foi publicado automaticamente no Railway.**
