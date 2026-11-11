@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Consulta pública por cidade a posicionamentos institucionais de estabelecimentos, com fontes verificáveis e direito de contestação.">
+  <meta name="theme-color" content="#f7f5ef">
+  <title>{% block title %}Consumo por Convicção{% endblock %}</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="header">
+    <div class="wrap topbar">
+      <a href="/" class="wordmark"><span class="mark">C<span>.</span></span> <span>consumo<br><strong>por convicção</strong></span></a>
+      <nav aria-label="Navegação principal" class="nav">
+        <a href="/estabelecimentos">Diretório</a><a href="/criterios">Critérios</a><a class="nav-cta" href="/enviar">Enviar registro <span aria-hidden="true">↗</span></a>
+      </nav>
+    </div>
+  </header>
+  <main>{% block content %}{% endblock %}</main>
+  <footer class="footer"><div class="wrap footer-grid"><div><div class="footbrand">consumo <em>por convicção.</em></div><p>Transparência institucional para escolhas conscientes. Sem acusações ou ataques a pessoas.</p></div><div class="footer-links"><a href="/estabelecimentos">Consultar</a><a href="/enviar">Enviar registro</a><a href="/contestar">Contestar registro</a><a href="/criterios">Critérios editoriais</a><a href="/privacidade">Privacidade</a><a href="/admin">Administração</a></div></div><div class="wrap footline"><span>© {{year}} Consumo por Convicção.</span><span>Registros publicados somente após verificação editorial.</span></div></footer>
+</body></html>
