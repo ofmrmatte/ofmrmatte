@@ -1,0 +1,11 @@
+{% extends 'base.html' %}{% block title %}Critérios editoriais — Consumo por Convicção{% endblock %}
+{% block content %}<section class="page-head"><div class="wrap"><p class="kicker">NOSSO COMPROMISSO</p><h1>Critérios <em>editoriais.</em></h1><p>Precisão, transparência, verificabilidade e possibilidade de contestação.</p></div></section><div class="wrap editorial">
+{% for number,title,body in [
+('01','Quem pode constar','Somente estabelecimentos empresariais formalmente identificáveis. Não registramos indivíduos, crenças de proprietários, funcionários nem familiares.'),
+('02','Fontes aceitas','Apenas comunicações públicas oficiais, realizadas pelo próprio estabelecimento em canais institucionais. Comentários de terceiros, boatos e prints sem origem são recusados.'),
+('03','O que não publicamos','Informações privadas, endereços residenciais, telefones particulares, ofensas, ameaças, acusações ou convocações ao assédio.'),
+('04','Identificação de pautas','A marcação de pautas progressistas exige declaração institucional explícita. Não inferimos ideologia de pessoas ou empresas pelo comportamento de terceiros.'),
+('05','Moderação editorial','Cada sugestão entra como pendente. A equipe confere a fonte, o contexto, a existência do negócio e a redação antes de aprovar.'),
+('06','Correções e remoções','Qualquer interessado pode solicitar revisão, contestação e remoção. Declarações retratadas, incorretas ou não verificáveis podem ser arquivadas.')
+] %}<article class="editorial-row"><span>{{number}}</span><h2>{{title}}</h2><p>{{body}}</p></article>{% endfor %}
+<a href="/contestar" class="btn">Solicitar revisão ↗</a></div>{% endblock %}
